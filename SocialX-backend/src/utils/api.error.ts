@@ -1,5 +1,6 @@
 class ApiError extends Error {
   public statusCode: number;
+  public message: string;
   public errors?: unknown[];
   constructor(
     statusCode: number,

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -9,15 +9,28 @@ export interface IUser extends Document {
   userName: string;
   password: string;
   bio: string;
-  avatarUrl: string;
-  followers: ObjectId[];
-  following: ObjectId[];
+  avatarUrl: {
+    url: string;
+    localPath: string;
+  };
+  followers: mongoose.Types.ObjectId[];
+  following: mongoose.Types.ObjectId[];
   isEmailVerified: boolean;
   refreshToken: string;
   forgotPasswordToken: string;
   forgotPasswordExpiry: Date;
   emailVerificationToken: string;
   emailVerificationExpiry: Date;
+
+  // * Methods
+  isPasswordCorrect(password: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+  generateTemporaryToken(): {
+    unHashedToken: string;
+    hashedToken: string;
+    tokenExpiry: Date;
+  };
 }
 
 const userSchema: Schema = new mongoose.Schema(
@@ -27,7 +40,10 @@ const userSchema: Schema = new mongoose.Schema(
     userName: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     bio: { type: String, default: "" },
-    avatarUrl: { type: String, default: "" },
+    avatarUrl: {
+      url: { type: String, default: "" },
+      localPath: { type: String, default: "" },
+    },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     isEmailVerified: { type: Boolean, default: false },
@@ -61,7 +77,7 @@ userSchema.methods.generateAccessToken = function () {
       email: this.email,
       userName: this.userName,
     },
-    process.env.ACCESS_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET as string,
     { expiresIn: "1d" },
   );
 };
@@ -70,7 +86,7 @@ userSchema.methods.generateRefreshToken = function () {
     {
       _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET,
+    process.env.REFRESH_TOKEN_SECRET as string,
     { expiresIn: "10d" },
   );
 };
@@ -81,7 +97,7 @@ userSchema.methods.generateTemporaryToken = function () {
     .createHash("sha256")
     .update(unHashedToken)
     .digest("hex");
-  const tokenExpiry = Date.now() + 20 * 60 * 1000;
+  const tokenExpiry = new Date(Date.now() + 20 * 60 * 1000);
   return { unHashedToken, hashedToken, tokenExpiry };
 };
 

@@ -24,6 +24,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 10. Chat with Followers(Optional now - Learn Socket.io first)
 
 **Database Collections**
+
 - users
 - posts
 - comments
@@ -141,7 +142,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 - `POST /register` - User registration
 - `POST /login` - User authentication
 - `POST /logout` - User logout (secured)
-
+- `GET /current-user` - Get current user info
 - `POST /change-password` - Change user password (secured)
 - `POST /refresh-token` - Refresh access token
 - `GET /verify-email/:verificationToken` - Email verification

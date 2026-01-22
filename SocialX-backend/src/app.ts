@@ -1,12 +1,16 @@
 import express from "express";
 import cors from "cors";
 import healthCheckRouter from "./routes/healthCheck.route";
+import authRouter from "./routes/auth.route";
+import cookieParser from "cookie-parser";
+import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 const app = express();
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
+app.use(cookieParser());
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN?.split(",") || "http://localhost:5173",
@@ -16,5 +20,7 @@ app.use(
   }),
 );
 app.use("/api/v1/healthcheck", healthCheckRouter);
+app.use("/api/v1/auth", authRouter);
+app.use(errorHandler);
 
 export default app;
