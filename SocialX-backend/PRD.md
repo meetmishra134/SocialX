@@ -152,7 +152,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 **User Profile Routes** (`/api/v1/users/`)
 
-- `GET/:userId` - Any logged-in user can view any user’s profile
+- `GET/:userId` - Any logged-in user can view any user’s profile (secured)
 
 - `PUT/me` - User can update only their own profile
 
