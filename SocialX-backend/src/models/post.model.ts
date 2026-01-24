@@ -17,6 +17,7 @@ const postSchema = new mongoose.Schema<IPosts>(
     text: {
       type: String,
       required: true,
+      trim: true,
       maxlength: 500,
       default: "",
     },
@@ -35,11 +36,6 @@ const postSchema = new mongoose.Schema<IPosts>(
     timestamps: true,
   },
 );
-// postSchema.pre("save", function () {
-//   if (this.text) {
-//     this.text = this.text.trim();
-//   }
-// });
 
 postSchema.index({ createdAt: -1 });
 postSchema.index({ author: 1, createdAt: -1 });
