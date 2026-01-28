@@ -154,7 +154,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - `GET/:userId` - Any logged-in user can view any user’s profile (secured)
 
-- `PUT/me` - User can update only their own profile
+- `PATCH/me` - User can update only their own profile
 
 - `DELETE/me`- User can delete their own profile
 
