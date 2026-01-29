@@ -29,7 +29,14 @@ const generateAccessAndRefreshToken = async (userId: Types.ObjectId) => {
 
 //* Registering
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-  const { fullName, userName, email, password } = req.body;
+  const {
+    fullName,
+    userName,
+    email,
+    password,
+    bio,
+    avatarUrl: { url, localPath },
+  } = req.body;
   const existedUser = await User.findOne({
     $or: [{ userName }, { email }],
   });
@@ -41,6 +48,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     userName,
     email,
     password,
+    bio,
+    avatarUrl: { url, localPath },
     isEmailVerified: false,
   });
   const { unHashedToken, hashedToken, tokenExpiry } =

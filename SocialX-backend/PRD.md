@@ -28,6 +28,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 - users
 - posts
 - comments
+- followRequest
 
 ### 2. Core Features
 
@@ -105,6 +106,8 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - **Unfollow Users:** Users can unfollow users they already follow
 
+- **Accept or Reject Users** -Users can accept or reject the incoming requests
+
 - **Dynamic Follow Action:** Display a Follow or Unfollow button on a user profile based on the current follow relationship
 
 - **Followers Count:** Display the total number of followers on a user profile
@@ -140,14 +143,23 @@ SocialX is a fullstack social media application intended for peoples who loves s
 **Authentication Routes** (`/api/v1/auth/`)
 
 - `POST /register` - User registration
+
 - `POST /login` - User authentication
+
 - `POST /logout` - User logout (secured)
+
 - `GET /current-user` - Get current user info
+
 - `POST /change-password` - Change user password (secured)
+
 - `POST /refresh-token` - Refresh access token
+
 - `GET /verify-email/:verificationToken` - Email verification
+
 - `POST /forgot-password` - Request password reset
+
 - `POST /reset-password/:resetToken` - Reset forgotten password
+
 - `POST /resend-email-verification` - Resend verification email (secured)
 
 **User Profile Routes** (`/api/v1/users/`)
@@ -158,9 +170,13 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - `DELETE/me`- User can delete their own profile
 
-- `POST/:userId/follow` - Follow & unfollow should be one endpoint, not two.
-
 - `GET /api/users/:userId/posts` - View User Posts (Profile Page)
+
+- `POST /api/v1/users/:userId/follow`- Create follow request (pending) DO NOT update followers/following
+
+- `GET /api/v1/users/me/follow-requests`- View Incoming Follow Requests
+
+- `POST /api/v1/follow-requests/:requestId/respond`- Accept or Reject Follow Request
 
 **User Feed Routes** (`/api/v1/posts/`)
 

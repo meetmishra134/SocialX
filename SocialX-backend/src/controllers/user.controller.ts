@@ -5,6 +5,7 @@ import { ApiError } from "../utils/api.error";
 import { ApiResponse } from "../utils/api.response";
 import { updateMeInput } from "../validators/user.validator";
 import { Post } from "../models/post.model";
+import { FollowRequest } from "../models/followRequest.model";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -82,4 +83,77 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, "User deleted successfully"));
 });
 
-export { editUserProfile, getUserProfile, deleteUserProfile };
+//* Send Follow Request
+const sendFollowRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { toUserId } = req.params;
+  const { _id: fromUserId } = req.user;
+
+  if (fromUserId.toString() === toUserId) {
+    throw new ApiError(400, "You cannot send follow request to yourself");
+  }
+  const toUser = await User.findById(toUserId);
+  if (!toUser) {
+    throw new ApiError(404, "User not found");
+  }
+  const alreadyFollowing = await User.exists({
+    _id: fromUserId,
+    following: toUserId,
+  });
+  if (alreadyFollowing) {
+    throw new ApiError(400, "You are already following this user");
+  }
+
+  const existingRequest = await FollowRequest.findOne({
+    $or: [
+      { fromUserId: fromUserId, toUserId: toUserId },
+      { fromUserId: toUserId, toUserId: fromUserId },
+    ],
+  });
+  if (existingRequest) {
+    throw new ApiError(400, "Follow request already exists");
+  }
+
+  const followRequest = await FollowRequest.create({
+    fromUserId: fromUserId,
+    toUserId: toUserId,
+  });
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(
+        201,
+        { data: followRequest },
+        "Follow request sent successfully",
+      ),
+    );
+});
+
+//* View incoming requests
+const viewIncomingRequests = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { _id: loggedInUserId } = req.user;
+    const requests = await FollowRequest.find({
+      toUserId: loggedInUserId,
+      status: "pending",
+    })
+      .populate("fromUserId", ["firstName", "userName", "avatarUrl"])
+      .populate("toUserId", ["firstName", "userName", "avatarUrl"]);
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: requests },
+          "Requests Fetched Successfully",
+        ),
+      );
+  },
+);
+
+export {
+  editUserProfile,
+  getUserProfile,
+  deleteUserProfile,
+  sendFollowRequest,
+  viewIncomingRequests,
+};

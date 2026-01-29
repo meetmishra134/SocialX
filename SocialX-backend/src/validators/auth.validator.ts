@@ -4,7 +4,12 @@ const userRegistrationValidator = z.object({
   fullName: z.string().trim().min(2).max(20),
   userName: z.string().trim().min(2).max(20).toLowerCase(),
   email: z.email("Email is required").trim().toLowerCase(),
-  password: z.string("Password is required").min(3).max(10),
+  password: z.string("Password is required").min(3).max(15),
+  bio: z.string().max(200).optional(),
+  avatarUrl: z.object({
+    url: z.url().optional(),
+    localPath: z.string().optional(),
+  }),
 });
 const userLoginValidator = z.object({
   email: z
