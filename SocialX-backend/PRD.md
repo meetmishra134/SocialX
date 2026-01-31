@@ -162,7 +162,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - `POST /resend-email-verification` - Resend verification email (secured)
 
-**User Profile Routes** (`/api/v1/users/`)
+**User Routes** (`/api/v1/users/`)
 
 - `GET/:userId` - Any logged-in user can view any user’s profile (secured)
 
@@ -172,11 +172,20 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - `GET /api/users/:userId/posts` - View User Posts (Profile Page)
 
-- `POST /api/v1/users/:userId/follow`- Create follow request (pending) DO NOT update followers/following
+- `POST /api/v1/users/follow/:userId`- Create follow request (pending) DO NOT update followers/following
 
 - `GET /api/v1/users/me/follow-requests`- View Incoming Follow Requests
 
-- `POST /api/v1/follow-requests/:requestId/respond`- Accept or Reject Follow Request
+- `POST /api/v1/users/review/:status/:requestId`- Accept or Reject Follow Request
+
+- `POST /api/v1/users/unfollow/:userId`- Unfollow a user(The user whose req status is accepted is unfollowed )
+
+- `GET/api/v1/users/:userId/followers`- logged in user can see others followers(if they both follow each other) and their followers
+
+- `GET/api/v1/users/:userId/following`- logged in user can see others following(if they both follow each other) and their following
+
+- `GET/users` - List all users Show only their name / username ,profile picture (avatar) , bio
+  remember Logged-in user should not appear and Authenticated users only
 
 **User Feed Routes** (`/api/v1/posts/`)
 
@@ -201,13 +210,6 @@ SocialX is a fullstack social media application intended for peoples who loves s
 - `GET /api/posts/:postId/comments` - View Comments for a Post
 
 - `DELETE /api/comments/:commentId` - Delete Comment (OWNER ONLY)
-
-**User discovery & exploration** (`/api/v1/users`)
-
-- `GET/users` - List all users Show only their name / username ,profile picture (avatar) , bio
-  remember Logged-in user should not appear and Authenticated users only
-
-- `POST/:userId/follow` - Follow / Unfollow from User List (NO NEW API)
 
 **Health Check** (`/api/v1/healthcheck/`)
 

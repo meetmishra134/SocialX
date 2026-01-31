@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/api.response";
 import { updateMeInput } from "../validators/user.validator";
 import { Post } from "../models/post.model";
 import { FollowRequest } from "../models/followRequest.model";
+import { hasMutualFollowing } from "../utils/mutal.relationship";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -85,7 +86,7 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
 
 //* Send Follow Request
 const sendFollowRequest = asyncHandler(async (req: Request, res: Response) => {
-  const { toUserId } = req.params;
+  const { userId: toUserId } = req.params;
   const { _id: fromUserId } = req.user;
 
   if (fromUserId.toString() === toUserId) {
@@ -120,12 +121,34 @@ const sendFollowRequest = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(201)
     .json(
-      new ApiResponse(
-        201,
-        { data: followRequest },
-        "Follow request sent successfully",
-      ),
+      new ApiResponse(201, followRequest, "Follow request sent successfully"),
     );
+});
+//* Unfollow a user
+const unfollowRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { _id: loggedInUserId } = req.user;
+  const { userId: toUserId } = req.params;
+
+  if (loggedInUserId.toString() === toUserId) {
+    throw new ApiError(400, "You cannot unfollow yourself");
+  }
+
+  const isfollowing = await User.exists({
+    _id: loggedInUserId,
+    following: toUserId,
+  });
+  if (!isfollowing) {
+    throw new ApiError(400, "You are not following this user ");
+  }
+
+  await User.findByIdAndUpdate(loggedInUserId, {
+    $pull: { following: toUserId },
+  });
+  await User.findByIdAndUpdate(toUserId, {
+    $pull: { followers: loggedInUserId },
+  });
+
+  return res.status(200).json(new ApiResponse(200, "Unfollowing successful"));
 });
 
 //* View incoming requests
@@ -136,19 +159,137 @@ const viewIncomingRequests = asyncHandler(
       toUserId: loggedInUserId,
       status: "pending",
     })
-      .populate("fromUserId", ["firstName", "userName", "avatarUrl"])
-      .populate("toUserId", ["firstName", "userName", "avatarUrl"]);
+      .populate("fromUserId", "fullName userName avatarUrl")
+      .select("-createdAt -updatedAt -toUserId")
+      .lean()
+      .sort({ createdAt: -1 });
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          { data: requests },
-          "Requests Fetched Successfully",
-        ),
+        new ApiResponse(200, { requests }, "Requests Fetched Successfully"),
       );
   },
 );
+
+//* Respond Incoming Requests
+const respondIncomingRequests = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { _id: loggedInUserId } = req.user;
+    const { status, requestId } = req.params;
+    const allowedStatus = ["accepted", "rejected"];
+    if (!allowedStatus.includes(status as string)) {
+      throw new ApiError(400, "Status not allowed");
+    }
+    const followRequests = await FollowRequest.findOne({
+      _id: requestId,
+      toUserId: loggedInUserId,
+      status: "pending",
+    });
+    if (!followRequests) {
+      throw new ApiError(400, "Follow request doesn't exists");
+    }
+    await User.findByIdAndUpdate(loggedInUserId, {
+      $addToSet: { followers: followRequests.fromUserId },
+    });
+
+    await User.findByIdAndUpdate(followRequests.fromUserId, {
+      $addToSet: { following: loggedInUserId },
+    });
+
+    followRequests.status = status as "accepted" | "rejected";
+    await followRequests.save();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, `You have ${status} the follow request`));
+  },
+);
+
+//* User Following
+const userFollowing = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  let targetUserId: String;
+
+  if (loggedInUserId.toString() === userId) {
+    targetUserId = loggedInUserId.toString();
+  } else {
+    const isMutual = await hasMutualFollowing(
+      loggedInUserId.toString(),
+      userId as string,
+    );
+    if (!isMutual) {
+      throw new ApiError(403, "You are not allowed to view ");
+    }
+    targetUserId = userId as string;
+  }
+
+  const user = await User.findById(targetUserId)
+    .populate("following", "avatarUrl fullName userName")
+    .select("following");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user?.following ?? [],
+        "Following fetched successfully",
+      ),
+    );
+});
+
+//* User Followers
+const userFollowers = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  let targetUserId: string;
+  if (loggedInUserId.toString() === userId) {
+    targetUserId = loggedInUserId.toString();
+  } else {
+    const isMutual = await hasMutualFollowing(
+      loggedInUserId.toString(),
+      userId as string,
+    );
+    if (!isMutual) {
+      throw new ApiError(403, "You are not allowed to view");
+    }
+    targetUserId = userId as string;
+  }
+  const user = await User.findById(targetUserId)
+    .populate("followers", "avatarUrl fullName userName")
+    .select("followers")
+    .lean();
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user?.followers ?? [],
+        "Followers fetched successfully",
+      ),
+    );
+});
+
+const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
+  const { _id: loggedInUserId } = req.user;
+  const users = await User.find({
+    _id: { $ne: loggedInUserId },
+  }).select("fullName avatarUrl userName");
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, users, "User discovery list fetched successfully"),
+    );
+});
 
 export {
   editUserProfile,
@@ -156,4 +297,9 @@ export {
   deleteUserProfile,
   sendFollowRequest,
   viewIncomingRequests,
+  respondIncomingRequests,
+  unfollowRequest,
+  userFollowers,
+  userFollowing,
+  userDiscoveryList,
 };
