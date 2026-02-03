@@ -197,7 +197,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 **Post Management Routes** (`/api/v1/posts`)
 
-- `POST/posts` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
+- `POST/upload-post` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
 
 - `POST/uploads` - Upload image Get image URL & Save URL in post
 

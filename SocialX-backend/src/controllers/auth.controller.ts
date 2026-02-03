@@ -12,7 +12,6 @@ import {
   sendEmail,
 } from "../utils/mail";
 import { RefreshTokenPayload } from "../types/jwt.types";
-import { fa } from "zod/v4/locales";
 
 const generateAccessAndRefreshToken = async (userId: Types.ObjectId) => {
   try {
