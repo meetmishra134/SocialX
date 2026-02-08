@@ -48,7 +48,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     email,
     password,
     bio,
-    avatarUrl: { url, localPath },
+    avatarUrl: { url },
     isEmailVerified: false,
   });
   const { unHashedToken, hashedToken, tokenExpiry } =

@@ -4,18 +4,20 @@ import cloudinary from "../server";
 
 export const uploadToCloudinary = async (
   localFilePath: string,
-  imageName: string,
-  authorName: string,
+  options: {
+    folder: string;
+    publicId?: string;
+  },
 ) => {
   if (!localFilePath) {
     throw new ApiError(400, "File path not found");
   }
-  const safeAuthor = authorName.toLowerCase().replace(/[^a-z0-9]/g, "-");
 
   try {
     const result = await cloudinary.uploader.upload(localFilePath, {
-      folder: `posts/${safeAuthor}`,
-      public_id: imageName,
+      folder: options.folder,
+      public_id: options.publicId,
+      overwrite: true,
       resource_type: "image",
     });
 

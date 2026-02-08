@@ -3,10 +3,11 @@ import { asyncHandler } from "../utils/async-handler";
 import { User } from "../models/user.model";
 import { ApiError } from "../utils/api.error";
 import { ApiResponse } from "../utils/api.response";
-import { updateMeInput } from "../validators/user.validator";
+import { updateMeInput, updateMeSchema } from "../validators/user.validator";
 import { Post } from "../models/post.model";
 import { FollowRequest } from "../models/followRequest.model";
 import { hasMutualFollowing } from "../utils/mutal.relationship";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -23,7 +24,7 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
     _id: user._id,
     userName: user.userName,
     fullName: user.fullName,
-    avatar: user.avatarUrl,
+    avatar: user.avatarUrl.url,
     bio: user.bio,
     followersCount: user.followers.length,
     followingCount: user.following.length,
@@ -46,17 +47,49 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
 
 const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
-  const updates = req.body as updateMeInput;
-  const user = await User.findByIdAndUpdate(loggedInUserId, updates, {
-    new: true,
-    runValidators: true,
-  });
+  const file = req.file;
+  const {
+    avatarUrl: { url },
+    userName,
+    bio,
+  } = req.body as updateMeInput;
+
+  const updateData: any = {};
+  if (userName) {
+    updateData.userName = userName;
+  }
+  if (bio) {
+    updateData.bio = bio;
+  }
+  if (file) {
+    const uploadResult = await uploadToCloudinary(file.path, {
+      folder: "profiles",
+      publicId: `user-${loggedInUserId}`,
+    });
+    updateData.avatarUrl = {
+      url: uploadResult.secure_url,
+    };
+  }
+  if (Object.keys(updateData).length === 0) {
+    throw new ApiError(400, "Nothing to update");
+  }
+  const validateData = updateMeSchema.parse(updateData);
+  const updatedUser = await User.findByIdAndUpdate(
+    loggedInUserId,
+    {
+      $set: validateData,
+    },
+    { new: true },
+  );
+  if (!updatedUser) {
+    throw new ApiError(404, "user not found");
+  }
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { updatedUser: user },
+        { updatedUser: updatedUser },
         "Details updated successfully",
       ),
     );
