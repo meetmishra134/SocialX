@@ -4,6 +4,7 @@ import healthCheckRouter from "./routes/healthCheck.route";
 import authRouter from "./routes/auth.route";
 import userRouter from "./routes/user.routes";
 import postRouter from "./routes/post.route";
+import feedRouter from "./routes/feed.route";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import path from "path";
@@ -26,6 +27,7 @@ app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
+app.use("/api/v1/feed", feedRouter);
 app.use(errorHandler);
 
 export default app;

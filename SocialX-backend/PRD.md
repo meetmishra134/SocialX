@@ -184,32 +184,32 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - `GET/api/v1/users/:userId/following`- logged in user can see others following(if they both follow each other) and their following
 
-- `GET/users` - List all users Show only their name / username ,profile picture (avatar) , bio
+- `GET/api/v1/users/discovery` - List all users Show only their name / username ,profile picture (avatar) , bio
   remember Logged-in user should not appear and Authenticated users only
 
-**User Feed Routes** (`/api/v1/posts/`)
+**User Feed Routes** (`/api/v1/feed/`)
 
-- `GET/feed/global` - Show posts from all users Sorted by latest first & Paginated
+- `GET/global` - Show posts from all users Sorted by latest first & Paginated
 
-- `GET/feed/following` - Show posts only from users I follow and Exclude non-followed users Pagination logic is same
+- `GET/following` - Show posts only from users I follow and Exclude non-followed users Pagination logic is same
 
 - `GET /api/posts/feed/global?limit=10&cursor=2026-01-16T10:30:00Z`- Cursor-based pagination is stable
 
 **Post Management Routes** (`/api/v1/posts`)
 
-- `POST/upload-post` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
+- `POST /upload-post` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
 
-- `POST/uploads` - Upload image Get image URL & Save URL in post
+- `POST /uploads` - Upload image Get image URL & Save URL in post
 
-- `DELETE/:postId` - Only the post creator can delete posts for Others → 403 Forbidden
+- `DELETE /delete-post/:postId` - Only the post creator can delete posts for Others → 403 Forbidden
 
-- `POST/:postId/like` - Use ONE toggle endpoint (like/unlike).
+- `POST /like/:postId` - Use ONE toggle endpoint (like/unlike).
 
-- `POST/:postId/comments` - Seperate schema for comments bcoz it can can grow large , Easier pagination & Ownership control
+- `POST /comment/:postId` - Seperate schema for comments bcoz it can can grow large , Easier pagination & Ownership control
 
-- `GET /api/posts/:postId/comments` - View Comments for a Post
+- `GET /comments/:postId` - View Comments for a Post
 
-- `DELETE /api/comments/:commentId` - Delete Comment (OWNER ONLY)
+- `DELETE /delete-comment/:commentId` - Delete Comment (OWNER ONLY)
 
 **Health Check** (`/api/v1/healthcheck/`)
 

@@ -48,11 +48,7 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
 const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const file = req.file;
-  const {
-    avatarUrl: { url },
-    userName,
-    bio,
-  } = req.body as updateMeInput;
+  const { userName, bio } = req.body as updateMeInput;
 
   const updateData: any = {};
   if (userName) {
@@ -137,25 +133,30 @@ const sendFollowRequest = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "You are already following this user");
   }
 
-  const existingRequest = await FollowRequest.findOne({
-    $or: [
-      { fromUserId: fromUserId, toUserId: toUserId },
-      { fromUserId: toUserId, toUserId: fromUserId },
-    ],
-  });
-  if (existingRequest) {
-    throw new ApiError(400, "Follow request already exists");
-  }
-
-  const followRequest = await FollowRequest.create({
-    fromUserId: fromUserId,
-    toUserId: toUserId,
-  });
-  return res
-    .status(201)
-    .json(
-      new ApiResponse(201, followRequest, "Follow request sent successfully"),
+  const usersPair = [fromUserId, toUserId].sort();
+  try {
+    const followRequest = await FollowRequest.create({
+      requester: fromUserId,
+      users: usersPair,
+      status: "pending",
+    });
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(201, followRequest, "Follow request sent successfully"),
+      );
+  } catch (error: any) {
+    if (error.code === 11000) {
+      throw new ApiError(
+        400,
+        "Follow request already pending between these users",
+      );
+    }
+    throw new ApiError(
+      500,
+      "Something went wrong while sending follow request",
     );
+  }
 });
 //* Unfollow a user
 const unfollowRequest = asyncHandler(async (req: Request, res: Response) => {
@@ -189,18 +190,17 @@ const viewIncomingRequests = asyncHandler(
   async (req: Request, res: Response) => {
     const { _id: loggedInUserId } = req.user;
     const requests = await FollowRequest.find({
-      toUserId: loggedInUserId,
+      users: loggedInUserId,
       status: "pending",
+      requester: { $ne: loggedInUserId },
     })
-      .populate("fromUserId", "fullName userName avatarUrl")
-      .select("-createdAt -updatedAt -toUserId")
+      .populate("requester", "fullName userName avatarUrl")
+      .select("-createdAt -updatedAt -toUserId -users")
       .lean()
       .sort({ createdAt: -1 });
     return res
       .status(200)
-      .json(
-        new ApiResponse(200, { requests }, "Requests Fetched Successfully"),
-      );
+      .json(new ApiResponse(200, requests, "Requests Fetched Successfully"));
   },
 );
 
@@ -215,24 +215,25 @@ const respondIncomingRequests = asyncHandler(
     }
     const followRequests = await FollowRequest.findOne({
       _id: requestId,
-      toUserId: loggedInUserId,
       status: "pending",
+      users: loggedInUserId,
+      requester: { $ne: loggedInUserId },
     });
     if (!followRequests) {
       throw new ApiError(400, "Follow request doesn't exists");
     }
     await User.findByIdAndUpdate(loggedInUserId, {
-      $addToSet: { followers: followRequests.fromUserId },
+      $addToSet: { followers: followRequests.requester },
     });
 
-    await User.findByIdAndUpdate(followRequests.fromUserId, {
+    await User.findByIdAndUpdate(followRequests.requester, {
       $addToSet: { following: loggedInUserId },
     });
 
     followRequests.status = status as "accepted" | "rejected";
     await followRequests.save();
 
-    res
+    return res
       .status(200)
       .json(new ApiResponse(200, `You have ${status} the follow request`));
   },
@@ -312,16 +313,37 @@ const userFollowers = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
-  const { _id: loggedInUserId } = req.user;
+const userDiscoveryList = asyncHandler(async (req, res) => {
+  const loggedInUserId = req.user._id;
+
+  const me = await User.findById(loggedInUserId)
+    .select("followers following")
+    .lean();
+
+  const excludeUserIds = new Set([
+    loggedInUserId.toString(),
+    ...me.following.map((id) => id.toString()),
+    ...me.followers.map((id) => id.toString()),
+  ]);
+
+  const pendingRequests = await FollowRequest.find({
+    status: "pending",
+    users: loggedInUserId,
+  }).select("users");
+
+  pendingRequests.forEach((req) => {
+    req.users.forEach((userId) => {
+      excludeUserIds.add(userId.toString());
+    });
+  });
+
   const users = await User.find({
-    _id: { $ne: loggedInUserId },
-  }).select("fullName avatarUrl userName");
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, users, "User discovery list fetched successfully"),
-    );
+    _id: { $nin: Array.from(excludeUserIds) },
+  })
+    .select("username avatar bio")
+    .limit(20);
+
+  return res.status(200).json(new ApiResponse(200, users, "Discovered users"));
 });
 
 export {

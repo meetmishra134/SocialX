@@ -24,9 +24,11 @@ SocialX is a fullstack social media application intended for peoples who loves s
 10. Chat with Followers(Optional now - Learn Socket.io first)
 
 **Database Collections**
+
 - users
 - posts
 - comments
+- followRequest
 
 ### 2. Core Features
 
@@ -104,6 +106,8 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 - **Unfollow Users:** Users can unfollow users they already follow
 
+- **Accept or Reject Users** -Users can accept or reject the incoming requests
+
 - **Dynamic Follow Action:** Display a Follow or Unfollow button on a user profile based on the current follow relationship
 
 - **Followers Count:** Display the total number of followers on a user profile
@@ -139,58 +143,73 @@ SocialX is a fullstack social media application intended for peoples who loves s
 **Authentication Routes** (`/api/v1/auth/`)
 
 - `POST /register` - User registration
+
 - `POST /login` - User authentication
+
 - `POST /logout` - User logout (secured)
 
+- `GET /current-user` - Get current user info
+
 - `POST /change-password` - Change user password (secured)
+
 - `POST /refresh-token` - Refresh access token
+
 - `GET /verify-email/:verificationToken` - Email verification
+
 - `POST /forgot-password` - Request password reset
+
 - `POST /reset-password/:resetToken` - Reset forgotten password
+
 - `POST /resend-email-verification` - Resend verification email (secured)
 
-**User Profile Routes** (`/api/v1/users/`)
+**User Routes** (`/api/v1/users/`)
 
-- `GET/:userId` - Any logged-in user can view any user’s profile
+- `GET/:userId` - Any logged-in user can view any user’s profile (secured)
 
-- `PUT/me` - User can update only their own profile
+- `PATCH/edit-me` - User can update only their own profile
 
 - `DELETE/me`- User can delete their own profile
 
-- `POST/:userId/follow` - Follow & unfollow should be one endpoint, not two.
-
 - `GET /api/users/:userId/posts` - View User Posts (Profile Page)
 
-**User Feed Routes** (`/api/v1/posts/`)
+- `POST /api/v1/users/follow/:userId`- Create follow request (pending) DO NOT update followers/following
 
-- `GET/feed/global` - Show posts from all users Sorted by latest first & Paginated
+- `GET /api/v1/users/me/follow-requests`- View Incoming Follow Requests
 
-- `GET/feed/following` - Show posts only from users I follow and Exclude non-followed users Pagination logic is same
+- `POST /api/v1/users/review/:status/:requestId`- Accept or Reject Follow Request
+
+- `POST /api/v1/users/unfollow/:userId`- Unfollow a user(The user whose req status is accepted is unfollowed )
+
+- `GET/api/v1/users/:userId/followers`- logged in user can see others followers(if they both follow each other) and their followers
+
+- `GET/api/v1/users/:userId/following`- logged in user can see others following(if they both follow each other) and their following
+
+- `GET/users` - List all users Show only their name / username ,profile picture (avatar) , bio
+  remember Logged-in user should not appear and Authenticated users only
+
+**User Feed Routes** (`/api/v1/feed/`)
+
+- `GET/global` - Show posts from all users Sorted by latest first & Paginated
+
+- `GET/following` - Show posts only from users I follow and Exclude non-followed users Pagination logic is same
 
 - `GET /api/posts/feed/global?limit=10&cursor=2026-01-16T10:30:00Z`- Cursor-based pagination is stable
 
 **Post Management Routes** (`/api/v1/posts`)
 
-- `POST/posts` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
+- `POST /upload-post` - Post can contain: text only , image(s) only , text + image(s) & it must not be empty
 
-- `POST/uploads` - Upload image Get image URL & Save URL in post
+- `POST /uploads` - Upload image Get image URL & Save URL in post
 
-- `DELETE/:postId` - Only the post creator can delete posts for Others → 403 Forbidden
+- `DELETE /delete-post/:postId` - Only the post creator can delete posts for Others → 403 Forbidden
 
-- `POST/:postId/like` - Use ONE toggle endpoint (like/unlike).
+- `POST /like/:postId` - Use ONE toggle endpoint (like/unlike).
 
-- `POST/:postId/comments` - Seperate schema for comments bcoz it can can grow large , Easier pagination & Ownership control
+- `POST /comment/:postId` - Seperate schema for comments bcoz it can can grow large , Easier pagination & Ownership control
 
-- `GET /api/posts/:postId/comments` - View Comments for a Post
+- `GET /comments/:postId` - View Comments for a Post
 
-- `DELETE /api/comments/:commentId` - Delete Comment (OWNER ONLY)
-
-**User discovery & exploration** (`/api/v1/users`)
-
-- `GET/users` - List all users Show only their name / username ,profile picture (avatar) , bio
-  remember Logged-in user should not appear and Authenticated users only
-
-- `POST/:userId/follow` - Follow / Unfollow from User List (NO NEW API)
+- `DELETE /delete-comment/:commentId` - Delete Comment (OWNER ONLY)
 
 **Health Check** (`/api/v1/healthcheck/`)
 

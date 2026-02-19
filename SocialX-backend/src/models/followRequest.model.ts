@@ -1,21 +1,24 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IFollowRequest extends Document {
-  fromUserId: mongoose.Types.ObjectId;
-  toUserId: mongoose.Types.ObjectId;
+  requester: mongoose.Types.ObjectId;
+  users: [mongoose.Types.ObjectId];
   status: "pending" | "accepted" | "rejected";
 }
 const followRequestSchema = new mongoose.Schema<IFollowRequest>(
   {
-    fromUserId: {
+    requester: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    toUserId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    users: {
+      type: [Schema.Types.ObjectId],
       required: true,
+      validate: {
+        validator: (val: mongoose.Types.ObjectId[]) => val.length == 2,
+        message: "User array must contain two user Id's",
+      },
     },
     status: {
       type: String,
