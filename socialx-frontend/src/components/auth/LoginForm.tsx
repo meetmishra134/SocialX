@@ -1,4 +1,4 @@
-import { motion, scale } from "motion/react";
+import { motion } from "motion/react";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -16,7 +16,7 @@ const LoginForm = () => {
   const MotionButton = motion.create(Button);
   return (
     <div className="bg-background text-foreground  items-center justify-center w-full flex md:divide-x md:divide-neutral-200/30 ">
-      <div className="min-h-screen lg:flex justify-center items-start py-30  w-1/2 hidden ">
+      <div className="min-h-screen lg:flex lg:justify-center lg:items-start py-35  w-1/2 hidden ">
         <div className="flex flex-col items-center gap-6 ">
           <h1 className="text-4xl max-w-2xl text-center leading-relaxed tracking-tight font-medium">
             Share Your Thoughts{" "}
@@ -32,23 +32,24 @@ const LoginForm = () => {
           />
         </div>
       </div>
-      <div className="min-h-screen lg:w-1/2 w-full flex flex-col items-center justify-center p-4">
-        <div className="mb-10">
-          <h2 className="text-2xl relative  z-10 ">
-            Login To{" "}
-            <span className=" bg-foreground text-background p-1 skew-0">
-              SocialX
-            </span>
-          </h2>
-        </div>
-        <Card className="w-full max-w-md sm:max-w-sm border border-accent-foreground/30">
-          <CardHeader>
+      <div className="min-h-screen lg:w-1/2 w-full flex  items-center justify-center p-4">
+        <Card className="w-full max-w-md sm:max-w-sm border border-accent-foreground/30 ">
+          <CardHeader className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 mb-2">
+              <img
+                src="../../../images/Logo.webp"
+                alt="SocialX"
+                className="h-6 w-auto"
+              />
+              <h2 className="text-md font-bold">SocialX</h2>
+            </div>
+
             <CardTitle className="text-center text-xl">
               {" "}
-              Welcome Back!
+              Sign in to your account
             </CardTitle>
             <CardDescription className="text-center ">
-              Sign in to your account to continue.
+              Welcome back! Please enter your details
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -59,9 +60,8 @@ const LoginForm = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="you@example.com"
                     required
-                    className="focus:placeholder:-translate-y-2 py-2 focus:placeholder:text-xs placeholder:transition-all placeholder:duration-300"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -69,17 +69,16 @@ const LoginForm = () => {
                     <Label htmlFor="password">Password</Label>
                     <Link
                       to="/forgot-password"
-                      className="text-muted-foreground text-sm"
+                      className="text-muted-foreground text-sm hover:text-neutral-200 hover:underline"
                     >
-                      forgot password?
+                      Forgot?
                     </Link>
                   </div>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="********"
                     required
-                    className="focus:placeholder:-translate-y-2 py-2 focus:placeholder:text-xs placeholder:transition-all placeholder:duration-300"
                   />
                 </div>
               </div>
@@ -87,16 +86,19 @@ const LoginForm = () => {
                 <MotionButton
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.05 }}
-                  className="w-full cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 "
+                  className="w-full cursor-pointer bg-primary text-primary-foreground hover:bg-neutral-100 "
                   type="submit"
                 >
                   Login
                 </MotionButton>
                 <p className="text-sm text-muted-foreground mt-4">
                   Don't have an account?{" "}
-                  <a href="/signup" className="underline">
+                  <Link
+                    to="/register"
+                    className="hover:underline text-neutral-200 "
+                  >
                     Sign up
-                  </a>
+                  </Link>
                 </p>
               </CardFooter>
             </form>
