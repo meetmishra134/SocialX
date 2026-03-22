@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -10,17 +10,60 @@ import {
 } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { type UserLoginData, userLoginValidator } from "@/types/auth.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+import { useAuth } from "@/store/authStore";
+import axios from "axios";
 
 const LoginForm = () => {
-  const MotionButton = motion.create(Button);
+  const [loading, setLoading] = useState(false);
+  const login = useAuth((state) => state.login);
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UserLoginData>({
+    resolver: zodResolver(userLoginValidator),
+  });
+
+  const onSubmit = async (data: UserLoginData) => {
+    try {
+      setLoading(true);
+      const res = await api.post("/auth/login", data);
+      login(res.data.data.user, res.data.data.accessToken);
+      console.log(res.data);
+      toast.success(res.data?.message, { position: "top-center" });
+      return navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Login failed", {
+          position: "top-center",
+        });
+      } else {
+        toast.error("An unexpected error occurred", {
+          position: "top-center",
+        });
+      }
+    } finally {
+      setLoading(false);
+      reset();
+    }
+  };
   return (
-    <div className="bg-background text-foreground  items-center justify-center w-full flex md:divide-x md:divide-neutral-200/30 ">
-      <div className="min-h-screen lg:flex lg:justify-center lg:items-start py-35  w-1/2 hidden ">
-        <div className="flex flex-col items-center gap-6 ">
-          <h1 className="text-4xl max-w-2xl text-center leading-relaxed tracking-tight font-medium">
+    <div className="bg-background text-foreground flex w-full items-center justify-center md:divide-x md:divide-neutral-200/30">
+      <div className="hidden min-h-screen w-1/2 lg:flex lg:items-center lg:justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <h1 className="max-w-2xl text-center text-4xl leading-relaxed font-bold tracking-tight">
             Share Your Thoughts{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-sky-500 via-sky-400 to-sky-300">
+            <span className="bg-linear-to-r from-sky-500 via-sky-400 to-sky-300 bg-clip-text text-transparent">
               Connect
             </span>{" "}
             With The World
@@ -28,32 +71,30 @@ const LoginForm = () => {
           <img
             src="../../../images/social.webp"
             alt="Login"
-            className="w-100 h-80 object-cover"
+            className="h-80 w-100 object-cover"
           />
         </div>
       </div>
-      <div className="min-h-screen lg:w-1/2 w-full flex  items-center justify-center p-4">
-        <Card className="w-full max-w-md sm:max-w-sm border border-accent-foreground/30 ">
+      <div className="flex min-h-screen w-full items-center justify-center p-4 lg:w-1/2">
+        <Card className="border-accent-foreground/30 w-full max-w-sm border">
           <CardHeader className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center">
               <img
-                src="../../../images/Logo.webp"
+                src="../../../images/SocialXLogo1.png"
                 alt="SocialX"
-                className="h-6 w-auto"
+                className="h-9 w-auto object-cover"
               />
-              <h2 className="text-md font-bold">SocialX</h2>
             </div>
 
             <CardTitle className="text-center text-xl">
-              {" "}
               Sign in to your account
             </CardTitle>
-            <CardDescription className="text-center ">
+            <CardDescription className="text-center">
               Welcome back! Please enter your details
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action="">
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
@@ -61,8 +102,14 @@ const LoginForm = () => {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    required
+                    className={`${errors.email ? "border-destructive" : ""}`}
+                    {...register("email", { required: true })}
                   />
+                  {errors.email && (
+                    <p className="text-destructive text-xs">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
@@ -78,24 +125,30 @@ const LoginForm = () => {
                     id="password"
                     type="password"
                     placeholder="********"
-                    required
+                    {...register("password", { required: true })}
+                    className={`${errors.password ? "border-destructive" : ""}`}
                   />
+                  {errors.password && (
+                    <p className="text-destructive text-xs">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
               </div>
-              <CardFooter className="flex flex-col mt-5">
-                <MotionButton
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="w-full cursor-pointer bg-primary text-primary-foreground hover:bg-neutral-100 "
+              <CardFooter className="mt-5 flex flex-col">
+                <Button
+                  className="bg-primary text-primary-foreground w-full cursor-pointer font-medium hover:bg-neutral-100"
                   type="submit"
+                  disabled={loading}
                 >
-                  Login
-                </MotionButton>
-                <p className="text-sm text-muted-foreground mt-4">
+                  {loading ? "Logging in" : "Login"}
+                  {loading && <Spinner data-icon="inline-start" />}
+                </Button>
+                <p className="text-muted-foreground mt-4 text-sm">
                   Don't have an account?{" "}
                   <Link
                     to="/register"
-                    className="hover:underline text-neutral-200 "
+                    className="text-neutral-200 hover:underline"
                   >
                     Sign up
                   </Link>

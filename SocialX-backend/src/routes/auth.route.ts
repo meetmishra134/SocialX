@@ -30,7 +30,7 @@ router.route("/login").post(validate(userLoginValidator), loginUser);
 
 router.route("/verify-email/:verificationToken").get(verifyEmail);
 
-router.route("/refresh=token").post(refreshAccessToken);
+router.route("/refresh-token").post(refreshAccessToken);
 
 router
   .route("/forgot-password")

@@ -21,7 +21,11 @@ const userLoginValidator = z.object({
     .email({ error: "Please provide a valid email address" })
     .trim()
     .lowercase({ error: "Email must be in lowercase" }),
-  password: z.string({ error: "Password is required" }).trim(),
+  password: z
+    .string({ error: "Password is required" })
+    .trim()
+    .min(6, "password must be atleast 6 characters")
+    .max(10, "Password must be atmost 10 characters"),
 });
 const userChangeCurrentPasswordValidator = z.object({
   oldPassword: z
