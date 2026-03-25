@@ -4,9 +4,10 @@ import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoutes from "./ProtectedRoutes";
 import Layout from "@/components/layout/Layout";
 import Feed from "@/components/feed/Feed";
-import Profile from "@/components/user/Profile";
+
 import Bookmarks from "@/components/Bookmarks/Bookmarks";
 import Connect from "@/components/connect/Connect";
+import Profile from "@/components/Profile/Profile";
 
 export const router = createBrowserRouter([
   {

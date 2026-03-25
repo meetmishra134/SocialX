@@ -91,14 +91,19 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const loggedInUser = await User.findById(user._id).select(
     "-password -emailVerificationToken -emailVerificationExpiry -refreshToken",
   );
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
+
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 15 * 60 * 1000, //15 minutes
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+    })
     .json(
       new ApiResponse(
         200,
@@ -127,6 +132,7 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
   const options = {
     httpOnly: true,
     secure: true,
+    maxAge: 0,
   };
   return res
     .status(200)

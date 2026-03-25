@@ -18,7 +18,7 @@ const postSchema = new mongoose.Schema<IPosts>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 500,
+      maxlength: 200,
       default: "",
     },
     images: {
