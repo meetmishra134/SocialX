@@ -18,7 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-const Navbar = () => {
+interface NavbarProps {
+  onOpenPost: () => void;
+}
+
+const Navbar = ({ onOpenPost }: NavbarProps) => {
   return (
     <nav className="flex h-full w-full flex-col items-center py-4 lg:items-start lg:p-4">
       <div className="flex w-full items-center justify-center gap-2 lg:justify-start lg:px-4">
@@ -32,7 +36,11 @@ const Navbar = () => {
 
       <div className="w-full">
         <ul className="mt-6 flex flex-col gap-4 px-2 lg:px-4">
-          <NavItems name="Home" path="/" icon={<HomeIcon size={25} />} />
+          <NavItems
+            name="Home"
+            path="/home/foryou"
+            icon={<HomeIcon size={25} />}
+          />
           <NavItems
             name="Connect"
             path="/connect"
@@ -52,7 +60,10 @@ const Navbar = () => {
       </div>
 
       <div className="mt-4 w-full px-2 lg:px-4">
-        <Button className="w-full cursor-pointer rounded-full font-bold">
+        <Button
+          className="w-full cursor-pointer rounded-full font-bold"
+          onClick={onOpenPost}
+        >
           <span className="hidden lg:inline">Post</span>
           <span className="lg:hidden">
             <SquarePenIcon size={30} />
@@ -75,13 +86,9 @@ const Navbar = () => {
               <p className="text-sm font-semibold">Meet Mishra</p>
               <p className="text-muted-foreground text-xs">mishrameet@123</p>
 
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute top-0 right-0"
-              >
+              <button className="absolute top-1 right-0 cursor-pointer rounded-full ">
                 <Ellipsis />
-              </Button>
+              </button>
 
               <DropdownMenuContent className="ml-2 w-32 min-w-0">
                 <DropdownMenuItem

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -46,6 +47,7 @@
   --font-sans: Fira Sans, ui-sans-serif, sans-serif, system-ui;
   --font-mono: Fira Code, ui-monospace, monospace;
   --font-serif: Noto Serif SC, ui-serif, serif;
+  --font-poppins: Poppins, ui-sans-serif, sans-serif, system-ui;
   --radius: 0.625rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -109,6 +111,7 @@
   --font-sans: Fira Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Noto Serif SC, ui-serif, serif;
   --font-mono: Fira Code, ui-monospace, monospace;
+  --font-poppins: Poppins, ui-sans-serif, sans-serif, system-ui;
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;
   --shadow-blur: 3px;
@@ -169,6 +172,7 @@
   --font-sans: Fira Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Noto Serif SC, ui-serif, serif;
   --font-mono: Fira Code, ui-monospace, monospace;
+  --font-poppins: Poppins, ui-sans-serif, sans-serif, system-ui;
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;
   --shadow-blur: 3px;
@@ -198,5 +202,6 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    @apply font-poppins;
   }
 }

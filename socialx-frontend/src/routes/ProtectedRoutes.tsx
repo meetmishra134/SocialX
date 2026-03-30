@@ -6,17 +6,20 @@ import { Navigate } from "react-router-dom";
 const ProtectedRoutes = () => {
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
   const isCheckingAuth = useAuth((state) => state.isCheckingAuth);
-  if (isCheckingAuth) {
-    return (
-      <div className=" h-screen inset-0 backdrop-blur-md bg-black/30 flex items-center justify-center fixed z-50">
-        <Spinner className="size-10" />
-      </div>
-    );
-  }
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isCheckingAuth) {
     return <Navigate to="/login" replace />;
   }
-  return <Outlet />;
+
+  return (
+    <>
+      <Outlet />
+      {isCheckingAuth && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md">
+          <Spinner className="size-10" />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default ProtectedRoutes;

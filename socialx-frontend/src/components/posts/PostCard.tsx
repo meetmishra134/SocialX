@@ -1,60 +1,111 @@
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import type { Post } from "@/types/post.types";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import HeartIcon from "../icons/HeartIcon";
+
 import CommentIcon from "../icons/CommentIcon";
 import BookmarkIcon from "../icons/BookmarkIcon";
+import HeartIcon from "../icons/HeartIcon";
 
 interface PostCardProps {
   post: Post;
 }
 
 const PostCard = ({ post }: PostCardProps) => {
+  const hasMultipleImages = post.images && post.images.length > 1;
+  const hasSingleImage = post.images && post.images.length === 1;
+
   return (
-    <Card className="mx-auto mb-6 w-full max-w-xl gap-2 overflow-hidden border-gray-600 py-2">
-      <CardHeader className="flex flex-row items-center gap-3 pb-1">
-        <Avatar>
-          <AvatarImage src={post.author.avatarUrl} alt={post.author.userName} />
-          <AvatarFallback>{post.author.userName[0]}</AvatarFallback>
+    <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-hidden rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
+      {/* HEADER */}
+      <CardHeader className="flex flex-row items-center gap-3 px-4 pb-2 sm:px-6">
+        <Avatar className="h-10 w-10 shrink-0">
+          <AvatarImage src={post.author.avatarUrl} alt={post.author.fullName} />
+          <AvatarFallback>{post.author.fullName[0]}</AvatarFallback>
         </Avatar>
-        <div className="flex flex-col">
-          <span className="font-semibold">{post.author.userName}</span>
-          <span className="text-muted-foreground text-sm">
-            @{post.author.userName} .{" "}
-            {new Date(post.createdAt).toLocaleDateString()}
-          </span>
+        <div className="flex min-w-0 flex-col">
+          <h3 className="truncate text-sm font-semibold sm:text-base">
+            {post.author.fullName}
+          </h3>
+          <p className="text-muted-foreground truncate text-xs sm:text-sm">
+            @{post.author.userName} ·{" "}
+            {new Date(post.createdAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 pt-0">
-        {post.text && (
-          <div className="px-1 py-2">
-            <p className="text-sm leading-relaxed">{post.text}</p>
-          </div>
-        )}
-        {post.images?.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt="Post image"
-            className="max-h-[400px] rounded-lg object-cover"
-          />
-        ))}
-        <div className="flex items-center justify-between gap-4 px-1 py-2">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1">
-              <HeartIcon />
-              <span className="text-sm">{post.likes?.length || 0}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <CommentIcon />
-              <span className="text-sm">0</span>
-            </div>
-          </div>
-          <BookmarkIcon />
+
+      {/* CONTENT */}
+      <CardContent className="p-2 pt-0 sm:p-3 sm:pt-2">
+        <p className="text-foreground/90 ml-4 text-sm leading-relaxed whitespace-pre-wrap">
+          {post.text}
+        </p>
+
+        {/* IMAGE HANDLING */}
+        <div className="mt-2 px-2">
+          {/* Fallback for a single image */}
+          {hasSingleImage && (
+            <img
+              src={post.images?.[0]}
+              alt="Post attachment"
+              loading="lazy"
+              className="border-border/50 bg-muted aspect-4/3 w-full rounded-xl border object-cover sm:aspect-video"
+            />
+          )}
+
+          {/* Carousel for multiple images */}
+          {hasMultipleImages && (
+            <Carousel className="group relative w-full">
+              <CarouselContent>
+                {post.images?.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <img
+                      src={image}
+                      alt={`Post image ${index + 1}`}
+                      loading="lazy"
+                      // Fixed aspect ratio so the carousel doesn't jump in height
+                      className="border-border/50 bg-muted aspect-4/3 w-full rounded-xl border object-cover sm:aspect-video"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              {/* Navigation Arrows: Hidden on mobile (users will swipe), visible on desktop */}
+              <div className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:block">
+                <CarouselPrevious className="bg-background/80 left-2 backdrop-blur-sm" />
+                <CarouselNext className="bg-background/80 right-2 backdrop-blur-sm" />
+              </div>
+            </Carousel>
+          )}
         </div>
       </CardContent>
+      <div className="flex items-center justify-between px-6 pt-2 pb-1">
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-2">
+            <HeartIcon />
+            <span>{post.likes?.length}</span>
+          </button>
+          <button className="flex items-center gap-2">
+            <CommentIcon />
+            <span>1</span>
+          </button>
+        </div>
+        <div>
+          <button>
+            <BookmarkIcon />
+          </button>
+        </div>
+      </div>
     </Card>
   );
 };
-
 export default PostCard;

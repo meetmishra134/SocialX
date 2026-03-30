@@ -31,7 +31,7 @@ const friendsSuggestion: FriendSuggestion[] = [
 
 const FriendSuggestionWidget = () => {
   return (
-    <Card className="border-accent relative w-75 gap-4 p-2 shadow-lg">
+    <Card className="border-accent relative w-76 gap-4 p-2 shadow-lg">
       <CardHeader>
         <CardTitle className="text-primary relative w-full text-center text-[1.1rem] font-bold">
           Discover new friends

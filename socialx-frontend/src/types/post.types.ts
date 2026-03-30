@@ -4,6 +4,7 @@ export const PostSchema = z.object({
   id: z.string(),
   author: z.object({
     id: z.string(),
+    fullName: z.string(),
     userName: z.string(),
     avatarUrl: z.url(),
   }),

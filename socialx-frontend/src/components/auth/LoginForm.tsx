@@ -41,7 +41,7 @@ const LoginForm = () => {
       login(res.data.data.user, res.data.data.accessToken);
       console.log(res.data);
       toast.success(res.data?.message, { position: "top-center" });
-      return navigate("/");
+      return navigate("/home/foryou");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || "Login failed", {
