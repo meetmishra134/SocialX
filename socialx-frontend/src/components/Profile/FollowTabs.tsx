@@ -1,7 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import FollowersPage from "./FollowersPage";
-import FollowingPage from "./FollowingPage";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 const FollowTabs = () => {
   const location = useLocation();
@@ -30,12 +28,7 @@ const FollowTabs = () => {
           </TabsTrigger>
         </TabsList>
         <div className="no-scrollbar flex-1 overflow-y-auto">
-          <TabsContent value="followers">
-            <FollowersPage />
-          </TabsContent>
-          <TabsContent value="following">
-            <FollowingPage />
-          </TabsContent>
+          <Outlet />
         </div>
       </Tabs>
     </div>

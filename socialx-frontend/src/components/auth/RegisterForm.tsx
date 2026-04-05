@@ -19,13 +19,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
-import { api } from "@/lib/axios";
+import { authService } from "@/services/auth.services";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<UserRegistrationData>({
@@ -35,38 +36,36 @@ const RegisterForm = () => {
   const onSubmit = async (data: UserRegistrationData) => {
     try {
       setLoading(true);
-      const res = await api.post("/auth/register", data);
+      const res = await authService.register(data);
       console.log(res.data);
-      if (res.data.success === true) {
-        toast.success(res.data.message, {
+      toast.success(res.data?.message || "Registration successful", {
+        position: "top-center",
+      });
+      navigate("/login", { replace: true });
+    } catch (error: unknown) {
+      console.error("Registration failed:", error);
+      if (error instanceof Error) {
+        toast.error(error.message, { position: "top-center" });
+      } else {
+        toast.error("An unexpected error occurred. Please try again.", {
           position: "top-center",
         });
-        return navigate("/login");
-      } else {
-        setLoading(false);
-        toast.error(
-          res.data?.message || "Registration failed. Please try again",
-          {
-            position: "top-center",
-          },
-        );
       }
-    } catch (error) {
-      console.error("Registration failed:", error);
     } finally {
       setLoading(false);
+      reset();
     }
   };
   return (
     <div className="flex min-h-screen divide-x-0 md:divide-x md:divide-neutral-200/30">
-      <div className="hidden lg:flex lg:flex-col  lg:w-1/2 lg:justify-center lg:items-center ">
+      <div className="hidden lg:flex lg:w-1/2 lg:flex-col lg:items-center lg:justify-center">
         <div className="flex flex-col items-center gap-6 px-4 py-40">
-          <h1 className="text-4xl max-w-2xl text-center font-bold">
+          <h1 className="max-w-2xl text-center text-4xl font-bold">
             Build Meaningful Connections
           </h1>
-          <p className="text-2xl text-muted-foreground text-center">
+          <p className="text-muted-foreground text-center text-2xl">
             Join{" "}
-            <span className=" mx-1.5 p-0.5 inline-block before:content-[''] before:-skew-10 z-10 before:-z-10 text-neutral-800 before:bg-neutral-300 before:h-full before:w-full relative before:absolute before:inset-0">
+            <span className="relative z-10 mx-1.5 inline-block p-0.5 text-neutral-800 before:absolute before:inset-0 before:-z-10 before:h-full before:w-full before:-skew-10 before:bg-neutral-300 before:content-['']">
               SocialX
             </span>
             {""}
@@ -77,13 +76,13 @@ const RegisterForm = () => {
             <img
               src="../../../images/register.webp"
               alt="Register"
-              className="w-110 h-80 object-cover"
+              className="h-80 w-110 object-cover"
             />
           </div>
         </div>
       </div>
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
-        <Card className="w-full max-w-sm sm:max-w-md border border-accent-foreground/30 ">
+      <div className="flex w-full items-center justify-center p-6 lg:w-1/2">
+        <Card className="border-accent-foreground/30 w-full max-w-sm border sm:max-w-md">
           <CardHeader className="flex flex-col items-center gap-3">
             <CardTitle className="text-center text-xl">
               Create your account
@@ -102,7 +101,7 @@ const RegisterForm = () => {
                     type="text"
                     placeholder="John Doe"
                     {...register("fullName", { required: true })}
-                    className={`${errors.fullName ? "border-destructive " : ""}`}
+                    className={`${errors.fullName ? "border-destructive" : ""}`}
                   />
                   {errors.fullName && (
                     <p className="text-destructive text-xs">
@@ -116,7 +115,7 @@ const RegisterForm = () => {
                     id="userName"
                     type="text"
                     placeholder="john_doe_123"
-                    className={`${errors.userName ? "border-destructive " : ""}`}
+                    className={`${errors.userName ? "border-destructive" : ""}`}
                     {...register("userName", { required: true })}
                   />
                   {errors.userName && (
@@ -131,7 +130,7 @@ const RegisterForm = () => {
                     id="email"
                     type="email"
                     placeholder="john.doe@example.com"
-                    className={`${errors.email ? "border-destructive " : ""}`}
+                    className={`${errors.email ? "border-destructive" : ""}`}
                     {...register("email", { required: true })}
                   />
                   {errors.email && (
@@ -146,7 +145,7 @@ const RegisterForm = () => {
                     id="password"
                     type="password"
                     placeholder="********"
-                    className={`${errors.password ? "border-destructive " : ""}`}
+                    className={`${errors.password ? "border-destructive" : ""}`}
                     {...register("password", { required: true })}
                   />
                   {errors.password && (
@@ -156,20 +155,20 @@ const RegisterForm = () => {
                   )}
                 </div>
               </div>
-              <CardFooter className="flex flex-col mt-5">
+              <CardFooter className="mt-5 flex flex-col">
                 <Button
                   disabled={loading}
                   type="submit"
-                  className="w-full bg-primary text-primary-foreground hover:bg-neutral-100 cursor-pointer "
+                  className="bg-primary text-primary-foreground w-full cursor-pointer hover:bg-neutral-100"
                 >
                   {loading ? "Creating Account..." : "Create Account"}
                   {loading && <Spinner data-icon="inline-start" />}
                 </Button>
-                <p className="text-sm text-muted-foreground mt-4">
+                <p className="text-muted-foreground mt-4 text-sm">
                   Already have an account?
                   <Link
                     to="/login"
-                    className="hover:underline ml-1 text-neutral-200 "
+                    className="ml-1 text-neutral-200 hover:underline"
                   >
                     Login
                   </Link>

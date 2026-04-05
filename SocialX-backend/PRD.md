@@ -19,7 +19,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 5. Follow & Unfollow Peoples
 6. Edit Profile
 7. See Others Profile
-8. Light & Dark Mode
+8.  Dark Mode
 9. Make friends
 10. Chat with Followers(Optional now - Learn Socket.io first)
 
@@ -92,11 +92,7 @@ SocialX is a fullstack social media application intended for peoples who loves s
 
 #### 2.6 Theme & UI Preferences
 
-- **Light Mode:** Default light theme for the application
-
 - **Dark Mode:** Optional dark theme for improved accessibility
-
-- **Theme Persistence:** Save user theme preference across sessions
 
 - **Responsive Design:** Optimized UI for mobile, tablet, and desktop devices
 

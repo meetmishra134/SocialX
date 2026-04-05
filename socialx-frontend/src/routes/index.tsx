@@ -1,6 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import ProtectedRoutes from "./ProtectedRoutes";
 import Layout from "@/components/layout/Layout";
 import FeedTab from "@/components/feed/FeedTab";
@@ -12,17 +12,24 @@ import FollowersPage from "@/components/Profile/FollowersPage";
 import FollowingPage from "@/components/Profile/FollowingPage";
 import GlobalFeed from "@/components/feed/GlobalFeed";
 import FollowingFeed from "@/components/feed/FollowingFeed";
+import ConnectTab from "@/components/connect/ConnectTab";
+import ConnectRequests from "@/components/connect/ConnectRequests";
+import VerifyEmail from "@/components/auth/VerifyEmail";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
     element: <ProtectedRoutes />,
     children: [
       {
+        path: "/",
         element: <Layout />,
         children: [
           {
-            path: "/home",
+            index: true,
+            element: <Navigate to="/feed/foryou" replace />,
+          },
+          {
+            path: "feed",
             element: <FeedTab />,
             children: [
               {
@@ -40,7 +47,7 @@ export const router = createBrowserRouter([
             element: <Bookmarks />,
           },
           {
-            path: "/profile",
+            path: "profile",
             element: <Profile />,
             children: [
               {
@@ -54,8 +61,18 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            path: "/connect",
-            element: <Connect />,
+            path: "connect",
+            element: <ConnectTab />,
+            children: [
+              {
+                index: true,
+                element: <Connect />,
+              },
+              {
+                path: "requests",
+                element: <ConnectRequests />,
+              },
+            ],
           },
         ],
       },
@@ -65,8 +82,13 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <LoginForm />,
   },
+
   {
     path: "/register",
     element: <RegisterForm />,
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmail />,
   },
 ]);

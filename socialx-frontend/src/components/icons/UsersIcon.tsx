@@ -1,13 +1,17 @@
-const UsersIcon = () => {
+interface UserIconProps {
+  isFilled: boolean;
+  size?: number;
+}
+const UsersIcon = ({ isFilled, size = 25 }: UserIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="25"
-      height="25"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={isFilled ? "currentColor" : "none"}
       stroke="currentColor"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
       className="lucide lucide-users-round-icon lucide-users-round"

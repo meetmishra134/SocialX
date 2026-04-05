@@ -3,8 +3,11 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useState } from "react";
 import CreatePost from "../posts/CreatePost";
+import PendingVerification from "../auth/PendingVerification";
+import { useAuth } from "@/store/authStore";
 
 const Layout = () => {
+  const { user } = useAuth() || {};
   const [open, setOpen] = useState<boolean>(false);
   return (
     <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-12">
@@ -15,6 +18,7 @@ const Layout = () => {
       <main className="col-span-10 min-h-screen md:col-span-10 lg:col-span-6">
         <Outlet />
         <CreatePost open={open} setOpen={setOpen} />
+        {user && !user.isEmailVerified && <PendingVerification />}
       </main>
 
       <aside className="sticky top-0 hidden h-screen border-l border-neutral-600 lg:col-span-3 lg:block">

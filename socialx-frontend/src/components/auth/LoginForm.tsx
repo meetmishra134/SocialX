@@ -14,11 +14,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { type UserLoginData, userLoginValidator } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { api } from "@/lib/axios";
+
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import { useAuth } from "@/store/authStore";
-import axios from "axios";
+
+import { authService } from "@/services/auth.services";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -37,18 +38,19 @@ const LoginForm = () => {
   const onSubmit = async (data: UserLoginData) => {
     try {
       setLoading(true);
-      const res = await api.post("/auth/login", data);
-      login(res.data.data.user, res.data.data.accessToken);
-      console.log(res.data);
-      toast.success(res.data?.message, { position: "top-center" });
-      return navigate("/home/foryou");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Login failed", {
-          position: "top-center",
-        });
+      const response = await authService.login(data);
+      login(response.data.data.user);
+      console.log(response.data);
+      toast.success(response.data?.message, { position: "top-center" });
+      return navigate("/feed/foryou", {
+        state: { email: data.email },
+        replace: true,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message, { position: "top-center" });
       } else {
-        toast.error("An unexpected error occurred", {
+        toast.error("An unexpected error occurred. Please try again.", {
           position: "top-center",
         });
       }

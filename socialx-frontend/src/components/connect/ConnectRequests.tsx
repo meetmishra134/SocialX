@@ -1,8 +1,9 @@
 import type { UserCardType } from "@/types/user.types";
 import UserCard from "./UserCard";
+
 import { Button } from "../ui/button";
 
-const users: UserCardType[] = [
+const connectRequests: UserCardType[] = [
   {
     _id: "1",
     fullName: "John Doe",
@@ -25,17 +26,29 @@ const users: UserCardType[] = [
   },
 ];
 
-const Connect = () => {
+const ConnectRequests = () => {
   return (
-    <div className="mx-auto max-w-7xl space-y-2 p-4">
-      {users.map((user) => (
+    <div className="mx-auto max-w-7xl space-y-2 px-2 py-3">
+      {connectRequests.map((user) => (
         <UserCard
           user={user}
           key={user._id}
           action={
-            <Button size="sm" className="cursor-pointer rounded-full">
-              Follow
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                className="cursor-pointer rounded-full px-3 py-2"
+              >
+                Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="cursor-pointer rounded-full px-3 py-2"
+              >
+                Decline
+              </Button>
+            </div>
           }
         />
       ))}
@@ -43,4 +56,4 @@ const Connect = () => {
   );
 };
 
-export default Connect;
+export default ConnectRequests;

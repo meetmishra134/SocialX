@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import CreatePostForm from "./CreatePostForm";
 
 interface CreatePostProps {
@@ -9,9 +9,13 @@ interface CreatePostProps {
 const CreatePost = ({ open, setOpen }: CreatePostProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-100 sm:max-w-md">
-        <h2 className="text-lg font-semibold">Create a post</h2>
-        <CreatePostForm />
+      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Create a post</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <CreatePostForm />
+        </div>
       </DialogContent>
     </Dialog>
   );

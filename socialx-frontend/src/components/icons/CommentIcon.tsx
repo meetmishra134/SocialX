@@ -1,13 +1,17 @@
-const CommentIcon = () => {
+interface CommentIconProps {
+  isFilled?: boolean;
+  size?: number;
+}
+const CommentIcon = ({ isFilled, size = 20 }: CommentIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
+      strokeWidth={isFilled ? "0" : "2"}
       stroke-linecap="round"
       stroke-linejoin="round"
       className="lucide lucide-message-circle-icon lucide-message-circle"

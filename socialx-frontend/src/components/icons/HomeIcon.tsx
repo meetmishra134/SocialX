@@ -1,19 +1,23 @@
-const HomeIcon = () => {
+interface HomeIconProps {
+  isFilled: boolean;
+  size?: number;
+}
+
+const HomeIcon = ({ isFilled, size = 25 }: HomeIconProps) => {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="25"
-      height="25"
-      viewBox="0 0 24 24"
-      fill="none"
+      height={size}
+      width={size}
+      fill={isFilled ? "currentColor" : "none"}
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      className="lucide lucide-house-icon lucide-house"
+      strokeWidth={isFilled ? "0" : "2"}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd r-1nao33i r-lwhw9o r-cnnz9e"
     >
-      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-      <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <g>
+        <path d="M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913H9.14c.51 0 .929-.41.929-.913v-7.075h3.909v7.075c0 .502.417.913.928.913h6.165c.511 0 .929-.41.929-.913V7.904c0-.301-.158-.584-.408-.758z"></path>
+      </g>
     </svg>
   );
 };

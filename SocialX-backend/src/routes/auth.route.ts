@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  changeCurrentPassword,
   currentUser,
   forgotPasswordRequest,
   loginUser,
@@ -42,13 +41,6 @@ router
 //* Secured Routes....
 router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/current-user").get(verifyJwt, currentUser);
-router
-  .route("/change-password")
-  .post(
-    verifyJwt,
-    validate(userChangeCurrentPasswordValidator),
-    changeCurrentPassword,
-  );
 router
   .route("/resend-email-verification")
   .post(verifyJwt, resendEmailVerification);

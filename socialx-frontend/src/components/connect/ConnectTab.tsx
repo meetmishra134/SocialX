@@ -1,29 +1,29 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
-const FeedTab = () => {
+const ConnectTab = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentTab = location.pathname.includes("following")
-    ? "following"
-    : "foryou";
+  const currentTab = location.pathname.includes("requests")
+    ? "requests"
+    : "connect";
   return (
     <div className="flex h-screen flex-col">
-      <Tabs defaultValue={currentTab} className="flex h-full flex-col">
+      <Tabs className="flex h-full flex-col" defaultValue={currentTab}>
         <TabsList className="bg-background sticky top-0 z-10 grid w-full grid-cols-2">
           <TabsTrigger
-            value="foryou"
+            value="connect"
             className="cursor-pointer"
-            onClick={() => navigate("/feed/foryou")}
+            onClick={() => navigate("/connect")}
           >
-            For You
+            Connect
           </TabsTrigger>
           <TabsTrigger
-            value="following"
+            value="Requests"
             className="cursor-pointer"
-            onClick={() => navigate("/feed/following")}
+            onClick={() => navigate("/connect/requests")}
           >
-            Following
+            Requests
           </TabsTrigger>
         </TabsList>
         <div className="no-scrollbar flex-1 overflow-y-auto">
@@ -34,4 +34,4 @@ const FeedTab = () => {
   );
 };
 
-export default FeedTab;
+export default ConnectTab;

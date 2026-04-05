@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     mailgenContent: () =>
       emailVerificationMailGenContent(
         user.userName,
-        `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`,
+        `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
       ),
   });
   const createdUser = await User.findById(user._id).select(
@@ -96,12 +96,12 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 15 * 60 * 1000, //15 minutes
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 30 * 60 * 1000, //30 minutes
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
     })
     .json(
@@ -131,7 +131,7 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
   );
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     maxAge: 0,
   };
   return res
@@ -182,7 +182,11 @@ const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
 //* Resend email verification
 const resendEmailVerification = asyncHandler(
   async (req: Request, res: Response) => {
-    const user = await User.findById(req.user?._id);
+    const { email } = req.body;
+    if (!email) {
+      throw new ApiError(400, "Email is required");
+    }
+    const user = await User.findOne({ email });
     if (!user) {
       throw new ApiError(404, "User does not exist");
     }
@@ -202,7 +206,7 @@ const resendEmailVerification = asyncHandler(
       mailgenContent: () =>
         emailVerificationMailGenContent(
           user.userName,
-          `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`,
+          `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
         ),
     });
     return res
@@ -231,7 +235,7 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
     }
     const options = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
     };
     const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
@@ -313,25 +317,7 @@ const resetForgotPassword = asyncHandler(
       .json(new ApiResponse(200, "Password reset successful"));
   },
 );
-//* Change current password
-const changeCurrentPassword = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { oldPassword, newPassword } = req.body;
-    const user = await User.findById(req.user);
-    if (!user) {
-      throw new ApiError(400, "User does not exist");
-    }
-    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
-    if (!isPasswordValid) {
-      throw new ApiError(400, "Old password is incorrect");
-    }
-    user.password = newPassword;
-    await user.save({ validateBeforeSave: false });
-    return res
-      .status(200)
-      .json(new ApiResponse(200, "Password changed successfully"));
-  },
-);
+
 export {
   registerUser,
   loginUser,
@@ -342,5 +328,4 @@ export {
   refreshAccessToken,
   forgotPasswordRequest,
   resetForgotPassword,
-  changeCurrentPassword,
 };

@@ -15,6 +15,8 @@ import HeartIcon from "../icons/HeartIcon";
 
 interface PostCardProps {
   post: Post;
+  isFilled?: boolean;
+  size?: number;
 }
 
 const PostCard = ({ post }: PostCardProps) => {
@@ -90,20 +92,26 @@ const PostCard = ({ post }: PostCardProps) => {
       </CardContent>
       <div className="flex items-center justify-between px-6 pt-2 pb-1">
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2">
-            <HeartIcon />
-            <span>{post.likes?.length}</span>
+          <button className="group flex items-center gap-2 transition-colors hover:text-red-500">
+            <div className="flex h-4 w-4 items-center justify-center rounded-full transition-colors group-hover:bg-red-500/10 md:h-8 md:w-8">
+              <HeartIcon size={20} isFilled={false} />
+            </div>
+            <span className="text-sm">2</span>
           </button>
-          <button className="flex items-center gap-2">
-            <CommentIcon />
-            <span>1</span>
+
+          <button className="group flex items-center gap-2 transition-colors hover:text-blue-500">
+            <div className="flex h-4 w-4 items-center justify-center rounded-full transition-colors group-hover:bg-blue-500/10 md:h-8 md:w-8">
+              <CommentIcon size={20} isFilled={false} />
+            </div>
+            <span className="text-sm">1</span>
           </button>
         </div>
-        <div>
-          <button>
-            <BookmarkIcon />
-          </button>
-        </div>
+
+        <button className="hover:text-primary group flex items-center transition-colors">
+          <div className="group-hover:bg-primary/10 flex h-4 w-4 items-center justify-center rounded-full transition-colors md:h-8 md:w-8">
+            <BookmarkIcon size={20} isFilled={false} />
+          </div>
+        </button>
       </div>
     </Card>
   );

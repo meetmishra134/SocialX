@@ -1,13 +1,18 @@
-const BookmarkIcon = () => {
+interface BookmarkIconProps {
+  isFilled?: boolean;
+  size?: number;
+}
+
+const BookmarkIcon = ({ isFilled, size = 25 }: BookmarkIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={isFilled ? "currentColor" : "none"}
       stroke="currentColor"
-      stroke-width="2"
+      strokeWidth={isFilled ? "0" : "2"}
       stroke-linecap="round"
       stroke-linejoin="round"
       className="lucide lucide-bookmark-icon lucide-bookmark"

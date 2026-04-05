@@ -1,44 +1,53 @@
-import { api } from "@/lib/axios";
+import { authService } from "@/services/auth.services";
 import type { User } from "@/types/user.types";
 import { create } from "zustand";
 
 type AuthState = {
-  accessToken: string | null;
   user: User | null;
   isAuthenticated: boolean;
   isCheckingAuth: boolean;
-  login: (user: User, token: string) => void;
-  logout: () => void;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  clearSession: () => void;
 };
+
 export const useAuth = create<AuthState>((set) => ({
-  accessToken: null,
   user: null,
   isAuthenticated: false,
   isCheckingAuth: true,
-  login: (user, token) => {
+
+  login: (user) => {
     set({
       user,
-      accessToken: token,
       isAuthenticated: true,
       isCheckingAuth: false,
     });
     console.log("User logged in:", user);
   },
-  logout: () => {
-    set({
-      user: null,
-      accessToken: null,
-      isAuthenticated: false,
-      isCheckingAuth: false,
-    });
+
+  logout: async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout API failed:", error);
+    } finally {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isCheckingAuth: false,
+      });
+    }
   },
+  clearSession: () => {
+    set({ user: null, isAuthenticated: false });
+  },
+
   checkAuth: async () => {
     try {
-      const res = await api.get("/auth/current-user");
+      const res = await authService.currentUser();
       set({
-        user: res.data.data.user,
-        accessToken: res.data.data.token,
+        user: res.data.data.user || res.data.data,
         isAuthenticated: true,
         isCheckingAuth: false,
       });

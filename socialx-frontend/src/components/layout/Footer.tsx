@@ -1,4 +1,4 @@
-import FriendSuggestionWidget from "../user/FriendSuggestionWidget";
+import FriendSuggestionWidget from "./FriendSuggestionWidget";
 // import ProfileWidget from "../user/ProfileWidget";
 
 const Footer = () => {
