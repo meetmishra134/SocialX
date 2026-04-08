@@ -3,6 +3,7 @@ import { router } from "./routes";
 import { Toaster } from "./components/ui/sonner";
 import { useAuth } from "./store/authStore";
 import { useEffect } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
   const checkAuth = useAuth((state) => state.checkAuth);
@@ -14,10 +15,10 @@ const App = () => {
   }, []);
 
   return (
-    <>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <RouterProvider router={router} />
       <Toaster />
-    </>
+    </GoogleOAuthProvider>
   );
 };
 

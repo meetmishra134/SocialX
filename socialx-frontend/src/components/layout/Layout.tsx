@@ -3,8 +3,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useState } from "react";
 import CreatePost from "../posts/CreatePost";
-import PendingVerification from "../auth/PendingVerification";
 import { useAuth } from "@/store/authStore";
+import PendingVerification from "../auth/PendingVerification";
 
 const Layout = () => {
   const { user } = useAuth() || {};

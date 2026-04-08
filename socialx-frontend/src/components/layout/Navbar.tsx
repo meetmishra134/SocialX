@@ -1,48 +1,19 @@
-import { Ellipsis, LogOut, SquarePenIcon } from "lucide-react";
+import { SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { useAuth } from "@/store/authStore";
-import { toast } from "sonner";
+
 import HomeIcon from "../icons/HomeIcon";
 import UsersIcon from "../icons/UsersIcon";
 import BookmarkIcon from "../icons/BookmarkIcon";
 import UserIcon from "../icons/UserIcon";
-import { authService } from "@/services/auth.services";
+import UserMenu from "../ui/UserMenu";
 
 interface NavbarProps {
   onOpenPost: () => void;
 }
 
 const Navbar = ({ onOpenPost }: NavbarProps) => {
-  const { fullName, userName } = useAuth((state) => state.user) || {};
-  const logout = useAuth((state) => state.logout);
-  const navigate = useNavigate();
-  const handleLogout = async () => {
-    try {
-      const res = await authService.logout();
-      toast.success(res.data?.message || "Logged out successfully", {
-        position: "top-center",
-      });
-      navigate("/login");
-      logout();
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message, { position: "top-center" });
-      } else {
-        toast.error("An unexpected error occurred. Please try again.", {
-          position: "top-center",
-        });
-      }
-    }
-  };
   return (
     <nav className="flex h-full w-full flex-col items-center py-4 lg:items-start lg:p-4">
       <Link
@@ -93,39 +64,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
           </span>
         </Button>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="hover:bg-muted mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-full p-2 lg:justify-start">
-            <Avatar size="lg">
-              <AvatarImage alt="User" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-
-            <div className="relative hidden flex-1 flex-col lg:flex">
-              <p className="text-sm font-semibold">{fullName}</p>
-              <p className="text-muted-foreground text-xs">{userName}</p>
-
-              <button className="absolute top-1 right-0 cursor-pointer rounded-full">
-                <Ellipsis />
-              </button>
-
-              <DropdownMenuContent className="md:bg-popover ml-2 w-32 min-w-0 rounded-md border p-1 shadow-lg">
-                <DropdownMenuItem
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleLogout();
-                  }}
-                >
-                  <LogOut />
-                  <span>Logout </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </div>
-          </div>
-        </DropdownMenuTrigger>
-      </DropdownMenu>
+      <UserMenu />
     </nav>
   );
 };

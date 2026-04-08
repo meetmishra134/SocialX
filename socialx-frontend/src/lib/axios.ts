@@ -1,22 +1,33 @@
 import { useAuth } from "@/store/authStore";
 import axios from "axios";
-const BASE_URL = "http://localhost:8000/api/v1";
+// const BASE_URL = "http://localhost:8000/api/v1";
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 api.interceptors.response.use(
   (response) => {
     return response;
   },
+
   async (error) => {
     const originalRequest = error.config;
+    const authRoutes = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/logout",
+      "/users/delete-me",
+      "/auth/forgot-password",
+      "/auth/reset-password",
+    ];
+    const isAuthRoute = authRoutes.some((route) =>
+      originalRequest.url?.includes(route),
+    );
 
-    // THE FIX: Add a check to ensure we aren't intercepting the logout route!
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/logout") // <-- ADD THIS LINE
+      !isAuthRoute //
     ) {
       originalRequest._retry = true;
 
@@ -30,7 +41,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         console.error("Session expired. Please log in again.");
 
-        // We will fix this in Step 2!
         useAuth.getState().clearSession();
 
         return Promise.reject(refreshError);

@@ -12,7 +12,7 @@ import {
   sendEmail,
 } from "../utils/mail";
 import { RefreshTokenPayload } from "../types/jwt.types";
-
+import { OAuth2Client } from "google-auth-library";
 const generateAccessAndRefreshToken = async (userId: Types.ObjectId) => {
   try {
     const user = await User.findById(userId);
@@ -68,6 +68,57 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     .status(201)
     .json(
       new ApiResponse(201, { user: createdUser }, "User created successfully"),
+    );
+});
+
+//* Login with google
+const googleLogin = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = req.body;
+  const ticket = await new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+  ).verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const { email, name, picture, sub: googleId } = payload;
+
+  let user = await User.findOne({ email });
+  if (!user) {
+    user = await User.create({
+      fullName: name,
+      userName: email.split("@")[0],
+      email: email,
+      avatarUrl: { url: picture },
+      isEmailVerified: true,
+      authProvider: "google",
+      googleId: googleId,
+    });
+  }
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    user._id,
+  );
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3 * 60 * 1000, //30 minutes
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+    })
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user,
+          accessToken,
+        },
+        "Google login successful",
+      ),
     );
 });
 
@@ -279,7 +330,7 @@ const forgotPasswordRequest = asyncHandler(
       mailgenContent: () =>
         forgotPasswordMailGenContent(
           user.userName,
-          `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/${unHashedToken}`,
+          `${process.env.FRONTEND_URL}/reset-password?token=${unHashedToken}`,
         ),
     });
     return res
@@ -296,7 +347,10 @@ const forgotPasswordRequest = asyncHandler(
 const resetForgotPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { resetToken } = req.params;
-    const { newPassword } = req.body;
+    const { newPassword, confirmPassword } = req.body;
+    if (newPassword !== confirmPassword) {
+      throw new ApiError(400, "Passwords do not match");
+    }
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken as string)
@@ -328,4 +382,5 @@ export {
   refreshAccessToken,
   forgotPasswordRequest,
   resetForgotPassword,
+  googleLogin,
 };

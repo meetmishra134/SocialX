@@ -36,6 +36,21 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(201, { data: post }, "Post created successfully"));
 });
 
+//* View single post
+const viewPost = asyncHandler(async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId).populate(
+    "author",
+    "userName avatarUrl",
+  );
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { post }, "Post fetched successfully"));
+});
+
 //* Delete a post
 const deletePost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
@@ -149,4 +164,5 @@ export {
   commentOnPost,
   deleteComment,
   viewComments,
+  viewPost,
 };

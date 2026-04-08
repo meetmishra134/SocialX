@@ -95,8 +95,6 @@ const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
 const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   await Post.deleteMany({ author: loggedInUserId });
-  await Post.deleteMany({ author: loggedInUserId });
-
   await User.updateMany(
     { followers: loggedInUserId },
     { $pull: { followers: loggedInUserId } },
@@ -110,6 +108,14 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
   await User.findByIdAndDelete(loggedInUserId);
   return res
     .status(200)
+    .clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    })
+    .clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    })
     .json(new ApiResponse(200, "User deleted successfully"));
 });
 
@@ -346,6 +352,52 @@ const userDiscoveryList = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, users, "Discovered users"));
 });
 
+const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  const hasBookmarked = await User.exists({
+    _id: loggedInUserId,
+    bookmarks: postId,
+  });
+  if (hasBookmarked) {
+    await User.findByIdAndUpdate(loggedInUserId, {
+      $pull: { bookmarks: postId },
+    });
+  }
+
+  await User.findByIdAndUpdate(loggedInUserId, {
+    $addToSet: { bookmarks: postId },
+  });
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        {},
+        hasBookmarked
+          ? "Post removed from bookmarks successfully"
+          : "Post added to bookmarks successfully",
+      ),
+    );
+});
+//* Get bookmarked posts
+const getBookmarkedPosts = asyncHandler(async (req: Request, res: Response) => {
+  const { _id: loggedInUserId } = req.user;
+  const bookmarks = await User.findById(loggedInUserId)
+    .select("bookmarks")
+    .lean();
+  const posts = await Post.find({ _id: { $in: bookmarks?.bookmarks ?? [] } })
+    .populate("author", "userName fullName avatarUrl")
+    .lean();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, posts, "Bookmarked posts fetched successfully"));
+});
+
 export {
   editUserProfile,
   getUserProfile,
@@ -354,6 +406,8 @@ export {
   viewIncomingRequests,
   respondIncomingRequests,
   unfollowRequest,
+  toggleBookmark,
+  getBookmarkedPosts,
   userFollowers,
   userFollowing,
   userDiscoveryList,

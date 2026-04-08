@@ -12,38 +12,76 @@ import type { Post } from "@/types/post.types";
 import CommentIcon from "../icons/CommentIcon";
 import BookmarkIcon from "../icons/BookmarkIcon";
 import HeartIcon from "../icons/HeartIcon";
+import { useAuth } from "@/store/authStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
-  isFilled?: boolean;
-  size?: number;
+  onPostDeleted?: (postId: string) => void;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
   const hasMultipleImages = post.images && post.images.length > 1;
   const hasSingleImage = post.images && post.images.length === 1;
+  const user = useAuth((state) => state.user);
+  const handleDelete = () => {};
+  const isAuthor = user?._id === post.author.id;
 
   return (
     <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-hidden rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
-      {/* HEADER */}
-      <CardHeader className="flex flex-row items-center gap-3 px-4 pb-2 sm:px-6">
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarImage src={post.author.avatarUrl} alt={post.author.fullName} />
-          <AvatarFallback>{post.author.fullName[0]}</AvatarFallback>
-        </Avatar>
-        <div className="flex min-w-0 flex-col">
-          <h3 className="truncate text-sm font-semibold sm:text-base">
-            {post.author.fullName}
-          </h3>
-          <p className="text-muted-foreground truncate text-xs sm:text-sm">
-            @{post.author.userName} ·{" "}
-            {new Date(post.createdAt).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
+      <CardHeader className="flex flex-row items-center justify-between gap-3 px-4 pb-2 sm:px-6">
+        <div className="flex flex-row gap-2.5">
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarImage
+              src={post.author.avatarUrl}
+              alt={post.author.fullName}
+            />
+            <AvatarFallback>{post.author.fullName[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex min-w-0 flex-col">
+            <h3 className="truncate text-sm font-semibold sm:text-base">
+              {post.author.fullName}
+            </h3>
+            <p className="text-muted-foreground truncate text-xs sm:text-sm">
+              @{post.author.userName} ·{" "}
+              {new Date(post.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          </div>
         </div>
+
+        {isAuthor && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+              >
+                <MoreHorizontal className="text-muted-foreground h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="text-destructive focus:text-destructive cursor-pointer"
+              >
+                <Trash2 className="text-shadow-destructive text-destructive h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </CardHeader>
 
       {/* CONTENT */}

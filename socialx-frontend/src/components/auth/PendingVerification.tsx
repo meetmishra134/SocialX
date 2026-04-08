@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +13,13 @@ import { Mail, RefreshCw } from "lucide-react";
 import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 const PendingVerification = () => {
   const location = useLocation();
   const email = location.state?.email || "your email";
-
-  const [countdown, setCountdown] = useState(60);
   const [isResending, setIsResending] = useState(false);
+  const [countdown, setCountdown] = useState(60);
 
   // Handle the 60-second countdown timer
   useEffect(() => {
@@ -32,12 +32,10 @@ const PendingVerification = () => {
   const handleResendEmail = async () => {
     try {
       setIsResending(true);
-
-      await api.post("/auth/resend-email-verification", { email });
-
+      await api.post("/auth/resend-email/verification", { email });
       toast.success("Verification email resent!");
       setCountdown(60);
-    } catch (error) {
+    } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         toast.error(
           error.response?.data?.message ||
@@ -56,7 +54,9 @@ const PendingVerification = () => {
           <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
             <Mail className="text-primary h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl font-bold">Check your inbox</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Verify Your Email
+          </CardTitle>
           <CardDescription className="text-base">
             We've sent a verification link to <br />
             <span className="text-foreground font-medium">{email}</span>

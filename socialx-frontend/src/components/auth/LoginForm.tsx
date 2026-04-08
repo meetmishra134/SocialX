@@ -20,6 +20,9 @@ import { Spinner } from "../ui/spinner";
 import { useAuth } from "@/store/authStore";
 
 import { authService } from "@/services/auth.services";
+import { GoogleLogin } from "@react-oauth/google";
+import { api } from "@/lib/axios";
+import axios from "axios";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -34,6 +37,30 @@ const LoginForm = () => {
   } = useForm<UserLoginData>({
     resolver: zodResolver(userLoginValidator),
   });
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      setLoading(true);
+      const res = await api.post("/auth/google", {
+        token: credentialResponse.credential,
+      });
+      login(res.data.data.user);
+      toast.success(res.data?.message, { position: "top-center" });
+      navigate("/feed/foryou", {
+        replace: true,
+      });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            "Google login failed. Please try again.",
+          {
+            position: "top-center",
+          },
+        );
+      }
+    }
+  };
 
   const onSubmit = async (data: UserLoginData) => {
     try {
@@ -116,12 +143,12 @@ const LoginForm = () => {
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link
-                      to="/forgot-password"
-                      className="text-muted-foreground text-sm hover:text-neutral-200 hover:underline"
+                    <p
+                      className="text-muted-foreground cursor-pointer text-sm hover:text-neutral-200 hover:underline"
+                      onClick={() => navigate("/forgot-password")}
                     >
                       Forgot?
-                    </Link>
+                    </p>
                   </div>
                   <Input
                     id="password"
@@ -137,20 +164,51 @@ const LoginForm = () => {
                   )}
                 </div>
               </div>
-              <CardFooter className="mt-5 flex flex-col">
+              <CardFooter className="mt-5 flex flex-col p-0">
                 <Button
                   className="bg-primary text-primary-foreground w-full cursor-pointer font-medium hover:bg-neutral-100"
                   type="submit"
                   disabled={loading}
                 >
                   {loading ? "Logging in" : "Login"}
-                  {loading && <Spinner data-icon="inline-start" />}
+                  {loading && (
+                    <Spinner data-icon="inline-start" className="ml-2" />
+                  )}
                 </Button>
-                <p className="text-muted-foreground mt-4 text-sm">
+
+                {/* 2. The Visual Divider */}
+                <div className="relative my-4 w-full">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="border-border w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    {/* Note: Change 'bg-background' to whatever your card's background color class is if needed */}
+                    <span className="bg-background text-muted-foreground px-2">
+                      Or
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. The Google Login Button */}
+                <div className="mb-2 w-full px-2">
+                  {/* Assuming you are using @react-oauth/google */}
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => console.log("Login Failed")}
+                    useOneTap
+                    width="100%"
+                    size="large"
+                    theme="filled_black"
+                    text="continue_with"
+                  />
+                </div>
+
+                {/* 4. Your Existing Sign Up Link */}
+                <p className="text-muted-foreground mt-2 text-sm">
                   Don't have an account?{" "}
                   <Link
                     to="/register"
-                    className="text-neutral-200 hover:underline"
+                    className="font-medium text-neutral-200 hover:underline"
                   >
                     Sign up
                   </Link>

@@ -5,9 +5,12 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { useRef } from "react";
+import { useAuth } from "@/store/authStore";
 
 const EditProfileForm = () => {
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const { fullName, userName, avatarUrl } =
+    useAuth((state) => state.user) || {};
   const openFile = () => {
     fileRef.current?.click();
   };
@@ -16,11 +19,13 @@ const EditProfileForm = () => {
       <div className="flex flex-col items-center gap-2">
         <div className="relative">
           <Avatar className="h-20 w-20">
-            <AvatarImage
-              src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60"
-              alt="Profile"
-            />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src={avatarUrl?.url} alt="Profile" />
+            <AvatarFallback>
+              {fullName
+                ?.split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
           </Avatar>
           <button
             className="absolute right-0 bottom-0 cursor-pointer bg-black/60 p-1"
@@ -39,7 +44,7 @@ const EditProfileForm = () => {
       </div>
       <div className="flex flex-col gap-2">
         <Label className="text-sm font-medium">UserName</Label>
-        <Input placeholder="eg John doe" />
+        <Input placeholder="eg John doe" defaultValue={userName} />
       </div>
       <div className="flex flex-col gap-2">
         <Label className="text-sm font-medium">Bio</Label>

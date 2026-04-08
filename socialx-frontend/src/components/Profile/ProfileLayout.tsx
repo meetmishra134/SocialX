@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PostCard from "../posts/PostCard";
 import type { Post } from "@/types/post.types";
+import { useAuth } from "@/store/authStore";
 
 const posts: Post[] = [
   {
-    id: "post1",
+    _id: "post1",
     author: {
-      id: "user1",
+      id: "69cf68ae4d16faf04cd3b5c2",
       fullName: "John Doe",
       userName: "JohnDoe123",
       avatarUrl: "https://example.com/avatar.jpg",
@@ -21,7 +22,7 @@ const posts: Post[] = [
     likes: [],
   },
   {
-    id: "post2",
+    _id: "post2",
     author: {
       id: "user2",
       fullName: "Jane Smith",
@@ -34,7 +35,7 @@ const posts: Post[] = [
     likes: [],
   },
   {
-    id: "post3",
+    _id: "post3",
     author: {
       id: "user3",
       fullName: "Bob Johnson",
@@ -55,22 +56,26 @@ interface ProfileLayoutProps {
 }
 
 const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
+  const { fullName, userName, avatarUrl } =
+    useAuth((state) => state.user) || {};
   return (
     <>
       <div className="bg-muted/70 relative h-50 w-full">
-        <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-4 z-10 h-32 w-32 border-2 ring-2">
-          <AvatarImage
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60"
-            alt="Profile Picture"
-          />
-          <AvatarFallback>JD</AvatarFallback>
+        <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-4 z-10 h-28 w-28 border-2 ring-2">
+          <AvatarImage src={avatarUrl?.url} alt="Profile Picture" />
+          <AvatarFallback>
+            {fullName
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </AvatarFallback>
         </Avatar>
       </div>
       <div className="relative border-b border-neutral-700 px-6 pt-14 pb-2">
         <div>
-          <h2 className="text-xl font-bold">John Doe</h2>
-          <p className="text-muted-foreground">@johndoe</p>
-          <p className="mt-2 text-[1rem] leading-relaxed">
+          <h2 className="text-lg font-bold">{fullName}</h2>
+          <p className="text-muted-foreground text-sm">@{userName}</p>
+          <p className="mt-2 text-[0.9rem] leading-relaxed">
             UI/UX | Builder passionate about creating intuitive user experiences
             and solving complex design problems.
           </p>
@@ -106,7 +111,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
       </div>
       <div className="flex flex-col">
         {posts.map((post) => (
-          <div key={post.id} className="border-border border-b">
+          <div className="border-border border-b" key={post._id}>
             <PostCard post={post} />
           </div>
         ))}

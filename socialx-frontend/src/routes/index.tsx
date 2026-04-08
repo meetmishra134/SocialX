@@ -5,7 +5,7 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import Layout from "@/components/layout/Layout";
 import FeedTab from "@/components/feed/FeedTab";
 
-import Bookmarks from "@/components/Bookmarks/Bookmarks";
+import Bookmarks from "@/components/Bookmarks/BookmarksPage";
 import Connect from "@/components/connect/Connect";
 import Profile from "@/components/Profile/Profile";
 import FollowersPage from "@/components/Profile/FollowersPage";
@@ -15,6 +15,8 @@ import FollowingFeed from "@/components/feed/FollowingFeed";
 import ConnectTab from "@/components/connect/ConnectTab";
 import ConnectRequests from "@/components/connect/ConnectRequests";
 import VerifyEmail from "@/components/auth/VerifyEmail";
+import ResetPassword from "@/components/auth/ResetPassword";
+import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
 
 export const router = createBrowserRouter([
   {
@@ -90,5 +92,13 @@ export const router = createBrowserRouter([
   {
     path: "/verify-email",
     element: <VerifyEmail />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPending />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ]);

@@ -7,6 +7,7 @@ import {
   deletePost,
   likeDislikePost,
   viewComments,
+  viewPost,
 } from "../controllers/post.controller";
 import { verifyJwt } from "../middlewares/auth.middleware";
 
@@ -15,6 +16,7 @@ const router = Router();
 router
   .route("/upload-post")
   .post(verifyJwt, upload.array("images", 4), createPost);
+router.route("/view-post/:postId").get(verifyJwt, viewPost);
 
 router.route("/delete-post/:postId").delete(verifyJwt, deletePost);
 router.route("/comment/:postId").post(verifyJwt, commentOnPost);

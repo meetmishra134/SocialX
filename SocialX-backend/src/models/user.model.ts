@@ -7,13 +7,16 @@ export interface IUser extends Document {
   fullName: string;
   email: string;
   userName: string;
-  password: string;
+  password?: string;
+  authProvider: "google" | "local";
+  googleId?: string;
   bio: string;
   avatarUrl: {
     url: string;
   };
   followers: mongoose.Types.ObjectId[];
   following: mongoose.Types.ObjectId[];
+  bookmarks: mongoose.Types.ObjectId[];
   isEmailVerified: boolean;
   refreshToken: string;
   forgotPasswordToken: string;
@@ -37,7 +40,23 @@ const userSchema: Schema = new mongoose.Schema(
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     userName: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: function () {
+        return this.authProvider === "local";
+      },
+    },
+    authProvider: {
+      type: String,
+      enum: ["google", "local"],
+      default: "local",
+      required: true,
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
+    },
     bio: { type: String, default: "" },
     avatarUrl: {
       url: {
@@ -48,6 +67,13 @@ const userSchema: Schema = new mongoose.Schema(
     },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    bookmarks: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+
     isEmailVerified: { type: Boolean, default: false },
     refreshToken: { type: String },
     forgotPasswordToken: { type: String },
@@ -61,7 +87,9 @@ const userSchema: Schema = new mongoose.Schema(
 );
 
 userSchema.pre<IUser>("save", async function () {
-  if (!this.isModified("password")) return;
+  if (!this.isModified("password") || !this.password) {
+    return;
+  }
   this.password = await bcrypt.hash(this.password, 10);
 });
 
@@ -69,6 +97,9 @@ userSchema.methods.isPasswordCorrect = async function (
   this: IUser,
   password: string,
 ) {
+  if (!this.password) {
+    return false;
+  }
   return await bcrypt.compare(password, this.password);
 };
 
@@ -80,7 +111,7 @@ userSchema.methods.generateAccessToken = function () {
       userName: this.userName,
     },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "30m" },
+    { expiresIn: "3m" },
   );
 };
 userSchema.methods.generateRefreshToken = function () {

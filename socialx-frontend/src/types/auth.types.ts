@@ -29,5 +29,34 @@ export const userLoginValidator = z.object({
     .max(10, "Password must be atmost 10 characters"),
 });
 
+export const userResetForgotPasswordValidator = z
+  .object({
+    newPassword: z
+      .string("New password is required")
+      .trim()
+      .min(6, "New password must be atleast 6 characters")
+      .max(10, "New password must be atmost 10 characters"),
+    confirmPassword: z
+      .string("Confirm password is required")
+      .trim()
+      .min(6, "Confirm password must be atleast 6 characters")
+      .max(10, "Confirm password must be atmost 10 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+export const userForgotPasswordValidator = z.object({
+  email: z
+    .email({ error: "Please provide a valid email address" })
+    .lowercase({ error: "Email must be in lowercase" })
+    .trim(),
+});
 export type UserRegistrationData = z.infer<typeof userRegistrationValidator>;
 export type UserLoginData = z.infer<typeof userLoginValidator>;
+export type UserResetForgotPasswordData = z.infer<
+  typeof userResetForgotPasswordValidator
+>;
+export type UserForgotPasswordData = z.infer<
+  typeof userForgotPasswordValidator
+>;

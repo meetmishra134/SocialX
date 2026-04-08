@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   currentUser,
   forgotPasswordRequest,
+  googleLogin,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -16,7 +17,6 @@ import {
   userLoginValidator,
   userForgotPasswordValidator,
   userResetForgotPasswordValidator,
-  userChangeCurrentPasswordValidator,
 } from "../validators/auth.validator";
 import { verifyJwt } from "../middlewares/auth.middleware";
 
@@ -30,7 +30,7 @@ router.route("/login").post(validate(userLoginValidator), loginUser);
 router.route("/verify-email/:verificationToken").get(verifyEmail);
 
 router.route("/refresh-token").post(refreshAccessToken);
-
+router.route("/google").post(googleLogin);
 router
   .route("/forgot-password")
   .post(validate(userForgotPasswordValidator), forgotPasswordRequest);

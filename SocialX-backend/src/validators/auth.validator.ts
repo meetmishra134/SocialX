@@ -27,18 +27,7 @@ const userLoginValidator = z.object({
     .min(6, "password must be atleast 6 characters")
     .max(10, "Password must be atmost 10 characters"),
 });
-const userChangeCurrentPasswordValidator = z.object({
-  oldPassword: z
-    .string({ error: "Old password is required" })
-    .min(3)
-    .max(10)
-    .trim(),
-  newPassword: z
-    .string({ error: "New Password is required" })
-    .min(3)
-    .max(10)
-    .trim(),
-});
+
 const userForgotPasswordValidator = z.object({
   email: z
     .email({ error: "Please provide a valid email address" })
@@ -48,7 +37,12 @@ const userForgotPasswordValidator = z.object({
 const userResetForgotPasswordValidator = z.object({
   newPassword: z
     .string({ error: "New password is required" })
-    .min(3)
+    .min(6, "New password must be atleast 6 characters")
+    .max(10)
+    .trim(),
+  confirmPassword: z
+    .string({ error: "Confirm password is required" })
+    .min(6, "Confirm password must be atleast 6 characters")
     .max(10)
     .trim(),
 });
@@ -56,6 +50,5 @@ export {
   userRegistrationValidator,
   userLoginValidator,
   userForgotPasswordValidator,
-  userChangeCurrentPasswordValidator,
   userResetForgotPasswordValidator,
 };
