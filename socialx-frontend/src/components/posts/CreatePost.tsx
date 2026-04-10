@@ -14,7 +14,7 @@ const CreatePost = ({ open, setOpen }: CreatePostProps) => {
           <DialogTitle>Create a post</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <CreatePostForm />
+          <CreatePostForm onSuccessClose={() => setOpen(false)} />
         </div>
       </DialogContent>
     </Dialog>

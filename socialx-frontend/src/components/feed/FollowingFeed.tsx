@@ -3,7 +3,7 @@ import PostCard from "../posts/PostCard";
 import { motion } from "motion/react";
 const followingFeed: Post[] = [
   {
-    id: "post1",
+    _id: "post1",
     author: {
       id: "user1",
       fullName: "John Doe",
@@ -13,12 +13,14 @@ const followingFeed: Post[] = [
     text: "This is a sample post.",
     createdAt: "2023-01-01T00:00:00Z",
     images: [
-      "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+      {
+        url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+      },
     ],
     likes: [],
   },
   {
-    id: "post2",
+    _id: "post2",
     author: {
       id: "user2",
       fullName: "Jane Smith",
@@ -31,7 +33,7 @@ const followingFeed: Post[] = [
     likes: [],
   },
   {
-    id: "post3",
+    _id: "post3",
     author: {
       id: "user3",
       fullName: "Bob Johnson",
@@ -39,8 +41,12 @@ const followingFeed: Post[] = [
       avatarUrl: "https://example.com/avatar3.jpg",
     },
     images: [
-      "https://images.pexels.com/photos/5596132/pexels-photo-5596132.jpeg",
-      "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+      {
+        url: "https://images.pexels.com/photos/5596132/pexels-photo-5596132.jpeg",
+      },
+      {
+        url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+      },
     ],
     createdAt: "2023-01-01T00:00:00Z",
     likes: [],
@@ -56,7 +62,7 @@ const FollowingFeed = () => {
       className="flex flex-col gap-4 p-4"
     >
       {followingFeed.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post._id} post={post} />
       ))}
     </motion.div>
   );

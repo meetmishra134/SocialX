@@ -6,6 +6,7 @@ import {
   deleteComment,
   deletePost,
   likeDislikePost,
+  viewAllPosts,
   viewComments,
   viewPost,
 } from "../controllers/post.controller";
@@ -15,8 +16,9 @@ const router = Router();
 
 router
   .route("/upload-post")
-  .post(verifyJwt, upload.array("images", 4), createPost);
+  .post(verifyJwt, upload.array("files", 4), createPost);
 router.route("/view-post/:postId").get(verifyJwt, viewPost);
+router.route("/posts").get(verifyJwt, viewAllPosts);
 
 router.route("/delete-post/:postId").delete(verifyJwt, deletePost);
 router.route("/comment/:postId").post(verifyJwt, commentOnPost);

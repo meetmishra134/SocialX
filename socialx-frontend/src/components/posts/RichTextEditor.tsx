@@ -7,6 +7,7 @@ interface RichTextEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
 }
+
 const RichTextEditor = ({
   value,
   onChange,
@@ -14,8 +15,9 @@ const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
+
+  // 1. INITIALIZATION EFFECT (Runs once on mount)
   useEffect(() => {
-    // Only initialize if the DOM is ready AND Quill hasn't been initialized yet
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
@@ -29,17 +31,13 @@ const RichTextEditor = ({
         },
       });
 
-      // Set initial value
       if (value) {
         quillRef.current.clipboard.dangerouslyPasteHTML(value);
       }
 
-      // Listen for user typing
       quillRef.current.on("text-change", () => {
-        // Extract the raw HTML content
         const html = quillRef.current?.root.innerHTML || "";
 
-        // THE FIX: If Quill is empty, send a true empty string to React
         if (html === "<p><br></p>" || html === "") {
           onChange("");
         } else {
@@ -47,17 +45,24 @@ const RichTextEditor = ({
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
 
+  // 2. THE SYNC EFFECT (Runs when React Hook Form changes the value)
+  useEffect(() => {
+    // If RHF resets the value to an empty string (e.g., after a successful post)
+    if (quillRef.current && value === "") {
+      const currentHtml = quillRef.current.root.innerHTML;
+
+      // Only clear Quill if it isn't ALREADY empty to prevent an infinite loop
+      if (currentHtml !== "<p><br></p>" && currentHtml !== "") {
+        quillRef.current.setText(""); // This physically clears the editor UI
+      }
+    }
+  }, [value]);
+
   return (
-    /* TAILWIND STYLING WRAPPER 
-      We use Tailwind here to style the container holding Quill. 
-      The '[&_.ql-container]' syntax targets Quill's injected classes 
-      to override their default borders and match your app's theme.
-    */
     <div className="flex w-full flex-col">
-      <div className="/* Toolbar styling */ [&_.ql-toolbar]:border-input [&_.ql-toolbar]:bg-muted/50 /* Container styling */ [&_.ql-container]:border-input /* Control the height and make it scrollable */ /* Image styling */ /* THE FIX: Added '!' to force the color and font-style to override Quill */ [&_.ql-editor.ql-blank::before]:text-muted-foreground! [&_.ql-container]:rounded-b-md [&_.ql-container]:text-base [&_.ql-editor]:max-h-[40vh] [&_.ql-editor]:min-h-[150px] [&_.ql-editor]:overflow-y-auto [&_.ql-editor_img]:my-4 [&_.ql-editor_img]:max-w-full [&_.ql-editor_img]:rounded-md [&_.ql-editor.ql-blank::before]:not-italic! [&_.ql-toolbar]:rounded-t-md">
+      <div className="[&_.ql-toolbar]:border-input [&_.ql-toolbar]:bg-muted/50 [&_.ql-container]:border-input [&_.ql-editor.ql-blank::before]:text-muted-foreground! [&_.ql-container]:rounded-b-md [&_.ql-container]:text-base [&_.ql-editor]:max-h-[40vh] [&_.ql-editor]:min-h-[150px] [&_.ql-editor]:overflow-y-auto [&_.ql-editor_img]:my-4 [&_.ql-editor_img]:max-w-full [&_.ql-editor_img]:rounded-md [&_.ql-editor.ql-blank::before]:not-italic! [&_.ql-toolbar]:rounded-t-md">
         <div ref={editorRef} />
       </div>
     </div>

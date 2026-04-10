@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth.services";
 import { toast } from "sonner";
 import { userService } from "@/services/user.services";
-import DeleteAccountModal from "../Profile/DeleteAccountModal";
+import DeleteAccountModal from "./DeleteAccountModal";
 import { useState } from "react";
 
 const UserMenu = () => {
@@ -60,7 +60,11 @@ const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <div className="hover:bg-muted mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-full p-2 lg:justify-start">
             <Avatar size="lg">
-              <AvatarImage src={avatarUrl?.url} alt="User" />
+              <AvatarImage
+                src={avatarUrl?.url}
+                alt="User"
+                referrerPolicy="no-referrer"
+              />
               <AvatarFallback>{fullName?.charAt(0)}</AvatarFallback>
             </Avatar>
 
@@ -87,7 +91,7 @@ const UserMenu = () => {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
-                  className="text-destructive cursor-pointer focus:bg-red-100 focus:text-red-700 dark:focus:bg-red-900/50"
+                  className="text-destructive hover:bg-destructive cursor-pointer"
                   onSelect={(e) => {
                     e.preventDefault();
                     setShowDeleteModal(true);

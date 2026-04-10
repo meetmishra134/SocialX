@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
+} from "./alert-dialog";
 
 interface DeleteAccountModalProps {
   isOpen: boolean;

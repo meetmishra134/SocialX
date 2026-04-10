@@ -1,52 +1,63 @@
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
 import { motion } from "motion/react";
-const posts: Post[] = [
-  {
-    _id: "post1",
-    author: {
-      id: "69cf68ae4d16faf04cd3b5c2",
-      fullName: "John Doe",
-      userName: "JohnDoe123",
-      avatarUrl: "https://example.com/avatar.jpg",
-    },
-    text: "This is a sample post.",
-    createdAt: "2023-01-01T00:00:00Z",
-    images: [
-      "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
-    ],
-    likes: [],
-  },
-  {
-    _id: "post2",
-    author: {
-      id: "user2",
-      fullName: "Jane Smith",
-      userName: "JaneSmith123",
-      avatarUrl: "https://example.com/avatar2.jpg",
-    },
-    text: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    createdAt: "2023-01-01T00:00:00Z",
-    images: [],
-    likes: [],
-  },
-  {
-    _id: "post3",
-    author: {
-      id: "user3",
-      fullName: "Bob Johnson",
-      userName: "BobJohnson123",
-      avatarUrl: "https://example.com/avatar3.jpg",
-    },
-    images: [
-      "https://images.pexels.com/photos/5596132/pexels-photo-5596132.jpeg",
-      "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
-    ],
-    createdAt: "2023-01-01T00:00:00Z",
-    likes: [],
-  },
-];
+import { usePosts } from "@/hooks/usePosts";
+import SkeletonCard from "../posts/SkeletonCard";
+
+// const posts: Post[] = [
+//   {
+//     _id: "post1",
+//     author: {
+//       id: "69cf68ae4d16faf04cd3b5c2",
+//       fullName: "John Doe",
+//       userName: "JohnDoe123",
+//       avatarUrl: "https://example.com/avatar.jpg",
+//     },
+//     text: "This is a sample post.",
+//     createdAt: "2023-01-01T00:00:00Z",
+//     images: [
+//       {
+//         url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+//       },
+//     ],
+//     likes: [],
+//   },
+//   {
+//     _id: "post2",
+//     author: {
+//       id: "user2",
+//       fullName: "Jane Smith",
+//       userName: "JaneSmith123",
+//       avatarUrl: "https://example.com/avatar2.jpg",
+//     },
+//     text: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+//     createdAt: "2023-01-01T00:00:00Z",
+//     images: [],
+//     likes: [],
+//   },
+//   {
+//     _id: "post3",
+//     author: {
+//       id: "user3",
+//       fullName: "Bob Johnson",
+//       userName: "BobJohnson123",
+//       avatarUrl: "https://example.com/avatar3.jpg",
+//     },
+//     images: [
+//       {
+//         url: "https://images.pexels.com/photos/5596132/pexels-photo-5596132.jpeg",
+//       },
+//       {
+//         url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
+//       },
+//     ],
+//     createdAt: "2023-01-01T00:00:00Z",
+//     likes: [],
+//   },
+// ];
 const GlobalFeed = () => {
+  const { isLoading, isError, data: posts } = usePosts();
+  console.log("Posts in GlobalFeed:", posts);
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -54,9 +65,13 @@ const GlobalFeed = () => {
       transition={{ duration: 0.3 }}
       className="flex flex-col gap-4 p-4"
     >
-      {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
-      ))}
+      {isLoading ? (
+        [1, 2, 3].map((index) => <SkeletonCard key={index} />)
+      ) : isError ? (
+        <p>Error loading posts.</p>
+      ) : (
+        posts?.map((post: Post) => <PostCard key={post._id} post={post} />)
+      )}
     </motion.div>
   );
 };

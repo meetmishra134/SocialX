@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IPosts extends Document {
   author: mongoose.Types.ObjectId;
   text: string;
-  images: string[];
+  images: { url: string; publicId: string }[];
   likes: mongoose.Types.ObjectId[];
 }
 
@@ -18,12 +18,21 @@ const postSchema = new mongoose.Schema<IPosts>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 200,
+      maxlength: 400,
       default: "",
     },
     images: {
-      type: [String],
-      default: [],
+      type: [
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+        },
+      ],
+      validate: {
+        validator: function arrayLimit(val: any) {
+          return val.length <= 4;
+        },
+      },
     },
     likes: [
       {

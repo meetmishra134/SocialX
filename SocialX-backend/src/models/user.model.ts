@@ -111,7 +111,7 @@ userSchema.methods.generateAccessToken = function () {
       userName: this.userName,
     },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "3m" },
+    { expiresIn: "30m" },
   );
 };
 userSchema.methods.generateRefreshToken = function () {

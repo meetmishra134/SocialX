@@ -15,16 +15,14 @@ const globalFeed = asyncHandler(async (req: Request, res: Response) => {
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
-    .populate("author", "fullName,userName,avatarUrl")
+    .populate("author", "fullName userName avatarUrl")
     .lean();
   if (posts.length === 0) {
     throw new ApiError(404, "Posts not found for global feed");
   }
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, { data: posts }, "Global feed fetched successfully"),
-    );
+    .json(new ApiResponse(200, { posts }, "Global feed fetched successfully"));
 });
 //following feed
 const followingFeed = asyncHandler(async (req: Request, res: Response) => {

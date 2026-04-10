@@ -13,6 +13,7 @@ import CommentIcon from "../icons/CommentIcon";
 import BookmarkIcon from "../icons/BookmarkIcon";
 import HeartIcon from "../icons/HeartIcon";
 import { useAuth } from "@/store/authStore";
+import DOMPurify from "dompurify";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,19 +22,29 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { MoreHorizontal, Trash2 } from "lucide-react";
+import { getRelativeTime } from "@/lib/relativeTime";
+import { useDeletePost } from "@/hooks/useDeletePost";
+import { useNavigate } from "react-router-dom";
 
 interface PostCardProps {
   post: Post;
-  onPostDeleted?: (postId: string) => void;
 }
 
-const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
-  const hasMultipleImages = post.images && post.images.length > 1;
-  const hasSingleImage = post.images && post.images.length === 1;
-  const user = useAuth((state) => state.user);
-  const handleDelete = () => {};
-  const isAuthor = user?._id === post.author.id;
+const PostCard = ({ post }: PostCardProps) => {
+  const { mutate: deletePost } = useDeletePost();
+  const hasMultipleImages = (post?.images?.length ?? 0) > 1;
 
+  const hasSingleImage = post?.images && (post.images?.length ?? 0) === 1;
+  const user = useAuth((state) => state.user);
+  const navigate = useNavigate();
+  const isAuthor = user?._id === post.author._id;
+  const rawText = post.text || "";
+  const trimmedText = rawText.replace(/(<p><br><\/p>)+$/g, "");
+  const safeHTML = DOMPurify.sanitize(trimmedText);
+  const handlePostClick = (postId: string) => {
+    // Navigate to the detailed post view
+    navigate(`/post/${postId}`);
+  };
   return (
     <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-hidden rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between gap-3 px-4 pb-2 sm:px-6">
@@ -50,12 +61,7 @@ const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
               {post.author.fullName}
             </h3>
             <p className="text-muted-foreground truncate text-xs sm:text-sm">
-              @{post.author.userName} ·{" "}
-              {new Date(post.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+              @{post.author.userName} · {getRelativeTime(post.createdAt)}
             </p>
           </div>
         </div>
@@ -73,7 +79,7 @@ const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={handleDelete}
+                onClick={() => deletePost(post._id)}
                 className="text-destructive focus:text-destructive cursor-pointer"
               >
                 <Trash2 className="text-shadow-destructive text-destructive h-4 w-4" />
@@ -84,42 +90,49 @@ const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
         )}
       </CardHeader>
 
-      {/* CONTENT */}
-      <CardContent className="p-2 pt-0 sm:p-3 sm:pt-2">
-        <p className="text-foreground/90 ml-4 text-sm leading-relaxed whitespace-pre-wrap">
-          {post.text}
-        </p>
+      <CardContent
+        className="cursor-pointer p-2 pt-0 sm:p-3 sm:pt-2"
+        onClick={() => handlePostClick(post._id)}
+      >
+        <div
+          className="prose dark:prose-invert ml-4 max-w-none px-0 text-sm"
+          dangerouslySetInnerHTML={{ __html: safeHTML }}
+        ></div>
 
-        {/* IMAGE HANDLING */}
         <div className="mt-2 px-2">
-          {/* Fallback for a single image */}
           {hasSingleImage && (
             <img
-              src={post.images?.[0]}
+              src={
+                typeof post?.images?.[0] === "string"
+                  ? post?.images[0]
+                  : post?.images?.[0]?.url
+              }
               alt="Post attachment"
               loading="lazy"
               className="border-border/50 bg-muted aspect-4/3 w-full rounded-xl border object-cover sm:aspect-video"
             />
           )}
 
-          {/* Carousel for multiple images */}
           {hasMultipleImages && (
             <Carousel className="group relative w-full">
               <CarouselContent>
-                {post.images?.map((image, index) => (
-                  <CarouselItem key={index}>
-                    <img
-                      src={image}
-                      alt={`Post image ${index + 1}`}
-                      loading="lazy"
-                      // Fixed aspect ratio so the carousel doesn't jump in height
-                      className="border-border/50 bg-muted aspect-4/3 w-full rounded-xl border object-cover sm:aspect-video"
-                    />
-                  </CarouselItem>
-                ))}
+                {post.images?.map((image, index) => {
+                  const imgSrc = typeof image === "string" ? image : image?.url;
+
+                  return (
+                    <CarouselItem key={index}>
+                      <img
+                        src={imgSrc}
+                        alt={`Post image ${index + 1}`}
+                        loading="lazy"
+                        className="border-border/50 bg-muted aspect-4/3 w-full rounded-xl border object-cover sm:aspect-video"
+                      />
+                    </CarouselItem>
+                  );
+                })}
               </CarouselContent>
 
-              {/* Navigation Arrows: Hidden on mobile (users will swipe), visible on desktop */}
+              {/* Navigation Arrows */}
               <div className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:block">
                 <CarouselPrevious className="bg-background/80 left-2 backdrop-blur-sm" />
                 <CarouselNext className="bg-background/80 right-2 backdrop-blur-sm" />

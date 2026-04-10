@@ -62,7 +62,11 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
     <>
       <div className="bg-muted/70 relative h-50 w-full">
         <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-4 z-10 h-28 w-28 border-2 ring-2">
-          <AvatarImage src={avatarUrl?.url} alt="Profile Picture" />
+          <AvatarImage
+            src={avatarUrl?.url}
+            alt="Profile Picture"
+            referrerPolicy="no-referrer"
+          />
           <AvatarFallback>
             {fullName
               ?.split(" ")

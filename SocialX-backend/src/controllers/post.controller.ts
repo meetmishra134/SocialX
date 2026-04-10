@@ -5,6 +5,9 @@ import { Post } from "../models/post.model";
 import { ApiResponse } from "../utils/api.response";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 import { Comment } from "../models/comment.model";
+import fs from "fs/promises";
+import { UploadApiResponse } from "cloudinary";
+import cloudinary from "../server";
 
 //* Create a post (Text || Image)
 const createPost = asyncHandler(async (req: Request, res: Response) => {
@@ -15,25 +18,40 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
   const hasText = Boolean(text);
   const hasImages = Boolean(files && files.length > 0);
   if (!hasText && !hasImages) {
-    throw new ApiError(400, "Post cannot be empty Add text or image");
+    throw new ApiError(400, "Post cannot be empty Add text or images");
   }
-  const imageUrl = await Promise.all(
-    files.map((file, index) =>
-      uploadToCloudinary(file.path, {
-        folder: `posts/user-${loggedInUserId}`,
-        publicId: `post-${Date.now()}-${index}`,
+
+  let postImages: { url: string; publicId: string }[] = [];
+  if (hasImages && files) {
+    const cloudinaryResponses = await Promise.all(
+      files.map(async (file) => {
+        try {
+          const result = await uploadToCloudinary(file.path, {
+            folder: `posts/user-${userName}`,
+          });
+          await fs.unlink(file.path).catch(() => {});
+          return result as UploadApiResponse;
+        } catch (error) {
+          await fs.unlink(file.path).catch(() => {});
+          throw new ApiError(500, "Error uploading images to Cloudinary");
+        }
       }),
-    ),
-  );
+    );
+    postImages = cloudinaryResponses.map((img) => ({
+      url: img.secure_url,
+      publicId: img.public_id,
+    }));
+  }
+
   const post = await Post.create({
     text: hasText ? text : null,
-    images: imageUrl.map((img: any) => img.secure_url),
+    images: postImages,
     author: loggedInUserId,
   });
 
   return res
     .status(201)
-    .json(new ApiResponse(201, { data: post }, "Post created successfully"));
+    .json(new ApiResponse(201, { post }, "Post created successfully"));
 });
 
 //* View single post
@@ -41,7 +59,7 @@ const viewPost = asyncHandler(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const post = await Post.findById(postId).populate(
     "author",
-    "userName avatarUrl",
+    "userName fullName avatarUrl",
   );
   if (!post) {
     throw new ApiError(404, "Post not found");
@@ -49,6 +67,14 @@ const viewPost = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(new ApiResponse(200, { post }, "Post fetched successfully"));
+});
+
+//* View all posts
+const viewAllPosts = asyncHandler(async (req: Request, res: Response) => {
+  const posts = await Post.find().populate("author", "userName avatarUrl");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { posts }, "Posts fetched successfully"));
 });
 
 //* Delete a post
@@ -62,14 +88,29 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
   if (post.author.toString() !== loggedInUserId.toString()) {
     throw new ApiError(403, "Unauthorized to delete this post");
   }
-  await Post.findOneAndDelete({
-    _id: postId,
-    author: loggedInUserId,
-  });
+
+  if (post.images && post.images.length > 0) {
+    await Promise.all(
+      post.images.map(async (image: any) => {
+        if (image.publicId) {
+          await cloudinary.uploader
+            .destroy(image.publicId, { resource_type: "image" })
+            .catch(() => {
+              console.error(
+                "Failed to delete image from Cloudinary",
+                image.publicId,
+              );
+            });
+        }
+      }),
+    );
+  }
+
+  await post.deleteOne();
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Post deleted Successfully"));
+    .json(new ApiResponse(200, null, "Post deleted Successfully"));
 });
 
 //* Like or dislike a post
@@ -165,4 +206,5 @@ export {
   deleteComment,
   viewComments,
   viewPost,
+  viewAllPosts,
 };

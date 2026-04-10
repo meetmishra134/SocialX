@@ -17,6 +17,7 @@ import ConnectRequests from "@/components/connect/ConnectRequests";
 import VerifyEmail from "@/components/auth/VerifyEmail";
 import ResetPassword from "@/components/auth/ResetPassword";
 import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
+import DetailedPost from "@/components/posts/DetailedPost";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <Navigate to="/feed/foryou" replace />,
+          },
+          {
+            path: "/post/:postId",
+            element: <DetailedPost />,
           },
           {
             path: "feed",
@@ -44,6 +49,7 @@ export const router = createBrowserRouter([
               },
             ],
           },
+
           {
             path: "/bookmarks",
             element: <Bookmarks />,

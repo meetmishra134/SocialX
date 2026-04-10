@@ -15,7 +15,6 @@ api.interceptors.response.use(
     const authRoutes = [
       "/auth/login",
       "/auth/register",
-      "/auth/logout",
       "/users/delete-me",
       "/auth/forgot-password",
       "/auth/reset-password",

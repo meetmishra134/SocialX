@@ -103,7 +103,7 @@ const googleLogin = asyncHandler(async (req: Request, res: Response) => {
     .cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3 * 60 * 1000, //30 minutes
+      maxAge: 30 * 60 * 1000, //30 minutes
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -117,7 +117,7 @@ const googleLogin = asyncHandler(async (req: Request, res: Response) => {
           user,
           accessToken,
         },
-        "Google login successful",
+        " login successful",
       ),
     );
 });
@@ -284,18 +284,23 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
     if (incomingRefreshToken !== user.refreshToken) {
       throw new ApiError(401, "Refresh token expired already");
     }
-    const options = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    };
+
     const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
     user.refreshToken = newRefreshToken;
     await user.save();
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 60 * 1000, //30 minutes
+      })
+      .cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+      })
       .json(
         new ApiResponse(
           200,
