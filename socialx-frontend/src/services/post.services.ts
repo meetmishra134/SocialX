@@ -17,4 +17,18 @@ export const postServices = {
     const res = await api.get(`/posts/view-post/${postId}`);
     return res.data.data.post;
   },
+  fetchPostsByTopic: async (topic: string) => {
+    const res = await api.get(`/posts/search`, {
+      params: { topic },
+    });
+    return res.data.data.posts;
+  },
+  toggleLike: async (postId: string) => {
+    const res = await api.post(`/posts/like/${postId}`);
+    return res.data;
+  },
+  toggleBookmark: async (postId: string) => {
+    const res = await api.post(`/posts/bookmark/${postId}`);
+    return res.data;
+  },
 };

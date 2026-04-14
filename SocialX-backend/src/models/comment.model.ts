@@ -4,6 +4,7 @@ export interface IComments extends Document {
   author: mongoose.Types.ObjectId;
   text: String;
   post: mongoose.Types.ObjectId;
+  likes: mongoose.Types.ObjectId[];
 }
 
 const commentSchema = new mongoose.Schema<IComments>(
@@ -19,6 +20,12 @@ const commentSchema = new mongoose.Schema<IComments>(
       maxlength: 200,
       required: true,
     },
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     post: {
       type: Schema.Types.ObjectId,
@@ -26,6 +33,7 @@ const commentSchema = new mongoose.Schema<IComments>(
       required: true,
     },
   },
+
   {
     timestamps: true,
   },

@@ -14,4 +14,12 @@ export const userService = {
       }
     }
   },
+  getBookmarks: async () => {
+    const res = await api.get("/users/bookmarks");
+    return res.data.data.posts;
+  },
+  getUserProfile: async (userName: string) => {
+    const res = await api.get(`/users/${userName}`);
+    return res.data.data.userDetails;
+  },
 };

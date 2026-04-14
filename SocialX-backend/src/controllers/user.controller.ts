@@ -11,20 +11,20 @@ import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-  const { userId } = req.params;
+  const { userName } = req.params;
   const { _id: loggedInUserId } = req.user;
 
-  const user = await User.findById(userId);
+  const user = await User.findOne({ userName });
   if (!user) {
-    throw new ApiError(500, "User does not exist");
+    throw new ApiError(403, "User does not exist");
   }
-  const isFollowing = user.following.includes(loggedInUserId);
-  const isOwnProfile = loggedInUserId.toString() === userId;
+  const isFollowing = user.followers.includes(loggedInUserId);
+  const isOwnProfile = loggedInUserId.toString() === user._id.toString();
   const userDetails = {
     _id: user._id,
     userName: user.userName,
     fullName: user.fullName,
-    avatar: user.avatarUrl.url,
+    avatarUrl: user.avatarUrl?.url || "",
     bio: user.bio,
     followersCount: user.followers.length,
     followingCount: user.following.length,
@@ -37,7 +37,7 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
     .json(
       new ApiResponse(
         200,
-        { user: userDetails },
+        { userDetails },
         "User details fetched successfully",
       ),
     );
@@ -352,50 +352,18 @@ const userDiscoveryList = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, users, "Discovered users"));
 });
 
-const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
-  const { postId } = req.params;
-  const { _id: loggedInUserId } = req.user;
-  const post = await Post.findById(postId);
-  if (!post) {
-    throw new ApiError(404, "Post not found");
-  }
-  const hasBookmarked = await User.exists({
-    _id: loggedInUserId,
-    bookmarks: postId,
-  });
-  if (hasBookmarked) {
-    await User.findByIdAndUpdate(loggedInUserId, {
-      $pull: { bookmarks: postId },
-    });
-  }
-
-  await User.findByIdAndUpdate(loggedInUserId, {
-    $addToSet: { bookmarks: postId },
-  });
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        {},
-        hasBookmarked
-          ? "Post removed from bookmarks successfully"
-          : "Post added to bookmarks successfully",
-      ),
-    );
-});
 //* Get bookmarked posts
 const getBookmarkedPosts = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
-  const bookmarks = await User.findById(loggedInUserId)
-    .select("bookmarks")
-    .lean();
-  const posts = await Post.find({ _id: { $in: bookmarks?.bookmarks ?? [] } })
+  const user = await User.findById(loggedInUserId).select("bookmarks").lean();
+  const posts = await Post.find({ _id: { $in: user?.bookmarks ?? [] } })
     .populate("author", "userName fullName avatarUrl")
     .lean();
   return res
     .status(200)
-    .json(new ApiResponse(200, posts, "Bookmarked posts fetched successfully"));
+    .json(
+      new ApiResponse(200, { posts }, "Bookmarked posts fetched successfully"),
+    );
 });
 
 export {
@@ -406,7 +374,6 @@ export {
   viewIncomingRequests,
   respondIncomingRequests,
   unfollowRequest,
-  toggleBookmark,
   getBookmarkedPosts,
   userFollowers,
   userFollowing,

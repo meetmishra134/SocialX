@@ -6,7 +6,9 @@ import {
   deleteComment,
   deletePost,
   likeDislikePost,
-  viewAllPosts,
+  searchPostByTopic,
+  toggleBookmark,
+  getUserPosts,
   viewComments,
   viewPost,
 } from "../controllers/post.controller";
@@ -17,9 +19,10 @@ const router = Router();
 router
   .route("/upload-post")
   .post(verifyJwt, upload.array("files", 4), createPost);
+router.route("/search").get(verifyJwt, searchPostByTopic);
 router.route("/view-post/:postId").get(verifyJwt, viewPost);
-router.route("/posts").get(verifyJwt, viewAllPosts);
-
+router.route("/posts").get(verifyJwt, getUserPosts);
+router.route("/bookmark/:postId").post(verifyJwt, toggleBookmark);
 router.route("/delete-post/:postId").delete(verifyJwt, deletePost);
 router.route("/comment/:postId").post(verifyJwt, commentOnPost);
 router.route("/like/:postId").post(verifyJwt, likeDislikePost);

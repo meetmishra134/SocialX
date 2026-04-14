@@ -18,6 +18,7 @@ import VerifyEmail from "@/components/auth/VerifyEmail";
 import ResetPassword from "@/components/auth/ResetPassword";
 import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
 import DetailedPost from "@/components/posts/DetailedPost";
+import TopicFeed from "@/components/feed/TopicFeed";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <Navigate to="/feed/foryou" replace />,
+          },
+          {
+            path: "/topic/:topic",
+            element: <TopicFeed />,
           },
           {
             path: "/post/:postId",
@@ -55,7 +60,7 @@ export const router = createBrowserRouter([
             element: <Bookmarks />,
           },
           {
-            path: "profile",
+            path: "profile/:userName",
             element: <Profile />,
             children: [
               {

@@ -59,7 +59,7 @@ const UserMenu = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="hover:bg-muted mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-full p-2 lg:justify-start">
-            <Avatar size="lg">
+            <Avatar className="size-7 sm:size-9">
               <AvatarImage
                 src={avatarUrl?.url}
                 alt="User"
@@ -98,7 +98,7 @@ const UserMenu = () => {
                   }}
                 >
                   <UserRoundXIcon className="mr-2 h-4 w-4" />
-                  <span>Delete {userName}</span>
+                  <span>Delete Account</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </div>

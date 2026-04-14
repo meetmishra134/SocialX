@@ -1,11 +1,12 @@
 import { toast } from "sonner";
 import { Label } from "../ui/label";
-import { ImageIcon, Loader2 } from "lucide-react";
+import { ImageIcon, Loader2, XIcon } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import RichTextEditor from "./RichTextEditor";
 import { useForm, Controller } from "react-hook-form";
 import { useCreatePost } from "@/hooks/useCreatePost";
+import { useState } from "react";
 
 export interface PostFormData {
   text: string;
@@ -16,6 +17,8 @@ interface CreatePostFormProps {
 }
 const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
   const { mutate: createPost, isPending } = useCreatePost();
+  const [topics, setTopics] = useState<string[]>([]);
+  const [topicInput, setTopicInput] = useState("");
   const { control, handleSubmit, setValue, watch, reset } =
     useForm<PostFormData>({
       defaultValues: {
@@ -46,10 +49,25 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
       { shouldValidate: true },
     );
   };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const newTopic = topicInput.trim().toLowerCase();
+      if (newTopic && !topics.includes(newTopic) && topics.length < 5) {
+        setTopics([...topics, newTopic]);
+        setTopicInput("");
+      }
+    }
+  };
+  const handleTopicDelete = (id: number) => {
+    const updatedTopics = topics.filter((_, index) => index !== id);
+    setTopics(updatedTopics);
+  };
 
   const onSubmit = (data: PostFormData) => {
     console.log("Text:", data.text);
     console.log("Attached Files:", data.images);
+    console.log("Topics:", topics);
 
     const formData = new FormData();
 
@@ -62,6 +80,7 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
         formData.append("files", file);
       });
     }
+    topics.forEach((topic) => formData.append("topics", topic));
     console.log(data);
     // Example API Call:
     createPost(formData, {
@@ -89,6 +108,38 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
           />
         )}
       />
+      <div className="flex flex-col gap-2 rounded-xl border p-3">
+        <Label htmlFor="topics">Topics</Label>
+        {topics.length < 5 && (
+          <Input
+            type="text"
+            value={topicInput}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => setTopicInput(e.target.value)}
+            id="topics "
+            placeholder={
+              topics.length === 0 ? "e.g. javascript, career..." : "Add more..."
+            }
+            className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"
+          />
+        )}
+        <div className="flex flex-wrap gap-2">
+          {topics.map((topic, index) => (
+            <span
+              key={index}
+              className="bg-primary/10 text-primary flex items-center gap-1 rounded-full px-3 py-1 text-sm"
+            >
+              #{topic}
+              <button
+                className="hover:text-red-500"
+                onClick={() => handleTopicDelete(index)}
+              >
+                <XIcon className="size-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {images.length > 0 && (
         <div className="grid grid-cols-2 gap-4">

@@ -10,6 +10,7 @@ export const PostSchema = z.object({
   }),
   text: z.string().max(400).optional(),
   createdAt: z.string(),
+  topics: z.array(z.string()).optional(),
   images: z
     .array(
       z.object({

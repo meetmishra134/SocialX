@@ -4,6 +4,7 @@ export interface User {
   fullName: string;
   userName: string;
   email: string;
+  bookmarks: string[];
   bio?: string;
   followers: string[];
   following: string[];
@@ -16,6 +17,7 @@ export const userCardSchema = z.object({
   _id: z.string(),
   fullName: z.string(),
   userName: z.string(),
+  bookmarks: z.array(z.string()).optional(),
   bio: z.string().max(100).optional(),
   avatarUrl: z.object({ url: z.string() }).optional(),
   isFollowing: z.boolean().optional(),

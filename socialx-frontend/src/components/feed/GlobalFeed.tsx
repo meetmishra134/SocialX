@@ -68,7 +68,9 @@ const GlobalFeed = () => {
       {isLoading ? (
         [1, 2, 3].map((index) => <SkeletonCard key={index} />)
       ) : isError ? (
-        <p>Error loading posts.</p>
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <p className="text-lg capitalize sm:text-xl">Error loading posts.</p>
+        </div>
       ) : (
         posts?.map((post: Post) => <PostCard key={post._id} post={post} />)
       )}

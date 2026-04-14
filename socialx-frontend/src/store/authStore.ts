@@ -1,5 +1,6 @@
 import { authService } from "@/services/auth.services";
 import type { User } from "@/types/user.types";
+
 import { create } from "zustand";
 
 type AuthState = {
@@ -23,6 +24,7 @@ export const useAuth = create<AuthState>((set) => ({
       isAuthenticated: true,
       isCheckingAuth: false,
     });
+
     console.log("User logged in:", user);
   },
 

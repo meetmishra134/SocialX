@@ -1,19 +1,25 @@
-import { SquarePenIcon } from "lucide-react";
+import { Bookmark, SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 
 import HomeIcon from "../icons/HomeIcon";
 import UsersIcon from "../icons/UsersIcon";
-import BookmarkIcon from "../icons/BookmarkIcon";
+
 import UserIcon from "../icons/UserIcon";
 import UserMenu from "../ui/UserMenu";
+import { useAuth } from "@/store/authStore";
 
 interface NavbarProps {
   onOpenPost: () => void;
 }
 
 const Navbar = ({ onOpenPost }: NavbarProps) => {
+  const location = useLocation();
+  const user = useAuth((state) => state.user);
+  const isHomeActive =
+    location.pathname.startsWith("/feed/foryou") ||
+    location.pathname.startsWith("/feed/following");
   return (
     <nav className="flex h-full w-full flex-col items-center py-4 lg:items-start lg:p-4">
       <Link
@@ -34,6 +40,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             name="Home"
             path="/feed/foryou"
             icon={(isActive) => <HomeIcon isFilled={isActive} size={25} />}
+            forceActive={isHomeActive}
           />
           <NavItems
             name="Connect"
@@ -43,11 +50,13 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
           <NavItems
             name="Bookmarks"
             path="/bookmarks"
-            icon={(isActive) => <BookmarkIcon isFilled={isActive} size={25} />}
+            icon={(isActive) => (
+              <Bookmark size={25} fill={isActive ? "currentColor" : "none"} />
+            )}
           />
           <NavItems
             name="Profile"
-            path="/profile"
+            path={`/profile/${user?.userName}`}
             icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
           />
         </ul>
@@ -73,26 +82,35 @@ interface NavItemsProps {
   name: string;
   path: string;
   icon: (isActive: boolean) => JSX.Element;
+  forceActive?: boolean;
 }
 
-const NavItems = ({ name, path, icon }: NavItemsProps) => {
+const NavItems = ({ name, path, icon, forceActive }: NavItemsProps) => {
   return (
     <NavLink
       to={path}
-      className={({ isActive }) =>
-        `hover:bg-muted flex cursor-pointer items-start justify-center gap-3 rounded-full p-3 lg:justify-start lg:px-4 lg:py-2 ${
-          isActive
+      className={({ isActive }) => {
+        const actuallyActive =
+          forceActive !== undefined ? forceActive : isActive;
+
+        return `hover:bg-muted flex cursor-pointer items-start justify-center gap-3 rounded-full p-3 lg:justify-start lg:px-4 lg:py-2 ${
+          actuallyActive
             ? "text-foreground bg-muted/50 font-semibold"
             : "text-foreground"
-        }`
-      }
+        }`;
+      }}
     >
-      {({ isActive }) => (
-        <>
-          {icon(isActive)}
-          <span className="hidden text-xl lg:block">{name}</span>
-        </>
-      )}
+      {({ isActive }) => {
+        const actuallyActive =
+          forceActive !== undefined ? forceActive : isActive;
+
+        return (
+          <>
+            {icon(actuallyActive)}
+            <span className="hidden text-xl lg:block">{name}</span>
+          </>
+        );
+      }}
     </NavLink>
   );
 };

@@ -31,8 +31,7 @@ const DeleteAccountModal = ({
           </AlertDialogMedia>
           <AlertDialogTitle>Delete Profile?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete your profile and all associated data.
-            This action cannot be undone. Are you sure you want to proceed?
+            You will lose all your data and posts. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

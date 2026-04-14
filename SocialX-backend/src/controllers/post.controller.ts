@@ -8,12 +8,15 @@ import { Comment } from "../models/comment.model";
 import fs from "fs/promises";
 import { UploadApiResponse } from "cloudinary";
 import cloudinary from "../server";
+import { User } from "../models/user.model";
 
 //* Create a post (Text || Image)
 const createPost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId, userName } = req.user;
-  const text = req.body.text?.trim();
+  const { text, topics } = req.body;
   const files = req.files as Express.Multer.File[] | undefined;
+
+  const sanitizedTopics = Array.isArray(topics) ? topics.slice(0, 5) : [];
 
   const hasText = Boolean(text);
   const hasImages = Boolean(files && files.length > 0);
@@ -47,11 +50,27 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
     text: hasText ? text : null,
     images: postImages,
     author: loggedInUserId,
+    topics: sanitizedTopics,
   });
 
   return res
     .status(201)
     .json(new ApiResponse(201, { post }, "Post created successfully"));
+});
+
+const searchPostByTopic = asyncHandler(async (req: Request, res: Response) => {
+  const { topic } = req.query;
+  if (!topic || typeof topic !== "string") {
+    throw new ApiError(400, "Topic query parameter is required");
+  }
+  const posts = await Post.find({
+    topics: { $regex: `^${topic}$`, $options: "i" },
+  })
+    .sort({ createdAt: -1 })
+    .populate("author", "userName avatarUrl fullName");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { posts }, "Posts fetched successfully"));
 });
 
 //* View single post
@@ -70,8 +89,12 @@ const viewPost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 //* View all posts
-const viewAllPosts = asyncHandler(async (req: Request, res: Response) => {
-  const posts = await Post.find().populate("author", "userName avatarUrl");
+const getUserPosts = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const posts = await Post.find({ author: userId })
+    .sort({ createdAt: -1 })
+    .populate("author", "userName fullName avatarUrl");
+
   return res
     .status(200)
     .json(new ApiResponse(200, { posts }, "Posts fetched successfully"));
@@ -117,28 +140,31 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
 const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const { postId } = req.params;
-  const post = await Post.findById(postId);
-  if (!post) {
-    throw new ApiError(404, "Post not found");
-  }
-  const hasLiked = post.likes.includes(loggedInUserId);
-  if (hasLiked) {
-    post.likes = post.likes.filter(
-      (userId) => userId.toString() !== loggedInUserId.toString(),
+  const post = await Post.findOne(
+    { _id: postId, likes: loggedInUserId },
+    { _id: 1 },
+  );
+  let updatedPost;
+  if (post) {
+    updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { likes: loggedInUserId } },
+      { new: true, select: "likes" },
     );
   } else {
-    post.likes.push(loggedInUserId);
-  }
-  await post.save();
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { data: post },
-        hasLiked ? "Post disliked successfully" : "Post liked successfully",
-      ),
+    updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { $addToSet: { likes: loggedInUserId } },
+      { new: true, select: "likes" },
     );
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      likesCount: updatedPost?.likes.length,
+      isLiked: !post,
+    }),
+  );
 });
 
 //* Comment on a post
@@ -152,17 +178,15 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Post not found");
   }
 
-  const newComment = await Comment.create({
+  const comments = await Comment.create({
     author: loggedInUserId,
     post: postId,
     text: comment,
   });
-  await newComment.save();
+  await comments.save();
   return res
     .status(201)
-    .json(
-      new ApiResponse(201, { data: newComment }, "Comment added successfully"),
-    );
+    .json(new ApiResponse(201, { comments }, "Comment added successfully"));
 });
 
 //* Delete Comment on a post
@@ -185,16 +209,60 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
 
 //* View comment on a post
 const viewComments = asyncHandler(async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 3;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
   const { postId } = req.params;
-  const comments = await Comment.find({ post: postId }).populate(
-    "author",
-    "userName",
-    "avatarUrl",
-  );
+  const comments = await Comment.find({ post: postId })
+    .populate("author", "userName fullName avatarUrl")
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  const totalComments = await Comment.countDocuments({ post: postId });
+  const hasMore = skip + comments.length < totalComments;
+
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { data: comments }, "comments fetched successfully"),
+      new ApiResponse(
+        200,
+        { comments, hasMore, nextPage: hasMore ? page + 1 : null },
+        "comments fetched successfully",
+      ),
+    );
+});
+const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  const post = await Post.findById(postId);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  const hasBookmarked = await User.exists({
+    _id: loggedInUserId,
+    bookmarks: postId,
+  });
+  if (hasBookmarked) {
+    await User.findByIdAndUpdate(loggedInUserId, {
+      $pull: { bookmarks: postId },
+    });
+  } else {
+    await User.findByIdAndUpdate(loggedInUserId, {
+      $addToSet: { bookmarks: postId },
+    });
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        null,
+        hasBookmarked
+          ? "Post removed from bookmarks successfully"
+          : "Post added to bookmarks successfully",
+      ),
     );
 });
 
@@ -206,5 +274,7 @@ export {
   deleteComment,
   viewComments,
   viewPost,
-  viewAllPosts,
+  getUserPosts,
+  toggleBookmark,
+  searchPostByTopic,
 };

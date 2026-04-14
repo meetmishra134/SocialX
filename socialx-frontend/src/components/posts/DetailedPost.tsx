@@ -2,10 +2,13 @@ import { useSinglePost } from "@/hooks/useSinglePost";
 import { useNavigate, useParams } from "react-router-dom";
 import PostCard from "./PostCard";
 import { ArrowLeft, Loader } from "lucide-react";
+import CommentInput from "../comments/CommentInput";
+import Comment from "../comments/Comment";
 
 const DetailedPost = () => {
   const { postId } = useParams();
   const { data: post, isLoading, error } = useSinglePost(postId);
+
   const navigate = useNavigate();
   return (
     <div>
@@ -29,6 +32,13 @@ const DetailedPost = () => {
         </div>
       )}
       {post && <PostCard post={post} />}
+      <div className="border-border border-b px-4 py-3">
+        <CommentInput />
+      </div>
+      {/* Comments List */}
+      <div className="mt-4 px-4">
+        <Comment />
+      </div>
     </div>
   );
 };
