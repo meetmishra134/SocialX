@@ -31,4 +31,8 @@ export const postServices = {
     const res = await api.post(`/posts/bookmark/${postId}`);
     return res.data;
   },
+  getUserPosts: async (userName: string) => {
+    const res = await api.get(`/posts/${userName}`);
+    return res.data.data.posts;
+  },
 };

@@ -24,10 +24,10 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
     <nav className="flex h-full w-full flex-col items-center py-4 lg:items-start lg:p-4">
       <Link
         to="/feed/foryou"
-        className="flex w-full items-center justify-center gap-2 lg:justify-start lg:px-4"
+        className="flex w-full items-center justify-center gap-2 lg:justify-start lg:px-8"
       >
         <img
-          src="../../../images/XLogo.png"
+          src="../../../images/SocialXLogo.png"
           alt="SocialX"
           className="h-8 w-auto lg:h-10"
         />

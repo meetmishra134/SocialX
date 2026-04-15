@@ -1,10 +1,11 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Link, useParams } from "react-router-dom";
-import PostCard from "../posts/PostCard";
-// import type { Post } from "@/types/post.types";
-import { useAuth } from "@/store/authStore";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProfileData } from "@/hooks/useProfileData";
+import { ArrowLeft } from "lucide-react";
+import { useGetUserPosts } from "@/hooks/getUserPosts";
+import PostCard from "../posts/PostCard";
+import type { Post } from "@/types/post.types";
 
 // const posts: Post[] = [
 //   {
@@ -58,11 +59,33 @@ interface ProfileLayoutProps {
 
 const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
   const { userName } = useParams();
+  const navigate = useNavigate();
   const { data: profile } = useProfileData(userName as string);
-  // const { fullName, userName, avatarUrl } =
-  //   useAuth((state) => state.user) || {};
+  const {
+    data: posts,
+    isError,
+    isLoading,
+  } = useGetUserPosts(userName as string);
+
   return (
-    <>
+    <div>
+      <div className="bg-background/80 sticky top-0 z-50 flex items-center gap-4 border-b p-2 backdrop-blur-md">
+        <button
+          onClick={() => navigate(-1)}
+          className="hover:bg-muted cursor-pointer rounded-full p-2 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div className="flex flex-col">
+          <h1 className="flex items-center gap-1 text-xl font-bold">
+            {" "}
+            {profile?.fullName}
+          </h1>
+          <span className="text-muted-foreground text-sm">
+            {posts?.length || 0} posts
+          </span>
+        </div>
+      </div>
       <div className="bg-muted/70 relative h-50 w-full">
         <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-4 z-10 h-28 w-28 border-2 ring-2">
           <AvatarImage
@@ -123,13 +146,23 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         </div>
       </div>
       <div className="flex flex-col">
-        {/* {posts.map((post) => (
-          <div className="border-border border-b" key={post._id}>
-            <PostCard post={post} />
-          </div>
-        ))} */}
+        {isLoading ? (
+          <p className="text-muted-foreground p-4 text-center">
+            Loading posts...
+          </p>
+        ) : isError ? (
+          <p className="text-muted-foreground p-4 text-center">
+            Error loading posts.
+          </p>
+        ) : (
+          posts.map((post: Post) => (
+            <div className="border-border border-b" key={post._id}>
+              <PostCard post={post} />
+            </div>
+          ))
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

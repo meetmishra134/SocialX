@@ -22,4 +22,18 @@ export const userService = {
     const res = await api.get(`/users/${userName}`);
     return res.data.data.userDetails;
   },
+
+  discoverUsers: async () => {
+    const res = await api.get("/users/discovery");
+    return res.data.data.users;
+  },
+
+  followUser: async (userId: string) => {
+    const res = await api.post(`/users/follow/${userId}`);
+    return res.data;
+  },
+  unfollowUser: async (userId: string) => {
+    const res = await api.post(`/users/unfollow/${userId}`);
+    return res.data;
+  },
 };

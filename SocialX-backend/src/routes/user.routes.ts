@@ -2,15 +2,13 @@ import { Router } from "express";
 import {
   deleteUserProfile,
   editUserProfile,
+  followUser,
   getBookmarkedPosts,
+  getFollowers,
+  getFollowing,
   getUserProfile,
-  respondIncomingRequests,
-  sendFollowRequest,
-  unfollowRequest,
+  unfollowUser,
   userDiscoveryList,
-  userFollowers,
-  userFollowing,
-  viewIncomingRequests,
 } from "../controllers/user.controller";
 import { verifyJwt } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/multer";
@@ -20,17 +18,13 @@ router.route("/bookmarks").get(verifyJwt, getBookmarkedPosts);
 router
   .route("/edit-me")
   .patch(verifyJwt, upload.single("avatar"), editUserProfile);
-router.route("/:userName").get(verifyJwt, getUserProfile);
-router.route("/follow/:userId").post(verifyJwt, sendFollowRequest);
-router.route("/me/follow-requests").get(verifyJwt, viewIncomingRequests);
-router.route("/delete-me").delete(verifyJwt, deleteUserProfile);
-router
-  .route("/review/:status/:requestId")
-  .post(verifyJwt, respondIncomingRequests);
-
-router.route("/unfollow/:userId").post(verifyJwt, unfollowRequest);
-router.route("/:userId/following").post(verifyJwt, userFollowing);
-router.route("/:userId/followers").get(verifyJwt, userFollowers);
 router.route("/discovery").get(verifyJwt, userDiscoveryList);
+router.route("/follow/:userId").post(verifyJwt, followUser);
+router.route("/unfollow/:userId").post(verifyJwt, unfollowUser);
+router.route("/get-followers/:userId").get(verifyJwt, getFollowers);
+router.route("/get-following/:userId").get(verifyJwt, getFollowing);
+
+router.route("/:userName").get(verifyJwt, getUserProfile);
+router.route("/delete-me").delete(verifyJwt, deleteUserProfile);
 
 export default router;

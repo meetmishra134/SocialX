@@ -5,8 +5,6 @@ import { ApiError } from "../utils/api.error";
 import { ApiResponse } from "../utils/api.response";
 import { updateMeInput, updateMeSchema } from "../validators/user.validator";
 import { Post } from "../models/post.model";
-import { FollowRequest } from "../models/followRequest.model";
-import { hasMutualFollowing } from "../utils/mutal.relationship";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 //* Get any user detail
@@ -44,7 +42,6 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
 });
 
 //* Update or edit profile information
-
 const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const file = req.file;
@@ -119,155 +116,110 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, "User deleted successfully"));
 });
 
-//* Send Follow Request
-const sendFollowRequest = asyncHandler(async (req: Request, res: Response) => {
-  const { userId: toUserId } = req.params;
-  const { _id: fromUserId } = req.user;
-
-  if (fromUserId.toString() === toUserId) {
-    throw new ApiError(400, "You cannot send follow request to yourself");
+const userDiscoveryList = asyncHandler(async (req, res) => {
+  const { _id: loggedInUserId } = req.user;
+  const me = await User.findById(loggedInUserId).select("following").lean();
+  if (!me) {
+    throw new ApiError(404, "User not found");
   }
-  const toUser = await User.findById(toUserId);
-  if (!toUser) {
+  const excludedUserIds = [loggedInUserId, ...me.following];
+  const users = await User.find({ _id: { $nin: excludedUserIds } })
+    .select("userName fullName avatarUrl bio ")
+    .limit(10)
+    .lean();
+
+  const formattedUsers = users.map((user) => ({
+    ...user,
+    isFollowing: false,
+  }));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { users: formattedUsers },
+        "User discovery list fetched successfully",
+      ),
+    );
+});
+
+const followUser = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { _id: loggedInUserId } = req.user;
+
+  if (loggedInUserId.toString() === userId) {
+    throw new ApiError(400, "You cannot follow yourself");
+  }
+  const userToFollow = await User.findById(userId);
+  if (!userToFollow) {
     throw new ApiError(404, "User not found");
   }
   const alreadyFollowing = await User.exists({
-    _id: fromUserId,
-    following: toUserId,
+    _id: loggedInUserId,
+    following: userId,
   });
   if (alreadyFollowing) {
     throw new ApiError(400, "You are already following this user");
   }
-
-  const usersPair = [fromUserId, toUserId].sort();
-  try {
-    const followRequest = await FollowRequest.create({
-      requester: fromUserId,
-      users: usersPair,
-      status: "pending",
-    });
-    return res
-      .status(201)
-      .json(
-        new ApiResponse(201, followRequest, "Follow request sent successfully"),
-      );
-  } catch (error: any) {
-    if (error.code === 11000) {
-      throw new ApiError(
-        400,
-        "Follow request already pending between these users",
-      );
-    }
-    throw new ApiError(
-      500,
-      "Something went wrong while sending follow request",
-    );
-  }
-});
-//* Unfollow a user
-const unfollowRequest = asyncHandler(async (req: Request, res: Response) => {
-  const { _id: loggedInUserId } = req.user;
-  const { userId: toUserId } = req.params;
-
-  if (loggedInUserId.toString() === toUserId) {
-    throw new ApiError(400, "You cannot unfollow yourself");
-  }
-
-  const isfollowing = await User.exists({
-    _id: loggedInUserId,
-    following: toUserId,
-  });
-  if (!isfollowing) {
-    throw new ApiError(400, "You are not following this user ");
-  }
-
   await User.findByIdAndUpdate(loggedInUserId, {
-    $pull: { following: toUserId },
+    $addToSet: { following: userId },
   });
-  await User.findByIdAndUpdate(toUserId, {
-    $pull: { followers: loggedInUserId },
+  await User.findByIdAndUpdate(userId, {
+    $addToSet: { followers: loggedInUserId },
   });
-
-  return res.status(200).json(new ApiResponse(200, "Unfollowing successful"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "You are now following this user"));
 });
 
-//* View incoming requests
-const viewIncomingRequests = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { _id: loggedInUserId } = req.user;
-    const requests = await FollowRequest.find({
-      users: loggedInUserId,
-      status: "pending",
-      requester: { $ne: loggedInUserId },
-    })
-      .populate("requester", "fullName userName avatarUrl")
-      .select("-createdAt -updatedAt -toUserId -users")
-      .lean()
-      .sort({ createdAt: -1 });
-    return res
-      .status(200)
-      .json(new ApiResponse(200, requests, "Requests Fetched Successfully"));
-  },
-);
-
-//* Respond Incoming Requests
-const respondIncomingRequests = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { _id: loggedInUserId } = req.user;
-    const { status, requestId } = req.params;
-    const allowedStatus = ["accepted", "rejected"];
-    if (!allowedStatus.includes(status as string)) {
-      throw new ApiError(400, "Status not allowed");
-    }
-    const followRequests = await FollowRequest.findOne({
-      _id: requestId,
-      status: "pending",
-      users: loggedInUserId,
-      requester: { $ne: loggedInUserId },
-    });
-    if (!followRequests) {
-      throw new ApiError(400, "Follow request doesn't exists");
-    }
-    await User.findByIdAndUpdate(loggedInUserId, {
-      $addToSet: { followers: followRequests.requester },
-    });
-
-    await User.findByIdAndUpdate(followRequests.requester, {
-      $addToSet: { following: loggedInUserId },
-    });
-
-    followRequests.status = status as "accepted" | "rejected";
-    await followRequests.save();
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, `You have ${status} the follow request`));
-  },
-);
-
-//* User Following
-const userFollowing = asyncHandler(async (req: Request, res: Response) => {
+const unfollowUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
-  let targetUserId: String;
-
   if (loggedInUserId.toString() === userId) {
-    targetUserId = loggedInUserId.toString();
-  } else {
-    const isMutual = await hasMutualFollowing(
-      loggedInUserId.toString(),
-      userId as string,
-    );
-    if (!isMutual) {
-      throw new ApiError(403, "You are not allowed to view ");
-    }
-    targetUserId = userId as string;
+    throw new ApiError(400, "You cannot unfollow yourself");
   }
+  const isFollowing = await User.exists({
+    _id: loggedInUserId,
+    following: userId,
+  });
+  if (!isFollowing) {
+    throw new ApiError(400, "You are not following this user");
+  }
+  await User.findByIdAndUpdate(loggedInUserId, {
+    $pull: { following: userId },
+  });
+  await User.findByIdAndUpdate(userId, {
+    $pull: { followers: loggedInUserId },
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "You have unfollowed this user"));
+});
 
-  const user = await User.findById(targetUserId)
-    .populate("following", "avatarUrl fullName userName")
-    .select("following");
+const getFollowers = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const user = await User.findById(userId)
+    .populate("followers", "userName fullName avatarUrl")
+    .select("followers");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user?.followers ?? [],
+        "Followers fetched successfully",
+      ),
+    );
+});
 
+const getFollowing = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const user = await User.findById(userId)
+    .select("following")
+    .populate("following", "userName fullName avatarUrl");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -280,76 +232,6 @@ const userFollowing = asyncHandler(async (req: Request, res: Response) => {
         "Following fetched successfully",
       ),
     );
-});
-
-//* User Followers
-const userFollowers = asyncHandler(async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const { _id: loggedInUserId } = req.user;
-  let targetUserId: string;
-  if (loggedInUserId.toString() === userId) {
-    targetUserId = loggedInUserId.toString();
-  } else {
-    const isMutual = await hasMutualFollowing(
-      loggedInUserId.toString(),
-      userId as string,
-    );
-    if (!isMutual) {
-      throw new ApiError(403, "You are not allowed to view");
-    }
-    targetUserId = userId as string;
-  }
-  const user = await User.findById(targetUserId)
-    .populate("followers", "avatarUrl fullName userName")
-    .select("followers")
-    .lean();
-
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        user?.followers ?? [],
-        "Followers fetched successfully",
-      ),
-    );
-});
-
-const userDiscoveryList = asyncHandler(async (req, res) => {
-  const loggedInUserId = req.user._id;
-
-  const me = await User.findById(loggedInUserId)
-    .select("followers following")
-    .lean();
-
-  const excludeUserIds = new Set([
-    loggedInUserId.toString(),
-    ...me.following.map((id) => id.toString()),
-    ...me.followers.map((id) => id.toString()),
-  ]);
-
-  const pendingRequests = await FollowRequest.find({
-    status: "pending",
-    users: loggedInUserId,
-  }).select("users");
-
-  pendingRequests.forEach((req) => {
-    req.users.forEach((userId) => {
-      excludeUserIds.add(userId.toString());
-    });
-  });
-
-  const users = await User.find({
-    _id: { $nin: Array.from(excludeUserIds) },
-  })
-    .select("username avatar bio")
-    .limit(20);
-
-  return res.status(200).json(new ApiResponse(200, users, "Discovered users"));
 });
 
 //* Get bookmarked posts
@@ -370,12 +252,10 @@ export {
   editUserProfile,
   getUserProfile,
   deleteUserProfile,
-  sendFollowRequest,
-  viewIncomingRequests,
-  respondIncomingRequests,
-  unfollowRequest,
+  followUser,
+  unfollowUser,
+  getFollowers,
+  getFollowing,
   getBookmarkedPosts,
-  userFollowers,
-  userFollowing,
   userDiscoveryList,
 };

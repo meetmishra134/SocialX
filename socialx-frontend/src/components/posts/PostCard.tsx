@@ -49,7 +49,7 @@ const PostCard = ({ post }: PostCardProps) => {
     navigate(`/post/${postId}`);
   };
   return (
-    <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-hidden rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
+    <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-visible rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-4 pb-2 sm:px-6">
         <div className="flex flex-row items-start gap-2.5">
           <Avatar className="h-10 w-10 shrink-0">
@@ -89,7 +89,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
         {isAuthor && (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild className="ml-auto">
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"

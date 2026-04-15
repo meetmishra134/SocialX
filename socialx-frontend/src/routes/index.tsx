@@ -12,8 +12,6 @@ import FollowersPage from "@/components/Profile/FollowersPage";
 import FollowingPage from "@/components/Profile/FollowingPage";
 import GlobalFeed from "@/components/feed/GlobalFeed";
 import FollowingFeed from "@/components/feed/FollowingFeed";
-import ConnectTab from "@/components/connect/ConnectTab";
-import ConnectRequests from "@/components/connect/ConnectRequests";
 import VerifyEmail from "@/components/auth/VerifyEmail";
 import ResetPassword from "@/components/auth/ResetPassword";
 import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
@@ -75,17 +73,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "connect",
-            element: <ConnectTab />,
-            children: [
-              {
-                index: true,
-                element: <Connect />,
-              },
-              {
-                path: "requests",
-                element: <ConnectRequests />,
-              },
-            ],
+            element: <Connect />,
           },
         ],
       },
