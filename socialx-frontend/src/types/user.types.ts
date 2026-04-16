@@ -21,5 +21,7 @@ export const userCardSchema = z.object({
   bio: z.string().max(100).optional(),
   avatarUrl: z.object({ url: z.string() }).optional(),
   isFollowing: z.boolean().optional(),
+  followsMe: z.boolean().optional(),
+  isOwnProfile: z.boolean().optional(),
 });
 export type UserCardType = z.infer<typeof userCardSchema>;

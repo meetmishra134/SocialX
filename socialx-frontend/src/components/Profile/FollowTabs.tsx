@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 const FollowTabs = () => {
@@ -7,22 +7,23 @@ const FollowTabs = () => {
   const activeTab = location.pathname.includes("following")
     ? "following"
     : "followers";
+  const { userName } = useParams();
 
   return (
     <div className="flex h-screen flex-col">
-      <Tabs defaultValue={activeTab} className="flex h-full flex-col">
+      <Tabs value={activeTab} className="flex h-full flex-col">
         <TabsList className="bg-background sticky top-0 z-10 grid w-full grid-cols-2">
           <TabsTrigger
             value="followers"
             className="cursor-pointer"
-            onClick={() => navigate("/profile/followers")}
+            onClick={() => navigate(`/profile/${userName}/followers`)}
           >
             Followers
           </TabsTrigger>
           <TabsTrigger
             value="following"
             className="cursor-pointer"
-            onClick={() => navigate("/profile/following")}
+            onClick={() => navigate(`/profile/${userName}/following`)}
           >
             Following
           </TabsTrigger>

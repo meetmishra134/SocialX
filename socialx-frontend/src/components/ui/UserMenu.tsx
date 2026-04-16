@@ -59,7 +59,7 @@ const UserMenu = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="hover:bg-muted mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-full p-2 lg:justify-start">
-            <Avatar className="size-7 sm:size-9">
+            <Avatar className="size-7 sm:size-9" size="lg">
               <AvatarImage
                 src={avatarUrl?.url}
                 alt="User"
@@ -76,7 +76,7 @@ const UserMenu = () => {
                 <Ellipsis />
               </button>
 
-              <DropdownMenuContent className="md:bg-popover ml-2 w-56 rounded-md border p-1 shadow-lg">
+              <DropdownMenuContent className="md:bg-popover bg-background/60 ml-2 w-56 rounded-md border p-1 shadow-lg backdrop-blur-md">
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onSelect={(e) => {
@@ -91,13 +91,13 @@ const UserMenu = () => {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
-                  className="text-destructive hover:bg-destructive cursor-pointer"
+                  className="cursor-pointer"
                   onSelect={(e) => {
                     e.preventDefault();
                     setShowDeleteModal(true);
                   }}
                 >
-                  <UserRoundXIcon className="mr-2 h-4 w-4" />
+                  <UserRoundXIcon className="text-destructive mr-2 h-4 w-4" />
                   <span>Delete Account</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

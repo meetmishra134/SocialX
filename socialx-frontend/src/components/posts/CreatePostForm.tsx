@@ -118,7 +118,9 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
             onChange={(e) => setTopicInput(e.target.value)}
             id="topics "
             placeholder={
-              topics.length === 0 ? "e.g. javascript, career..." : "Add more..."
+              topics.length === 0
+                ? "Add topics to categorize your post (e.g., #technology, #health)"
+                : "Add more topics (max 5)"
             }
             className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"
           />
@@ -192,7 +194,6 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              "Posting..."
             </>
           ) : (
             "Post"

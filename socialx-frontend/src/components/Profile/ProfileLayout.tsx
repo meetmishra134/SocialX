@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { useGetUserPosts } from "@/hooks/getUserPosts";
 import PostCard from "../posts/PostCard";
 import type { Post } from "@/types/post.types";
+import FollowButton from "../connect/FollowButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 // const posts: Post[] = [
 //   {
@@ -60,13 +62,25 @@ interface ProfileLayoutProps {
 const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
   const { userName } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: profile } = useProfileData(userName as string);
   const {
     data: posts,
     isError,
     isLoading,
   } = useGetUserPosts(userName as string);
-
+  // console.log("Profile Data:", profile);
+  const handleOptimisticStats = (userId: string, isNowFollowing: boolean) => {
+    queryClient.setQueryData(["profile", userId], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        follwersCount: isNowFollowing
+          ? oldData.followersCount + 1
+          : oldData.followersCount - 1,
+      };
+    });
+  };
   return (
     <div>
       <div className="bg-background/80 sticky top-0 z-50 flex items-center gap-4 border-b p-2 backdrop-blur-md">
@@ -119,15 +133,19 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
               Edit Profile
             </Button>
           ) : (
-            <Button className="mt-4 ml-auto cursor-pointer rounded-full">
-              Follow
-            </Button>
+            <FollowButton
+              className="mt-4 rounded-full"
+              userId={profile?._id}
+              initialIsFollowing={profile?.isFollowing}
+              followsMe={profile?.followsMe}
+              onSuccess={handleOptimisticStats}
+            />
           )}
         </div>
         <div className="mt-2 flex gap-4 text-[0.95rem]">
           <div>
             <Link
-              to="/profile/followers"
+              to={`/profile/${userName}/followers`}
               className="text-foreground/90 hover:text-foreground hover:decoration-accent-foreground hover:underline"
             >
               <span>{profile?.followersCount}</span>
@@ -136,7 +154,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
           </div>
           <div>
             <Link
-              to="/profile/following"
+              to={`/profile/${userName}/following`}
               className="text-foreground/90 hover:text-foreground hover:decoration-accent-foreground hover:underline"
             >
               <span>{profile?.followingCount}</span>
@@ -146,6 +164,11 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         </div>
       </div>
       <div className="flex flex-col">
+        {posts?.length === 0 && (
+          <p className="text-muted-foreground p-4 text-center">
+            No posts available{" "}
+          </p>
+        )}
         {isLoading ? (
           <p className="text-muted-foreground p-4 text-center">
             Loading posts...

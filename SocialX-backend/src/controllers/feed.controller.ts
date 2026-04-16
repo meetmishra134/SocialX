@@ -41,11 +41,7 @@ const followingFeed = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        { data: posts },
-        "Following feed fetched successfully",
-      ),
+      new ApiResponse(200, { posts }, "Following feed fetched successfully"),
     );
 });
 

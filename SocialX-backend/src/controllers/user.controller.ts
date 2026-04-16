@@ -116,7 +116,7 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, "User deleted successfully"));
 });
 
-const userDiscoveryList = asyncHandler(async (req, res) => {
+const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const me = await User.findById(loggedInUserId).select("following").lean();
   if (!me) {
@@ -197,38 +197,77 @@ const unfollowUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getFollowers = asyncHandler(async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const user = await User.findById(userId)
+  const { userName } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  const user = await User.findOne({ userName })
     .populate("followers", "userName fullName avatarUrl")
     .select("followers");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
+  const me = await User.findById(loggedInUserId)
+    .select("followers following")
+    .lean();
+  const formattedFollowers = user.followers.map((follower: any) => {
+    const isFollowing = me?.following.some(
+      (id) => id.toString() === follower._id.toString(),
+    );
+    const followsMe = me.followers.some(
+      (id) => id.toString() === follower._id.toString(),
+    );
+    const isOwnProfile = loggedInUserId.toString() === follower._id.toString();
+    return {
+      ...follower.toObject(),
+      isFollowing,
+      followsMe,
+      isOwnProfile,
+    };
+  });
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        user?.followers ?? [],
+        { followers: formattedFollowers },
         "Followers fetched successfully",
       ),
     );
 });
 
 const getFollowing = asyncHandler(async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const user = await User.findById(userId)
+  const { userName } = req.params;
+  const { _id: loggedInUserId } = req.user;
+  const user = await User.findOne({ userName })
     .select("following")
     .populate("following", "userName fullName avatarUrl");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
+  const me = await User.findById(loggedInUserId)
+    .select("followers following")
+    .lean();
+  const formattedFollowing = user.following.map((following: any) => {
+    const isFollowing = me?.following.some(
+      (id) => id.toString() === following._id.toString(),
+    );
+    const followsMe = me.followers.some(
+      (id) => id.toString() === following._id.toString(),
+    );
+    const isOwnProfile = loggedInUserId.toString() === following._id.toString();
+    return {
+      ...following.toObject(),
+      isFollowing,
+      followsMe,
+      isOwnProfile,
+    };
+  });
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        user?.following ?? [],
+        { following: formattedFollowing },
         "Following fetched successfully",
       ),
     );

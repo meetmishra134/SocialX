@@ -5,6 +5,6 @@ export const useDiscovery = () => {
   return useQuery({
     queryKey: ["discover-users"],
     queryFn: () => userService.discoverUsers(),
-    staleTime: 1000 * 60 * 5, //
+    staleTime: 1000 * 60 * 5,
   });
 };

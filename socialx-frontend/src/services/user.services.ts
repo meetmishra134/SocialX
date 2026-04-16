@@ -36,4 +36,12 @@ export const userService = {
     const res = await api.post(`/users/unfollow/${userId}`);
     return res.data;
   },
+  getFollowers: async (userName: string) => {
+    const res = await api.get(`users/get-followers/${userName}`);
+    return res.data.data.followers;
+  },
+  getFollowing: async (userName: string) => {
+    const res = await api.get(`users/get-following/${userName}`);
+    return res.data.data.following;
+  },
 };
