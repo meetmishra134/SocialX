@@ -1,4 +1,3 @@
-import { useSearch } from "@/hooks/useSearch";
 import { ArrowLeft, Hash } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "../ui/spinner";
@@ -8,7 +7,6 @@ import PostCard from "../posts/PostCard";
 const TopicFeed = () => {
   const { topic } = useParams();
   const navigate = useNavigate();
-  const { data: posts, isLoading } = useSearch(topic as string);
   return (
     <div className="mx-auto max-w-2xl pb-24">
       <div className="bg-background/80 sticky top-0 z-10 flex items-center gap-4 border-b p-2 backdrop-blur-md">

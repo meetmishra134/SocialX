@@ -34,7 +34,7 @@ const followingFeed = asyncHandler(async (req: Request, res: Response) => {
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
-    .populate("author", "fullName,userName,avatarUrl");
+    .populate("author", "fullName userName avatarUrl");
   if (posts.length === 0) {
     throw new ApiError(404, "Posts not found for following feed");
   }

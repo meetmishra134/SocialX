@@ -9,6 +9,10 @@ export const postServices = {
     const response = await api.get("/feed/global");
     return response.data.data.posts;
   },
+  getFollowingPosts: async () => {
+    const res = await api.get("/feed/following");
+    return res.data.data.posts;
+  },
   deletePost: async (postId: string) => {
     const res = await api.delete(`/posts/delete-post/${postId}`);
     return res.data;

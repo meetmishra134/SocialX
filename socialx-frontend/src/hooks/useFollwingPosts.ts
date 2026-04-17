@@ -3,13 +3,13 @@ import { useAuth } from "@/store/authStore";
 import type { Post } from "@/types/post.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const usePosts = () => {
+export const useFollowingPosts = () => {
   const queryClient = useQueryClient();
   const user = useAuth((state) => state.user);
   return useQuery({
-    queryKey: ["GlobalFeed"],
+    queryKey: ["FollowingFeed"],
     queryFn: async () => {
-      const posts = await postServices.getPost();
+      const posts = await postServices.getFollowingPosts();
 
       posts.forEach((post: Post) => {
         queryClient.setQueryData(
@@ -28,7 +28,5 @@ export const usePosts = () => {
 
       return posts;
     },
-    refetchInterval: 30000,
-    refetchIntervalInBackground: false,
   });
 };
