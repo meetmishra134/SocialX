@@ -5,32 +5,9 @@ import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
 import FollowButton from "../connect/FollowButton";
 
-// const users: UserCardType[] = [
-//   {
-//     _id: "1",
-//     fullName: "John Doe",
-//     userName: "johndoe",
-//     bio: "CEO at XYZ Company. Passionate about technology and innovation.",
-//     avatarUrl: {
-//       url: "https://images.pexels.com/photos/36361500/pexels-photo-36361500.jpeg",
-//     },
-//     isFollowing: false,
-//   },
-//   {
-//     _id: "2",
-//     fullName: "Jane Smith",
-//     userName: "janesmith",
-//     bio: "Marketing expert with a love for social media and content creation.",
-//     avatarUrl: {
-//       url: "https://images.pexels.com/photos/33260938/pexels-photo-33260938.jpeg",
-//     },
-//     isFollowing: false,
-//   },
-// ];
-
 const FollowersPage = () => {
-  const { userName } = useParams();
-  const { data: users, isLoading } = useFollowers(userName as string);
+  const { userId } = useParams();
+  const { data: users, isLoading } = useFollowers(userId as string);
 
   if (isLoading)
     return (
@@ -41,8 +18,8 @@ const FollowersPage = () => {
   if (users?.length === 0) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
-        <p className="text-muted-foreground capitalize">
-          {userName} has no followers yet
+        <p className="text-muted-foreground text-center capitalize">
+          This user has no followers yet
         </p>
       </div>
     );

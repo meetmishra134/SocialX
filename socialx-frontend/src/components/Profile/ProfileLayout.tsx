@@ -9,8 +9,6 @@ import type { Post } from "@/types/post.types";
 import FollowButton from "../connect/FollowButton";
 import { useQueryClient } from "@tanstack/react-query";
 
-// const posts: Post[] = [
-//   {
 //     _id: "post1",
 //     author: {
 //       _idid: "69cf68ae4d16faf04cd3b5c2",
@@ -60,15 +58,11 @@ interface ProfileLayoutProps {
 }
 
 const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
-  const { userName } = useParams();
+  const { userId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: profile } = useProfileData(userName as string);
-  const {
-    data: posts,
-    isError,
-    isLoading,
-  } = useGetUserPosts(userName as string);
+  const { data: profile } = useProfileData(userId as string);
+  const { data: posts, isError, isLoading } = useGetUserPosts(userId as string);
   // console.log("Profile Data:", profile);
   const handleOptimisticStats = (userId: string, isNowFollowing: boolean) => {
     queryClient.setQueryData(["profile", userId], (oldData: any) => {
@@ -120,8 +114,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
           <h2 className="text-lg font-bold">{profile?.fullName}</h2>
           <p className="text-muted-foreground text-sm">@{profile?.userName}</p>
           <p className="mt-2 text-[0.9rem] leading-relaxed">
-            UI/UX | Builder passionate about creating intuitive user experiences
-            and solving complex design problems.
+            {profile?.bio || "This user hasn't added a bio yet."}
           </p>
         </div>
         <div className="absolute top-0 right-2">
@@ -145,7 +138,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         <div className="mt-2 flex gap-4 text-[0.95rem]">
           <div>
             <Link
-              to={`/profile/${userName}/followers`}
+              to={`/profile/${userId}/followers`}
               className="text-foreground/90 hover:text-foreground hover:decoration-accent-foreground hover:underline"
             >
               <span>{profile?.followersCount}</span>
@@ -154,7 +147,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
           </div>
           <div>
             <Link
-              to={`/profile/${userName}/following`}
+              to={`/profile/${userId}/following`}
               className="text-foreground/90 hover:text-foreground hover:decoration-accent-foreground hover:underline"
             >
               <span>{profile?.followingCount}</span>
@@ -178,7 +171,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
             Error loading posts.
           </p>
         ) : (
-          posts.map((post: Post) => (
+          posts?.map((post: Post) => (
             <div className="border-border border-b" key={post._id}>
               <PostCard post={post} />
             </div>

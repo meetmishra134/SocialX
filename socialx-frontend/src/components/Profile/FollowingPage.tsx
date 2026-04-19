@@ -8,13 +8,13 @@ import FollowButton from "../connect/FollowButton";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FollowingPage = () => {
-  const { userName } = useParams();
-  const { data: users, isLoading } = useFollowing(userName as string);
+  const { userId } = useParams();
+  const { data: users, isLoading } = useFollowing(userId as string);
   const queryclient = useQueryClient();
   const handleFollow = (userId: string, isNowFollowing: boolean) => {
     if (!isNowFollowing) {
       setTimeout(() => {
-        queryclient.setQueryData(["following", userName], (oldData: any) => {
+        queryclient.setQueryData(["following", userId], (oldData: any) => {
           if (!oldData) return [];
           return oldData.filter((user) => user._id !== userId);
         });
@@ -32,8 +32,8 @@ const FollowingPage = () => {
   if (users?.length === 0) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
-        <p className="text-muted-foreground capitalize">
-          {userName} is not following anyone yet
+        <p className="text-muted-foreground text-center capitalize">
+          This user is not following anyone yet
         </p>
       </div>
     );

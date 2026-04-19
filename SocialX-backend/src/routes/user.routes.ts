@@ -19,11 +19,12 @@ router
   .route("/edit-me")
   .patch(verifyJwt, upload.single("avatar"), editUserProfile);
 router.route("/discovery").get(verifyJwt, userDiscoveryList);
+router.route("/:userId").get(verifyJwt, getUserProfile);
 router.route("/follow/:userId").post(verifyJwt, followUser);
 router.route("/unfollow/:userId").post(verifyJwt, unfollowUser);
-router.route("/get-followers/:userName").get(verifyJwt, getFollowers);
-router.route("/get-following/:userName").get(verifyJwt, getFollowing);
-router.route("/:userName").get(verifyJwt, getUserProfile);
+router.route("/get-followers/:userId").get(verifyJwt, getFollowers);
+router.route("/get-following/:userId").get(verifyJwt, getFollowing);
+
 router.route("/delete-me").delete(verifyJwt, deleteUserProfile);
 
 export default router;

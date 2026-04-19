@@ -50,7 +50,7 @@ const HeartIcon = ({ size = 20, postId }: HeartIconProps) => {
   return (
     <button
       onClick={handleLikeToggle}
-      className="group flex items-center gap-1.5 transition-colors hover:text-red-500"
+      className="group flex cursor-pointer items-center gap-1.5 transition-colors hover:text-red-500"
     >
       <div
         className={cn(
@@ -74,8 +74,8 @@ const HeartIcon = ({ size = 20, postId }: HeartIconProps) => {
       </div>
       <span
         className={cn(
-          "text-xs font-medium",
-          isLiked ? "text-red-500" : "text-muted-foreground",
+          "text-sm font-medium",
+          isLiked ? "text-red-500" : "text-primary",
         )}
       >
         {likesCount > 0 ? likesCount : 0}

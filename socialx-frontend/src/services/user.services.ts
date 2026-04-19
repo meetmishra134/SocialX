@@ -18,8 +18,8 @@ export const userService = {
     const res = await api.get("/users/bookmarks");
     return res.data.data.posts;
   },
-  getUserProfile: async (userName: string) => {
-    const res = await api.get(`/users/${userName}`);
+  getUserProfile: async (userId: string) => {
+    const res = await api.get(`/users/${userId}`);
     return res.data.data.userDetails;
   },
 
@@ -36,12 +36,16 @@ export const userService = {
     const res = await api.post(`/users/unfollow/${userId}`);
     return res.data;
   },
-  getFollowers: async (userName: string) => {
-    const res = await api.get(`users/get-followers/${userName}`);
+  getFollowers: async (userId: string) => {
+    const res = await api.get(`users/get-followers/${userId}`);
     return res.data.data.followers;
   },
-  getFollowing: async (userName: string) => {
-    const res = await api.get(`users/get-following/${userName}`);
+  getFollowing: async (userId: string) => {
+    const res = await api.get(`users/get-following/${userId}`);
     return res.data.data.following;
+  },
+  editUserProfile: async (data: FormData) => {
+    const res = await api.patch("/users/edit-me", data);
+    return res.data.data.user;
   },
 };

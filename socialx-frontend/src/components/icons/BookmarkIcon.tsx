@@ -24,7 +24,7 @@ const BookmarkIcon = ({ postId, size = 20 }: BookmarkIconProps) => {
   return (
     <button
       onClick={handleBookmarkToggle}
-      className={`group flex items-center transition-colors ${
+      className={`group flex cursor-pointer items-center transition-colors ${
         isBookmarked ? "text-foreground" : "text-muted-foreground"
       }`}
     >

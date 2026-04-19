@@ -31,10 +31,15 @@ const DetailedPost = () => {
           <p className="text-muted-foreground">Failed to load post.</p>
         </div>
       )}
-      {post && <PostCard post={post} />}
-      <div className="border-border border-b px-4 py-3">
-        <CommentInput />
-      </div>
+      {post && (
+        <>
+          <PostCard post={post} />
+          <div className="border-border border-b px-4 py-3">
+            <CommentInput />
+          </div>
+        </>
+      )}
+
       {/* Comments List */}
       <div className="mt-4 px-4">
         <Comment />

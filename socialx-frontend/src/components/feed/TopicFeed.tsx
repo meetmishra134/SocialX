@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "../ui/spinner";
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
+import { useSearch } from "@/hooks/useSearch";
 
 const TopicFeed = () => {
   const { topic } = useParams();
   const navigate = useNavigate();
+  const { data: posts, isLoading } = useSearch(topic);
   return (
     <div className="mx-auto max-w-2xl pb-24">
       <div className="bg-background/80 sticky top-0 z-10 flex items-center gap-4 border-b p-2 backdrop-blur-md">

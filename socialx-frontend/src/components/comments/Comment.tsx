@@ -4,38 +4,6 @@ import { useComment } from "@/hooks/useComment";
 import { useParams } from "react-router-dom";
 import { LoaderIcon, MessagesSquareIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-// const comment: CommentType[] = [
-//   {
-//     _id: "1",
-//     author: {
-//       _id: "123",
-//       userName: "John Doe",
-//       fullName: "Johnathan Doe",
-//       avatarUrl: {
-//         url: "https://randomuser.me/api/portraits/men/45.jpg",
-//       },
-//     },
-//     text: "This is a sample comment.",
-//     createdAt: new Date().toISOString(),
-//     likes: ["1", "2", "3", "4", "5"],
-//     updatedAt: new Date().toISOString(),
-//   },
-//   {
-//     _id: "2",
-//     author: {
-//       _id: "234",
-//       userName: "John Doe",
-//       fullName: "Johnathan Doe",
-//       avatarUrl: {
-//         url: "https://randomuser.me/api/portraits/men/45.jpg",
-//       },
-//     },
-//     text: "This is a sample comment.",
-//     createdAt: new Date().toISOString(),
-//     likes: ["1", "2", "3", "4", "5"],
-//     updatedAt: new Date().toISOString(),
-//   },
-// ];
 
 const Comment = () => {
   const { postId } = useParams();
@@ -61,36 +29,50 @@ const Comment = () => {
           <p className="text-muted-foreground ml-2">Failed to load comments.</p>
         </div>
       )}
-      {comments && comments.length > 0 ? (
-        <AnimatePresence>
-          {comments.map((comment: CommentType) => (
-            <motion.div
-              key={comment._id}
-              layout
-              initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, filter: "blur(10px)" }}
-              transition={{ duration: 0.3 }}
-            >
-              <CommentCard comment={comment} />
-            </motion.div>
-          ))}
-          {hasNextPage && (
-            <div className="flex justify-center py-4">
-              <button onClick={() => fetchNextPage()}>
-                {isFetchingNextPage ? "Loading more..." : "Load More Comments"}
-              </button>
-            </div>
-          )}
-        </AnimatePresence>
-      ) : (
-        !isLoading &&
-        !isError && (
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <p className="text-muted-foreground">No comments yet.</p>
+      <AnimatePresence mode="popLayout">
+        {comments && comments.length > 0 ? (
+          <div key="comment-list" className="space-y-4">
+            {comments.map((comment: CommentType) => (
+              <motion.div
+                key={comment._id}
+                layout
+                initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: 20, filter: "blur(10px)" }} // Keeping our slide-out fix!
+                transition={{ duration: 0.3 }}
+              >
+                <CommentCard comment={comment} />
+              </motion.div>
+            ))}
+
+            {hasNextPage && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={() => fetchNextPage()}
+                  className="text-primary hover:underline"
+                >
+                  {isFetchingNextPage
+                    ? "Loading more..."
+                    : "Load More Comments"}
+                </button>
+              </div>
+            )}
           </div>
-        )
-      )}
+        ) : (
+          !isLoading &&
+          !isError && (
+            <motion.div
+              key="empty-state"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex min-h-[50vh] items-center justify-center"
+            >
+              <p className="text-muted-foreground">No comments yet.</p>
+            </motion.div>
+          )
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -21,7 +21,7 @@ router
   .post(verifyJwt, upload.array("files", 4), createPost);
 router.route("/search").get(verifyJwt, searchPostByTopic);
 router.route("/view-post/:postId").get(verifyJwt, viewPost);
-router.route("/:userName").get(verifyJwt, getUserPosts);
+router.route("/:userId").get(verifyJwt, getUserPosts);
 router.route("/bookmark/:postId").post(verifyJwt, toggleBookmark);
 router.route("/delete-post/:postId").delete(verifyJwt, deletePost);
 router.route("/comment/:postId").post(verifyJwt, commentOnPost);

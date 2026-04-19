@@ -27,6 +27,7 @@ import { useDeletePost } from "@/hooks/useDeletePost";
 import { Link, useNavigate } from "react-router-dom";
 import { useComment } from "@/hooks/useComment";
 import TopicChip from "./TopicChip";
+import SharePosts from "./SharePosts";
 
 interface PostCardProps {
   post: Post;
@@ -44,9 +45,15 @@ const PostCard = ({ post }: PostCardProps) => {
   const rawText = post.text || "";
   const trimmedText = rawText.replace(/(<p><br><\/p>)+$/g, "");
   const safeHTML = DOMPurify.sanitize(trimmedText);
+  const postTitle = post.text
+    ? post.text.replace(/<[^>]+>/g, "").slice(0, 100)
+    : "Check out this post on SocialX!";
 
   const handlePostClick = (postId: string) => {
     navigate(`/post/${postId}`);
+  };
+  const handleCommentClick = () => {
+    navigate(`/post/${post._id}`, { state: { autoFocusComment: true } });
   };
   return (
     <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-visible rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
@@ -54,14 +61,14 @@ const PostCard = ({ post }: PostCardProps) => {
         <div className="flex flex-row items-start gap-2.5">
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage
-              src={post.author.avatarUrl}
+              src={post.author.avatarUrl?.url}
               alt={post.author.fullName}
             />
             <AvatarFallback>{post.author.fullName[0]}</AvatarFallback>
           </Avatar>
           <div className="flex min-w-0 flex-col">
             <Link
-              to={`/profile/${post.author.userName}`}
+              to={`/profile/${post.author._id}`}
               className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-1.5"
             >
               <h4 className="hover:decoration-muted-foreground cursor-pointer truncate text-sm font-semibold hover:underline">
@@ -164,20 +171,20 @@ const PostCard = ({ post }: PostCardProps) => {
       </CardContent>
       <div className="flex items-center justify-between px-6 pt-2 pb-1">
         <div className="flex items-center gap-4">
-          {/* <button className="group flex items-center gap-2 transition-colors hover:text-red-500">
-            <div className="flex h-4 w-4 items-center justify-center rounded-full transition-colors group-hover:bg-red-500/10 md:h-8 md:w-8">
-              <HeartIcon size={20} isFilled={false} />
-            </div>
-            <span className="text-sm">2</span>
-          </button> */}
           <HeartIcon postId={post._id} />
 
-          <button className="group flex items-center gap-2 transition-colors hover:text-blue-500">
+          <button
+            className="group flex cursor-pointer items-center gap-2 transition-colors hover:text-blue-500"
+            onClick={handleCommentClick}
+          >
             <div className="flex h-4 w-4 items-center justify-center rounded-full transition-colors group-hover:bg-blue-500/10 md:h-8 md:w-8">
-              <CommentIcon size={20} isFilled={false} />
+              <CommentIcon size={20} />
             </div>
             <span className="text-sm">{comments?.length || 0}</span>
           </button>
+          <div>
+            <SharePosts postId={post._id} postTitle={postTitle} />
+          </div>
         </div>
         <BookmarkIcon postId={post._id} size={20} />
       </div>

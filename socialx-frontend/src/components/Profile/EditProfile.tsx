@@ -13,7 +13,7 @@ const EditProfile = ({ open, setOpen }: EditProfileProps) => {
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
-        <EditProfileForm />
+        <EditProfileForm setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   );

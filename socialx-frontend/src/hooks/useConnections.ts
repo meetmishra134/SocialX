@@ -1,19 +1,19 @@
 import { userService } from "@/services/user.services";
 import { useQuery } from "@tanstack/react-query";
 
-export const useFollowers = (userName: string | undefined) => {
+export const useFollowers = (userId: string | undefined) => {
   return useQuery({
-    queryKey: ["followers", userName],
-    queryFn: () => userService.getFollowers(userName as string),
+    queryKey: ["followers", userId],
+    queryFn: () => userService.getFollowers(userId as string),
     staleTime: 5 * 60 * 1000,
-    enabled: !!userName,
+    enabled: !!userId,
   });
 };
-export const useFollowing = (userName: string | undefined) => {
+export const useFollowing = (userId: string | undefined) => {
   return useQuery({
-    queryKey: ["following", userName],
-    queryFn: () => userService.getFollowing(userName as string),
+    queryKey: ["following", userId],
+    queryFn: () => userService.getFollowing(userId as string),
     staleTime: 5 * 60 * 1000,
-    enabled: !!userName,
+    enabled: !!userId,
   });
 };

@@ -5,22 +5,31 @@ import { SendHorizontal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useForm } from "react-hook-form";
 import { useCreateComment } from "@/hooks/useCreateComment";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const CommentInput = () => {
   const user = useAuth((state) => state.user);
   const { postId } = useParams() as { postId: string };
   const { mutate: createComment, isPending } = useCreateComment();
+  const location = useLocation();
+
   const {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors },
   } = useForm({
     defaultValues: {
       text: "",
     },
   });
+  useEffect(() => {
+    if (location.state?.autoFocusComment) {
+      setFocus("text");
+    }
+  }, [location.state, setFocus]);
   const onSubmit = (data: { text: string }) => {
     createComment(
       { postId, comment: data.text },
@@ -30,7 +39,6 @@ const CommentInput = () => {
         },
       },
     );
-    console.log("Comment submitted:");
   };
   return (
     <div className="flex w-full items-start gap-2">

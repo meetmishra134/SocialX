@@ -11,6 +11,7 @@ type AuthState = {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   clearSession: () => void;
+  updateUser: (updatedUser: User) => void;
 };
 
 export const useAuth = create<AuthState>((set) => ({
@@ -27,6 +28,11 @@ export const useAuth = create<AuthState>((set) => ({
 
     console.log("User logged in:", user);
   },
+  updateUser: (updatedUser) =>
+    set(() => ({
+      user: updatedUser,
+      isAuthenticated: true,
+    })),
 
   logout: async () => {
     try {

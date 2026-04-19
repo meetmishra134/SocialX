@@ -58,7 +58,7 @@ export const router = createBrowserRouter([
             element: <Bookmarks />,
           },
           {
-            path: "profile/:userName",
+            path: "profile/:userId",
             element: <Profile />,
             children: [
               {

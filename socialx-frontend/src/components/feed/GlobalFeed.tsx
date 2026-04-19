@@ -3,10 +3,20 @@ import PostCard from "../posts/PostCard";
 import { motion } from "motion/react";
 import { usePosts } from "@/hooks/usePosts";
 import SkeletonCard from "../posts/SkeletonCard";
+import { ArrowDownIcon, Loader } from "lucide-react";
 
 const GlobalFeed = () => {
-  const { isLoading, isError, data: posts } = usePosts();
-  console.log("Posts in GlobalFeed:", posts);
+  const {
+    isLoading,
+    isError,
+    data,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = usePosts();
+  console.log("GlobalFeed data:", data?.pages);
+  const posts =
+    data?.pages.flatMap((page) => page?.posts || page).filter(Boolean) || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -22,7 +32,27 @@ const GlobalFeed = () => {
           <p className="text-lg capitalize sm:text-xl">Error loading posts.</p>
         </div>
       ) : (
-        posts?.map((post: Post) => <PostCard key={post._id} post={post} />)
+        <>
+          {posts?.map((post: Post) => (
+            <PostCard key={post._id} post={post} />
+          ))}
+
+          <div className="flex w-full justify-center py-6">
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+              >
+                {isFetchingNextPage ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  <ArrowDownIcon className="animate-bounce" />
+                )}
+              </button>
+            )}
+          </div>
+        </>
       )}
     </motion.div>
   );

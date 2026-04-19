@@ -5,12 +5,28 @@ export const postServices = {
     const response = await api.post("/posts/upload-post", postData);
     return response.data.data;
   },
-  getPost: async () => {
-    const response = await api.get("/feed/global");
+  getPost: async ({
+    pageParam = 1,
+    limit = 10,
+  }: {
+    pageParam: number;
+    limit: number;
+  }) => {
+    const response = await api.get(
+      `/feed/global/?page=${pageParam}&limit=${limit}`,
+    );
     return response.data.data.posts;
   },
-  getFollowingPosts: async () => {
-    const res = await api.get("/feed/following");
+  getFollowingPosts: async ({
+    pageParam = 1,
+    limit = 10,
+  }: {
+    pageParam: number;
+    limit: number;
+  }) => {
+    const res = await api.get(
+      `/feed/following/?page=${pageParam}&limit=${limit}`,
+    );
     return res.data.data.posts;
   },
   deletePost: async (postId: string) => {
@@ -35,8 +51,8 @@ export const postServices = {
     const res = await api.post(`/posts/bookmark/${postId}`);
     return res.data;
   },
-  getUserPosts: async (userName: string) => {
-    const res = await api.get(`/posts/${userName}`);
+  getUserPosts: async (userId: string) => {
+    const res = await api.get(`/posts/${userId}`);
     return res.data.data.posts;
   },
 };

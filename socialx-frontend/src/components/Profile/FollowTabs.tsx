@@ -7,7 +7,7 @@ const FollowTabs = () => {
   const activeTab = location.pathname.includes("following")
     ? "following"
     : "followers";
-  const { userName } = useParams();
+  const { userId } = useParams();
 
   return (
     <div className="flex h-screen flex-col">
@@ -16,14 +16,14 @@ const FollowTabs = () => {
           <TabsTrigger
             value="followers"
             className="cursor-pointer"
-            onClick={() => navigate(`/profile/${userName}/followers`)}
+            onClick={() => navigate(`/profile/${userId}/followers`)}
           >
             Followers
           </TabsTrigger>
           <TabsTrigger
             value="following"
             className="cursor-pointer"
-            onClick={() => navigate(`/profile/${userName}/following`)}
+            onClick={() => navigate(`/profile/${userId}/following`)}
           >
             Following
           </TabsTrigger>

@@ -56,7 +56,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
           />
           <NavItems
             name="Profile"
-            path={`/profile/${user?.userName}`}
+            path={`/profile/${user?._id}`}
             icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
           />
         </ul>

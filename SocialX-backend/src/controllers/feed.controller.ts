@@ -20,9 +20,19 @@ const globalFeed = asyncHandler(async (req: Request, res: Response) => {
   if (posts.length === 0) {
     throw new ApiError(404, "Posts not found for global feed");
   }
+
+  const totalPosts = await Post.countDocuments();
+  const hasMore = skip + posts.length < totalPosts;
+
   return res
     .status(200)
-    .json(new ApiResponse(200, { posts }, "Global feed fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { posts, hasMore, nextPage: hasMore ? page + 1 : null },
+        "Global feed fetched successfully",
+      ),
+    );
 });
 //following feed
 const followingFeed = asyncHandler(async (req: Request, res: Response) => {
@@ -38,10 +48,18 @@ const followingFeed = asyncHandler(async (req: Request, res: Response) => {
   if (posts.length === 0) {
     throw new ApiError(404, "Posts not found for following feed");
   }
+  const totalPosts = await Post.countDocuments({
+    author: { $in: req.user.following },
+  });
+  const hasMore = skip + posts.length < totalPosts;
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { posts }, "Following feed fetched successfully"),
+      new ApiResponse(
+        200,
+        { posts, hasMore, nextPage: hasMore ? page + 1 : null },
+        "Following feed fetched successfully",
+      ),
     );
 });
 

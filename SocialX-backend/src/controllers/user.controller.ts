@@ -6,13 +6,14 @@ import { ApiResponse } from "../utils/api.response";
 import { updateMeInput, updateMeSchema } from "../validators/user.validator";
 import { Post } from "../models/post.model";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
+import fs from "fs/promises";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-  const { userName } = req.params;
+  const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
 
-  const user = await User.findOne({ userName });
+  const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(403, "User does not exist");
   }
@@ -54,35 +55,51 @@ const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
   if (bio) {
     updateData.bio = bio;
   }
-  if (file) {
-    const uploadResult = await uploadToCloudinary(file.path, {
-      folder: "profiles",
-      publicId: `user-${loggedInUserId}`,
-    });
-    updateData.avatarUrl = {
-      url: uploadResult.secure_url,
-    };
-  }
-  if (Object.keys(updateData).length === 0) {
+  if (Object.keys(updateData).length === 0 && !file) {
     throw new ApiError(400, "Nothing to update");
   }
-  const validateData = updateMeSchema.parse(updateData);
-  const updatedUser = await User.findByIdAndUpdate(
-    loggedInUserId,
-    {
-      $set: validateData,
-    },
-    { new: true },
-  );
-  if (!updatedUser) {
-    throw new ApiError(404, "user not found");
+  let validateData = updateMeSchema.partial().parse(updateData);
+  if (file) {
+    try {
+      const uploadResult = await uploadToCloudinary(file.path, {
+        folder: "socialx/profile_pictures",
+        publicId: `user-${loggedInUserId}`,
+      });
+      validateData.avatarUrl = {
+        url: uploadResult.secure_url,
+      };
+      await fs.unlink(file.path).catch(() => {});
+    } catch (err) {
+      await fs.unlink(file.path).catch(() => {});
+      throw new ApiError(500, "Error uploading avatar");
+    }
   }
+
+  await User.findByIdAndUpdate(loggedInUserId, validateData, {
+    new: true,
+  });
+  const user = await User.findById(loggedInUserId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  const userDetails = {
+    _id: user._id,
+    userName: user.userName,
+    fullName: user.fullName,
+    avatarUrl: user.avatarUrl?.url || "",
+    bio: user.bio,
+    followersCount: user.followers.length,
+    followingCount: user.following.length,
+    isOwnProfile: true,
+    isFollowing: false,
+    isEmailVerified: user.isEmailVerified,
+  };
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { updatedUser: updatedUser },
+        { user: userDetails },
         "Details updated successfully",
       ),
     );
@@ -197,9 +214,9 @@ const unfollowUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getFollowers = asyncHandler(async (req: Request, res: Response) => {
-  const { userName } = req.params;
+  const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
-  const user = await User.findOne({ userName })
+  const user = await User.findById(userId)
     .populate("followers", "userName fullName avatarUrl")
     .select("followers");
   if (!user) {
@@ -235,9 +252,9 @@ const getFollowers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getFollowing = asyncHandler(async (req: Request, res: Response) => {
-  const { userName } = req.params;
+  const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
-  const user = await User.findOne({ userName })
+  const user = await User.findById(userId)
     .select("following")
     .populate("following", "userName fullName avatarUrl");
   if (!user) {

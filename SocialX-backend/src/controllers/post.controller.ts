@@ -90,12 +90,8 @@ const viewPost = asyncHandler(async (req: Request, res: Response) => {
 
 //* View all posts
 const getUserPosts = asyncHandler(async (req: Request, res: Response) => {
-  const { userName } = req.params;
-  const user = await User.findOne({ userName });
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-  const posts = await Post.find({ author: user._id })
+  const { userId } = req.params;
+  const posts = await Post.find({ author: userId })
     .sort({ createdAt: -1 })
     .populate("author", "userName fullName avatarUrl");
 

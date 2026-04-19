@@ -1,11 +1,11 @@
 import { userService } from "@/services/user.services";
 import { useQuery } from "@tanstack/react-query";
 
-export const useProfileData = (userName: string | undefined) => {
+export const useProfileData = (userId: string) => {
   return useQuery({
-    queryKey: ["profile", userName],
-    queryFn: () => userService.getUserProfile(userName as string),
-    enabled: !!userName,
+    queryKey: ["profile", userId],
+    queryFn: () => userService.getUserProfile(userId as string),
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 2 * 60 * 1000,
   });

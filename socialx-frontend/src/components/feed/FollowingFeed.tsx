@@ -3,64 +3,24 @@ import PostCard from "../posts/PostCard";
 import { motion } from "motion/react";
 import { useFollowingPosts } from "@/hooks/useFollwingPosts";
 import SkeletonCard from "../posts/SkeletonCard";
-// const followingFeed: Post[] = [
-//   {
-//     _id: "post1",
-//     author: {
-//       id: "user1",
-//       fullName: "John Doe",
-//       userName: "JohnDoe123",
-//       avatarUrl: "https://example.com/avatar.jpg",
-//     },
-//     text: "This is a sample post.",
-//     createdAt: "2023-01-01T00:00:00Z",
-//     images: [
-//       {
-//         url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
-//       },
-//     ],
-//     likes: [],
-//   },
-//   {
-//     _id: "post2",
-//     author: {
-//       id: "user2",
-//       fullName: "Jane Smith",
-//       userName: "JaneSmith123",
-//       avatarUrl: "https://example.com/avatar2.jpg",
-//     },
-//     text: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-//     createdAt: "2023-01-01T00:00:00Z",
-//     images: [],
-//     likes: [],
-//   },
-//   {
-//     _id: "post3",
-//     author: {
-//       id: "user3",
-//       fullName: "Bob Johnson",
-//       userName: "BobJohnson123",
-//       avatarUrl: "https://example.com/avatar3.jpg",
-//     },
-//     images: [
-//       {
-//         url: "https://images.pexels.com/photos/5596132/pexels-photo-5596132.jpeg",
-//       },
-//       {
-//         url: "https://images.pexels.com/photos/34302384/pexels-photo-34302384.jpeg",
-//       },
-//     ],
-//     createdAt: "2023-01-01T00:00:00Z",
-//     likes: [],
-//   },
-// ];
+import { ArrowDownIcon, Loader } from "lucide-react";
 
 const FollowingFeed = () => {
-  const { isError, data: posts, isLoading } = useFollowingPosts();
+  const {
+    isError,
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useFollowingPosts();
+  const posts =
+    data?.pages.flatMap((page) => page?.posts || page).filter(Boolean) || [];
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
       className="flex flex-col gap-4 p-4"
     >
@@ -71,7 +31,27 @@ const FollowingFeed = () => {
           <p className="text-lg capitalize sm:text-xl">Error loading posts.</p>
         </div>
       ) : (
-        posts?.map((post: Post) => <PostCard key={post._id} post={post} />)
+        <>
+          {posts?.map((post: Post) => (
+            <PostCard key={post._id} post={post} />
+          ))}
+
+          <div className="flex w-full justify-center py-6">
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+              >
+                {isFetchingNextPage ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  <ArrowDownIcon className="animate-bounce" />
+                )}
+              </button>
+            )}
+          </div>
+        </>
       )}
     </motion.div>
   );
