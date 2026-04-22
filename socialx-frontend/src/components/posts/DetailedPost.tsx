@@ -4,9 +4,12 @@ import PostCard from "./PostCard";
 import { ArrowLeft, Loader } from "lucide-react";
 import CommentInput from "../comments/CommentInput";
 import Comment from "../comments/Comment";
+import { useLikeSync } from "@/hooks/useLikeSync";
 
 const DetailedPost = () => {
+  useLikeSync();
   const { postId } = useParams();
+
   const { data: post, isLoading, error } = useSinglePost(postId);
 
   const navigate = useNavigate();

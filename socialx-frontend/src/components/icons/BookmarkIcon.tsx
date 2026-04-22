@@ -1,5 +1,5 @@
 import { useAddBookmark } from "@/hooks/useAddBookmark";
-import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/store/authStore";
 
 interface BookmarkIconProps {
   postId: string;
@@ -8,12 +8,9 @@ interface BookmarkIconProps {
 
 const BookmarkIcon = ({ postId, size = 20 }: BookmarkIconProps) => {
   const { mutate } = useAddBookmark(postId);
+  const user = useAuth((state) => state.user);
 
-  const { data: isBookmarked = false } = useQuery<boolean>({
-    queryKey: ["bookmark", postId],
-    staleTime: Infinity,
-    enabled: false,
-  });
+  const isBookmarked = user?.bookmarks?.includes(postId) ?? false;
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +36,6 @@ const BookmarkIcon = ({ postId, size = 20 }: BookmarkIconProps) => {
           strokeWidth={isBookmarked ? "0" : "2"}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="lucide lucide-bookmark-icon lucide-bookmark"
         >
           <path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z" />
         </svg>

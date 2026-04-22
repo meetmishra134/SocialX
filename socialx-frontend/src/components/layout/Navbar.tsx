@@ -1,4 +1,4 @@
-import { Bookmark, SquarePenIcon } from "lucide-react";
+import { Bookmark, MessageCircleMore, SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
@@ -29,7 +29,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
         <img
           src="../../../images/SocialXLogo.png"
           alt="SocialX"
-          className="h-8 w-auto lg:h-10"
+          className="h-10 w-auto lg:h-12"
         />
         <h1 className="hidden text-2xl font-bold lg:block">SocialX</h1>
       </Link>
@@ -59,6 +59,13 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             path={`/profile/${user?._id}`}
             icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
           />
+          <NavItems
+            name="Notifications"
+            path="/notifications"
+            icon={(isActive) => (
+              <MessageCircleMore fill={isActive ? "currentColor" : "none"} />
+            )}
+          />
         </ul>
       </div>
 
@@ -69,7 +76,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
         >
           <span className="hidden lg:inline">Post</span>
           <span className="lg:hidden">
-            <SquarePenIcon size={35} />
+            <SquarePenIcon size={40} />
           </span>
         </Button>
       </div>

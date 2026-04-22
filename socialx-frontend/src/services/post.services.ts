@@ -15,7 +15,7 @@ export const postServices = {
     const response = await api.get(
       `/feed/global/?page=${pageParam}&limit=${limit}`,
     );
-    return response.data.data.posts;
+    return response.data.data;
   },
   getFollowingPosts: async ({
     pageParam = 1,

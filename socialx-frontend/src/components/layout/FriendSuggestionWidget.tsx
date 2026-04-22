@@ -36,7 +36,7 @@ const FriendSuggestionWidget = () => {
               className="flex items-center justify-between gap-2"
             >
               <Link
-                to={`/profile/${friend.userName}`}
+                to={`/profile/${friend._id}`}
                 className="flex items-center gap-2 overflow-hidden transition-opacity hover:opacity-80"
               >
                 <img

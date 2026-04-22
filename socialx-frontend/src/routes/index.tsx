@@ -17,6 +17,7 @@ import ResetPassword from "@/components/auth/ResetPassword";
 import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
 import DetailedPost from "@/components/posts/DetailedPost";
 import TopicFeed from "@/components/feed/TopicFeed";
+import Notifications from "@/components/notifications/Notifications";
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
             element: <Bookmarks />,
           },
           {
+            path: "/notifications",
+            element: <Notifications />,
+          },
+          {
             path: "profile/:userId",
             element: <Profile />,
             children: [
@@ -88,6 +93,7 @@ export const router = createBrowserRouter([
     path: "/register",
     element: <RegisterForm />,
   },
+
   {
     path: "/verify-email",
     element: <VerifyEmail />,

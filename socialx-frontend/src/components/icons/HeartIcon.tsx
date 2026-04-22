@@ -1,61 +1,28 @@
+import { useLike } from "@/hooks/useLike";
 import { cn } from "@/lib/utils";
-import { postServices } from "@/services/post.services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import type { Post } from "@/types/post.types";
 
 interface HeartIconProps {
-  postId: string;
+  post: Post;
   size?: number;
+  currentUserId: string;
 }
 
-const HeartIcon = ({ size = 20, postId }: HeartIconProps) => {
-  const queryClient = useQueryClient();
-
-  const { data: isLiked = false } = useQuery<boolean>({
-    queryKey: ["like", postId],
-    staleTime: Infinity,
-    enabled: false,
-  });
-
-  const { data: likesCount = 0 } = useQuery<number>({
-    queryKey: ["likesCount", postId], //
-    staleTime: Infinity,
-    enabled: false, //
-  });
-
-  const { mutate } = useMutation({
-    mutationFn: () => postServices.toggleLike(postId),
-    onMutate: () => {
-      queryClient.setQueryData(["like", postId], !isLiked);
-      queryClient.setQueryData(
-        ["likesCount", postId],
-        isLiked ? likesCount - 1 : likesCount + 1,
-      );
-    },
-    onError: () => {
-      queryClient.setQueryData(["like", postId], isLiked);
-      queryClient.setQueryData(["likesCount", postId], likesCount);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["GlobalFeed"] });
-      queryClient.invalidateQueries({ queryKey: ["SinglePost", postId] });
-    },
-  });
-
-  const handleLikeToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    mutate();
-  };
-
+const HeartIcon = ({ size = 20, post, currentUserId }: HeartIconProps) => {
+  const { mutate: toggleLike, isPending } = useLike();
+  const isLiked = post.likes?.includes(currentUserId) || false;
+  const likesCount = post.likes?.length || 0;
   return (
     <button
-      onClick={handleLikeToggle}
+      onClick={() => toggleLike(post._id)}
+      disabled={isPending}
       className="group flex cursor-pointer items-center gap-1.5 transition-colors hover:text-red-500"
     >
       <div
         className={cn(
           "rounded-full p-1.5 transition-colors group-hover:bg-red-500/10",
-          isLiked && "text-red-500",
+          isLiked ? "text-red-500" : "text-primary",
         )}
       >
         <svg
@@ -78,7 +45,7 @@ const HeartIcon = ({ size = 20, postId }: HeartIconProps) => {
           isLiked ? "text-red-500" : "text-primary",
         )}
       >
-        {likesCount > 0 ? likesCount : 0}
+        {likesCount}
       </span>
     </button>
   );

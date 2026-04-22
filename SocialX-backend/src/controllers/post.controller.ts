@@ -9,6 +9,7 @@ import fs from "fs/promises";
 import { UploadApiResponse } from "cloudinary";
 import cloudinary from "../server";
 import { User } from "../models/user.model";
+import { io } from "../app";
 
 //* Create a post (Text || Image)
 const createPost = asyncHandler(async (req: Request, res: Response) => {
@@ -158,13 +159,16 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
       { new: true, select: "likes" },
     );
   }
-
-  return res.status(200).json(
-    new ApiResponse(200, {
-      likesCount: updatedPost?.likes.length,
-      isLiked: !post,
-    }),
-  );
+  const payload = {
+    postId,
+    likes: updatedPost?.likes,
+  };
+  io.emit("like_updated", payload);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, payload, "Post like status updated successfully"),
+    );
 });
 
 //* Comment on a post
@@ -184,6 +188,7 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
     text: comment,
   });
   await comments.save();
+
   return res
     .status(201)
     .json(new ApiResponse(201, { comments }, "Comment added successfully"));

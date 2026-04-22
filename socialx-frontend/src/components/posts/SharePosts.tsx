@@ -43,7 +43,7 @@ const SharePosts = ({ postId, postTitle }: ShareButtonProps) => {
       {copied ? (
         <Check className="h-5 w-5 text-green-500" />
       ) : (
-        <Share2 className="h-5 w-5" size={20} />
+        <Share2 className="h-5 w-5" size={19} />
       )}
     </button>
   );

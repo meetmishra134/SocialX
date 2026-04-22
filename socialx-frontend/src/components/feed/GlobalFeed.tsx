@@ -4,8 +4,10 @@ import { motion } from "motion/react";
 import { usePosts } from "@/hooks/usePosts";
 import SkeletonCard from "../posts/SkeletonCard";
 import { ArrowDownIcon, Loader } from "lucide-react";
+import { useLikeSync } from "@/hooks/useLikeSync";
 
 const GlobalFeed = () => {
+  useLikeSync();
   const {
     isLoading,
     isError,
@@ -14,9 +16,12 @@ const GlobalFeed = () => {
     hasNextPage,
     fetchNextPage,
   } = usePosts();
-  console.log("GlobalFeed data:", data?.pages);
+  console.log("pages[0]:", data?.pages[0]);
+  // console.log("posts:", posts);
   const posts =
-    data?.pages.flatMap((page) => page?.posts || page).filter(Boolean) || [];
+    data?.pages
+      .flatMap((page) => (Array.isArray(page) ? page : (page?.posts ?? [])))
+      .filter((post): post is Post => !!post?._id) ?? [];
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}

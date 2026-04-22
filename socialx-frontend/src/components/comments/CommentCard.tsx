@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { Heart, MoreHorizontal, Trash2 } from "lucide-react";
 import type { CommentType } from "@/types/comment.types";
 import { useDeleteComment } from "@/hooks/useDeleteComment";
+import { useAuth } from "@/store/authStore";
 
 interface CommentCardProps {
   comment: CommentType;
@@ -17,7 +18,8 @@ interface CommentCardProps {
 
 const CommentCard = ({ comment }: CommentCardProps) => {
   const { mutate: deleteComment } = useDeleteComment(comment._id);
-  const isMyComment = true; // Replace with actual logic to check if it's the user's comment
+  const user = useAuth((state) => state.user);
+  const isMyComment = user?._id === comment.author._id;
   return (
     <div className="group flex gap-3 py-4">
       <Avatar className="mt-0.5 h-8 w-8 shrink-0 sm:h-10 sm:w-10">

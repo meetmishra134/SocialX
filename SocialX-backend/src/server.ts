@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 
 import connectDatabase from "./config/database";
-import app from "./app";
+import { httpServer } from "./app";
 
 dotenv.config({
   path: "./.env",
@@ -13,15 +13,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
 export default cloudinary;
-const port = process.env.PORT || 3000;
-
-// app.get("/", (req: Request, res: Response) => {
-//   res.send("Hello SocialX");
-// });
+const port = process.env.PORT || 8000;
 
 connectDatabase()
   .then(() => {
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Server is running on port  http://localhost:${port}`);
     });
   })

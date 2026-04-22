@@ -4,8 +4,10 @@ import { Spinner } from "../ui/spinner";
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
 import { useSearch } from "@/hooks/useSearch";
+import { useLikeSync } from "@/hooks/useLikeSync";
 
 const TopicFeed = () => {
+  useLikeSync();
   const { topic } = useParams();
   const navigate = useNavigate();
   const { data: posts, isLoading } = useSearch(topic);

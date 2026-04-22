@@ -53,7 +53,6 @@ const FollowButton = ({
             : updatedData.followingCount - 1;
         }
 
-        // Scenario B: Update THEIR followers count (if you happen to be looking at their profile)
         if (updatedData._id === userId) {
           updatedData.followersCount = newState
             ? updatedData.followersCount + 1
