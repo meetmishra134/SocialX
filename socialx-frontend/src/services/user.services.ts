@@ -48,4 +48,12 @@ export const userService = {
     const res = await api.patch("/users/edit-me", data);
     return res.data.data.user;
   },
+  getUserNotification: async () => {
+    const res = await api.get("/users/notifications");
+    return res.data.data.notifications;
+  },
+  markNotificationRead: async () => {
+    const res = await api.post("/users/mark-notification-read");
+    return res.data;
+  },
 };

@@ -6,7 +6,9 @@ import {
   getBookmarkedPosts,
   getFollowers,
   getFollowing,
+  getUserNotifications,
   getUserProfile,
+  markNotificationRead,
   unfollowUser,
   userDiscoveryList,
 } from "../controllers/user.controller";
@@ -18,6 +20,8 @@ router.route("/bookmarks").get(verifyJwt, getBookmarkedPosts);
 router
   .route("/edit-me")
   .patch(verifyJwt, upload.single("avatar"), editUserProfile);
+router.route("/notifications").get(verifyJwt, getUserNotifications);
+router.route("/mark-notification-read").post(verifyJwt, markNotificationRead);
 router.route("/discovery").get(verifyJwt, userDiscoveryList);
 router.route("/:userId").get(verifyJwt, getUserProfile);
 router.route("/follow/:userId").post(verifyJwt, followUser);

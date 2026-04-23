@@ -9,7 +9,7 @@ import fs from "fs/promises";
 import { UploadApiResponse } from "cloudinary";
 import cloudinary from "../server";
 import { User } from "../models/user.model";
-import { io } from "../app";
+import { Notification } from "../models/notification.model";
 
 //* Create a post (Text || Image)
 const createPost = asyncHandler(async (req: Request, res: Response) => {
@@ -141,12 +141,14 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
 const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const { postId } = req.params;
-  const post = await Post.findOne(
-    { _id: postId, likes: loggedInUserId },
-    { _id: 1 },
-  );
+  const post = await Post.findById(postId).select("likes author");
+  if (!post) {
+    return res.status(404).json(new ApiResponse(404, null, "Post not found"));
+  }
+  const userIdString = loggedInUserId.toString();
+  const hasLiked = post.likes.some((id) => id.toString() === userIdString);
   let updatedPost;
-  if (post) {
+  if (hasLiked) {
     updatedPost = await Post.findByIdAndUpdate(
       postId,
       { $pull: { likes: loggedInUserId } },
@@ -156,14 +158,27 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
     updatedPost = await Post.findByIdAndUpdate(
       postId,
       { $addToSet: { likes: loggedInUserId } },
-      { new: true, select: "likes" },
+      { new: true, select: "likes author" },
     );
   }
+  const authorIdString = updatedPost?.author?.toString();
+  if (authorIdString && authorIdString !== userIdString && !hasLiked) {
+    const notification = await Notification.create({
+      recipient: updatedPost.author,
+      sender: loggedInUserId,
+      type: "like",
+      post: postId,
+    });
+    await notification.populate("sender", "userName avatarUrl fullName");
+    globalThis.io.to(authorIdString).emit("new_notification", notification);
+  }
+
   const payload = {
     postId,
-    likes: updatedPost?.likes,
+    likes: updatedPost?.likes || [],
   };
-  io.emit("like_updated", payload);
+  globalThis.io.emit("like_updated", payload);
+
   return res
     .status(200)
     .json(
@@ -187,8 +202,20 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
     post: postId,
     text: comment,
   });
-  await comments.save();
 
+  if (post.author.toString() !== loggedInUserId.toString()) {
+    const notification = await Notification.create({
+      recipient: post.author,
+      sender: loggedInUserId,
+      type: "comment",
+      post: post._id,
+      isRead: false,
+    });
+    await notification.populate("sender", "userName avatarUrl fullName");
+    globalThis.io
+      .to(post.author.toString())
+      .emit("new_notification", notification);
+  }
   return res
     .status(201)
     .json(new ApiResponse(201, { comments }, "Comment added successfully"));

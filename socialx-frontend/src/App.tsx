@@ -4,26 +4,23 @@ import { Toaster } from "./components/ui/sonner";
 import { useAuth } from "./store/authStore";
 import { useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-const queryClient = new QueryClient();
+import { useSocketNotification } from "./hooks/useSocketNotification";
 
 const App = () => {
   const checkAuth = useAuth((state) => state.checkAuth);
-
+  useSocketNotification();
   useEffect(() => {
     checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <RouterProvider router={router} />
-        <Toaster />
-      </GoogleOAuthProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <RouterProvider router={router} />
+      <Toaster />
       <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 };
 

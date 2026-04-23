@@ -11,6 +11,10 @@ import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import path from "path";
 
+declare global {
+  var io: Server;
+}
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -18,6 +22,18 @@ const io = new Server(httpServer, {
     origin: process.env.CORS_ORIGIN?.split(",") || "http://localhost:5173",
     credentials: true,
   },
+});
+globalThis.io = io;
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join_own_room", (userId: string) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their personal room: `);
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
 });
 
 app.use(express.json({ limit: "16kb" }));

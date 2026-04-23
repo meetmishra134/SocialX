@@ -1,4 +1,4 @@
-import { Bookmark, MessageCircleMore, SquarePenIcon } from "lucide-react";
+import { BellRing, Bookmark, SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
@@ -55,16 +55,16 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             )}
           />
           <NavItems
-            name="Profile"
-            path={`/profile/${user?._id}`}
-            icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
-          />
-          <NavItems
             name="Notifications"
             path="/notifications"
             icon={(isActive) => (
-              <MessageCircleMore fill={isActive ? "currentColor" : "none"} />
+              <BellRing fill={isActive ? "currentColor" : "none"} />
             )}
+          />
+          <NavItems
+            name="Profile"
+            path={`/profile/${user?._id}`}
+            icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
           />
         </ul>
       </div>

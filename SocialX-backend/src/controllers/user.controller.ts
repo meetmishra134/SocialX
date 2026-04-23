@@ -7,6 +7,7 @@ import { updateMeInput, updateMeSchema } from "../validators/user.validator";
 import { Post } from "../models/post.model";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 import fs from "fs/promises";
+import { Notification } from "../models/notification.model";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -184,6 +185,15 @@ const followUser = asyncHandler(async (req: Request, res: Response) => {
   await User.findByIdAndUpdate(userId, {
     $addToSet: { followers: loggedInUserId },
   });
+  if (userToFollow.isEmailVerified) {
+    const notification = await Notification.create({
+      recipient: userId,
+      sender: loggedInUserId,
+      type: "follow",
+    });
+    await notification.populate("sender", "userName avatarUrl");
+    globalThis.io.to(userId).emit("new_notification", notification);
+  }
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "You are now following this user"));
@@ -303,6 +313,41 @@ const getBookmarkedPosts = asyncHandler(async (req: Request, res: Response) => {
       new ApiResponse(200, { posts }, "Bookmarked posts fetched successfully"),
     );
 });
+const getUserNotifications = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { _id: loggedInUserId } = req.user;
+    const notifications = await Notification.find({
+      recipient: loggedInUserId,
+    })
+      .populate("sender", "userName avatarUrl fullName")
+      .populate("post", "text")
+      .sort({ createdAt: -1 })
+      .limit(20);
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { notifications },
+          "Notifications fetched successfully",
+        ),
+      );
+  },
+);
+const markNotificationRead = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { _id: loggedInUserId } = req.user;
+    await Notification.updateMany(
+      { recipient: loggedInUserId, isRead: false },
+      { $set: { isRead: true } },
+    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, null, "Notifications marked as read successfully"),
+      );
+  },
+);
 
 export {
   editUserProfile,
@@ -314,4 +359,6 @@ export {
   getFollowing,
   getBookmarkedPosts,
   userDiscoveryList,
+  getUserNotifications,
+  markNotificationRead,
 };
