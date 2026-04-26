@@ -2,12 +2,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProfileData } from "@/hooks/useProfileData";
-import { ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useGetUserPosts } from "@/hooks/getUserPosts";
 import PostCard from "../posts/PostCard";
 import type { Post } from "@/types/post.types";
 import FollowButton from "../connect/FollowButton";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/store/authStore";
+import { Skeleton } from "../ui/skeleton";
 
 //     _id: "post1",
 //     author: {
@@ -58,12 +60,12 @@ interface ProfileLayoutProps {
 }
 
 const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
+  const openVerifyPopup = useAuth((state) => state.openVerifyPopup);
   const { userId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: profile } = useProfileData(userId as string);
+  const { data: profile, isFetching } = useProfileData(userId as string);
   const { data: posts, isError, isLoading } = useGetUserPosts(userId as string);
-  // console.log("Profile Data:", profile);
   const handleOptimisticStats = (userId: string, isNowFollowing: boolean) => {
     queryClient.setQueryData(["profile", userId], (oldData: any) => {
       if (!oldData) return oldData;
@@ -77,7 +79,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
   };
   return (
     <div>
-      <div className="bg-background/80 sticky top-0 z-50 flex items-center gap-4 border-b p-2 backdrop-blur-md">
+      <div className="bg-background/80 sticky top-0 z-50 flex items-center gap-2 border-b p-2 backdrop-blur-md">
         <button
           onClick={() => navigate(-1)}
           className="hover:bg-muted cursor-pointer rounded-full p-2 transition-colors"
@@ -86,7 +88,6 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         </button>
         <div className="flex flex-col">
           <h1 className="flex items-center gap-1 text-xl font-bold">
-            {" "}
             {profile?.fullName}
           </h1>
           <span className="text-muted-foreground text-sm">
@@ -95,27 +96,59 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         </div>
       </div>
       <div className="bg-muted/70 relative h-50 w-full">
-        <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-4 z-10 h-28 w-28 border-2 ring-2">
-          <AvatarImage
-            src={profile?.avatarUrl}
-            alt="Profile Picture"
-            referrerPolicy="no-referrer"
-          />
-          <AvatarFallback>
-            {profile?.fullName
-              ?.split(" ")
-              .map((n: string) => n[0])
-              .join("")}
-          </AvatarFallback>
-        </Avatar>
+        {isFetching ? (
+          <Skeleton className="border-muted/40 absolute -bottom-12 left-2 h-25 w-25 rounded-full border-2" />
+        ) : (
+          <Avatar className="border-muted/40 ring-ring absolute -bottom-12 left-2 z-10 h-25 w-25 border-2 ring-2">
+            <AvatarImage
+              src={profile?.avatarUrl}
+              alt="Profile Picture"
+              referrerPolicy="no-referrer"
+            />
+            <AvatarFallback>
+              {profile?.fullName
+                ?.split(" ")
+                .map((n: string) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+        )}
       </div>
-      <div className="relative border-b border-neutral-700 px-6 pt-14 pb-2">
+      <div className="relative border-b border-neutral-700 px-4 pt-14 pb-2">
         <div>
-          <h2 className="text-lg font-bold">{profile?.fullName}</h2>
-          <p className="text-muted-foreground text-sm">@{profile?.userName}</p>
-          <p className="mt-2 text-[0.9rem] leading-relaxed">
-            {profile?.bio || "This user hasn't added a bio yet."}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-bold">
+              {isFetching ? (
+                <Skeleton className="h-3 w-35" />
+              ) : (
+                profile?.fullName
+              )}
+            </h2>
+
+            {profile?.isEmailVerified ? (
+              <span className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-500">
+                <CheckCircle2 className="h-5 w-5 fill-blue-500/10 text-blue-500" />
+                Email Verified
+              </span>
+            ) : profile?.isOwnProfile ? (
+              <button
+                className="flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5 text-[10px] font-medium text-yellow-600 transition-colors hover:bg-yellow-500/20 dark:text-yellow-400"
+                onClick={() => openVerifyPopup()}
+              >
+                <AlertCircle className="h-3 w-3" />
+                Verify Email
+              </button>
+            ) : null}
+          </div>
+
+          {isFetching ? (
+            <Skeleton className="mt-2 h-3 w-25" />
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              @{profile?.userName}
+            </p>
+          )}
+          <p className="mt-2 text-[0.9rem] leading-relaxed"></p>
         </div>
         <div className="absolute top-0 right-2">
           {profile?.isOwnProfile ? (

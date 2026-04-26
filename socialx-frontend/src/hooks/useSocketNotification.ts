@@ -20,6 +20,10 @@ export const useSocketNotification = () => {
         message = `💬${notification.sender?.fullName} commented on your post.`;
       } else if (notification.type === "follow") {
         message = `${notification.sender?.fullName} started following you.`;
+        queryClient.invalidateQueries({ queryKey: ["followers"] });
+        queryClient.invalidateQueries({ queryKey: ["profile", user._id] });
+      } else if (notification.type === "likeComment") {
+        message = `❤️${notification.sender?.fullName} liked your comment.`;
       }
       if (message) {
         toast(message, { position: "top-right" });

@@ -55,4 +55,8 @@ export const postServices = {
     const res = await api.get(`/posts/${userId}`);
     return res.data.data.posts;
   },
+  toggleCommentLike: async (commentId: string) => {
+    const res = await api.post(`/posts/like-comment/${commentId}`);
+    return res.data;
+  },
 };

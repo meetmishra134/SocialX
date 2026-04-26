@@ -26,6 +26,7 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
     fullName: user.fullName,
     avatarUrl: user.avatarUrl?.url || "",
     bio: user.bio,
+    isEmailVerified: user.isEmailVerified,
     followersCount: user.followers.length,
     followingCount: user.following.length,
     isOwnProfile: isOwnProfile,
@@ -191,7 +192,7 @@ const followUser = asyncHandler(async (req: Request, res: Response) => {
       sender: loggedInUserId,
       type: "follow",
     });
-    await notification.populate("sender", "userName avatarUrl");
+    await notification.populate("sender", "userName avatarUrl fullName");
     globalThis.io.to(userId).emit("new_notification", notification);
   }
   return res
@@ -218,6 +219,12 @@ const unfollowUser = asyncHandler(async (req: Request, res: Response) => {
   await User.findByIdAndUpdate(userId, {
     $pull: { followers: loggedInUserId },
   });
+  await Notification.deleteMany({
+    recipient: userId,
+    sender: loggedInUserId,
+    type: "follow",
+  });
+
   return res
     .status(200)
     .json(new ApiResponse(200, "You have unfollowed this user"));

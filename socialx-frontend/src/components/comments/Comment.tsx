@@ -4,9 +4,11 @@ import { useComment } from "@/hooks/useComment";
 import { useParams } from "react-router-dom";
 import { LoaderIcon, MessagesSquareIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useCommentLikeSync } from "@/hooks/useCommentLikeSync";
 
 const Comment = () => {
   const { postId } = useParams();
+  useCommentLikeSync(postId as string);
   const {
     data,
     hasNextPage,

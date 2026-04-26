@@ -4,14 +4,22 @@ import { toast } from "sonner";
 
 export const useDeletePost = () => {
   const queryclient = useQueryClient();
+
   return useMutation({
     mutationFn: postServices.deletePost,
-    onSuccess: () => {
-      toast.success("Post deleted successfully", { position: "top-center" });
+    onSuccess: (data) => {
+      const successMessage = data?.message || "Post deleted successfully";
+      toast.success(successMessage, { position: "top-center" });
       queryclient.invalidateQueries({ queryKey: ["GlobalFeed"] });
+      queryclient.invalidateQueries({ queryKey: ["userPosts"] });
     },
-    onError: () => {
-      toast.error("Failed to delete post", { position: "top-center" });
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data.error ||
+        error?.message ||
+        "An error occurred while deleting post.";
+      toast.error(errorMessage, { position: "top-center" });
     },
   });
 };

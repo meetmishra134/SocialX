@@ -11,6 +11,7 @@ import { Heart, MoreHorizontal, Trash2 } from "lucide-react";
 import type { CommentType } from "@/types/comment.types";
 import { useDeleteComment } from "@/hooks/useDeleteComment";
 import { useAuth } from "@/store/authStore";
+import { useLike } from "@/hooks/useLike";
 
 interface CommentCardProps {
   comment: CommentType;
@@ -18,8 +19,11 @@ interface CommentCardProps {
 
 const CommentCard = ({ comment }: CommentCardProps) => {
   const { mutate: deleteComment } = useDeleteComment(comment._id);
+  const { toogleCommentLike, isCommentLikePending } = useLike();
   const user = useAuth((state) => state.user);
   const isMyComment = user?._id === comment.author._id;
+  const isLiked = comment.likes?.includes(user?._id as string) || false;
+  const likesCount = comment.likes?.length || 0;
   return (
     <div className="group flex gap-3 py-4">
       <Avatar className="mt-0.5 h-8 w-8 shrink-0 sm:h-10 sm:w-10">
@@ -74,12 +78,32 @@ const CommentCard = ({ comment }: CommentCardProps) => {
         </span>
 
         <div className="mt-2 flex gap-4">
-          <button className="group/like text-muted-foreground flex items-center gap-1.5 transition-colors hover:text-red-500">
-            <div className="rounded-full p-1 transition-colors group-hover/like:bg-red-500/10">
-              <Heart className="h-4 w-4" />
+          <button
+            onClick={() => toogleCommentLike(comment._id)}
+            disabled={isCommentLikePending}
+            className={`group flex cursor-pointer items-center gap-1 transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+              isLiked
+                ? "text-red-500"
+                : "text-muted-foreground hover:text-red-500"
+            }`}
+          >
+            <div
+              className={`flex items-center justify-center rounded-full p-1.5 transition-colors duration-200 ${
+                isLiked
+                  ? "bg-red-500/10 text-red-500"
+                  : "text-muted-foreground group-hover:bg-red-500/10 group-hover:text-red-500"
+              }`}
+            >
+              <Heart
+                className="h-4 w-4 transition-transform active:scale-75"
+                fill={isLiked ? "currentColor" : "none"}
+                strokeWidth={isLiked ? 0 : 2}
+              />
             </div>
 
-            <span className="text-xs font-medium">1</span>
+            <span className="pr-2 text-xs font-medium tabular-nums">
+              {likesCount > 0 ? likesCount : ""}
+            </span>
           </button>
         </div>
       </div>

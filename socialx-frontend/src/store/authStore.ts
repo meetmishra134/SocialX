@@ -10,6 +10,9 @@ type AuthState = {
   login: (user: User) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  isVerifyPopupOpen: boolean;
+  openVerifyPopup: () => void;
+  closeVerifyPopup: () => void;
   clearSession: () => void;
   updateUser: (updatedUser: User) => void;
 };
@@ -64,4 +67,7 @@ export const useAuth = create<AuthState>((set) => ({
       console.error("Authentication check failed:", error);
     }
   },
+  isVerifyPopupOpen: false,
+  openVerifyPopup: () => set({ isVerifyPopupOpen: true }),
+  closeVerifyPopup: () => set({ isVerifyPopupOpen: false }),
 }));

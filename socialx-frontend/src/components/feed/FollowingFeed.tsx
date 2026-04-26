@@ -30,7 +30,9 @@ const FollowingFeed = () => {
         [1, 2, 3].map((index) => <SkeletonCard key={index} />)
       ) : isError ? (
         <div className="flex min-h-[80vh] items-center justify-center">
-          <p className="text-lg capitalize sm:text-xl">Error loading posts.</p>
+          <p className="text-center text-lg capitalize sm:text-xl">
+            Seems like you don't follow anyone or something went wrong.
+          </p>
         </div>
       ) : (
         <>

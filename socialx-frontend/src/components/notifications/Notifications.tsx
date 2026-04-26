@@ -1,4 +1,10 @@
-import { Heart, MessageCircle, CheckCheck, BellRingIcon } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  CheckCheck,
+  BellRingIcon,
+  Loader,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRelativeTime } from "@/lib/relativeTime";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -33,86 +39,94 @@ export default function NotificationsMenu() {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-20">
-        <div className="mt-2 flex flex-col gap-1 px-2 sm:px-4">
-          {isLoading && (
-            <p className="text-muted-foreground p-4 text-center text-sm">
-              Loading...
-            </p>
-          )}
-
-          {notifications?.map((notif: Notification) => {
-            const plainText = notif.post?.text?.replace(/<[^>]+>/g, "") || "";
-
-            return (
-              <div
-                key={notif._id}
-                className={`hover:bg-muted/50 flex items-start gap-4 rounded-xl bg-transparent p-3 transition-colors`}
-              >
-                <div className="relative mt-1">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={notif.sender.avatarUrl?.url} />
-                    <AvatarFallback>{notif.sender.fullName[0]}</AvatarFallback>
-                  </Avatar>
-
-                  <div
-                    className={`border-background absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 text-white ${
-                      notif.type === "like" ? "bg-red-500" : "bg-blue-500"
-                    }`}
-                  >
-                    {notif.type === "like" ? (
-                      <Heart className="h-2.5 w-2.5 fill-current" />
-                    ) : (
-                      <MessageCircle className="h-2.5 w-2.5 fill-current" />
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-1 flex-col gap-1 text-sm">
-                  <p className="text-foreground leading-snug">
-                    <span className="font-semibold">
-                      {notif.sender.fullName}
-                    </span>{" "}
-                    <span className="text-muted-foreground">
-                      {notif.type === "like"
-                        ? "liked your post"
-                        : "commented on your post"}
-                    </span>
-                  </p>
-
-                  {plainText && (
-                    <p className="border-muted text-muted-foreground line-clamp-1 border-l-2 text-xs">
-                      "{plainText}"
-                    </p>
-                  )}
-
-                  <span className="text-muted-foreground/80 mt-0.5 text-[11px]">
-                    {getRelativeTime(notif.createdAt)}
-                  </span>
-                </div>
-
-                {!notif.isRead && (
-                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
-                )}
-              </div>
-            );
-          })}
-
-          {!isLoading && notifications?.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-muted/50 text-muted-foreground flex h-16 w-16 items-center justify-center rounded-full">
-                <BellRingIcon className="h-8 w-8 opacity-50" />
-              </div>
-              <p className="text-foreground mt-4 text-lg font-medium">
-                Nothing to see here yet
-              </p>
-              <p className="text-muted-foreground text-sm">
-                When someone interacts with you, you'll see it here.
-              </p>
-            </div>
-          )}
+      {isLoading ? (
+        <div className="flex min-h-[70vh] animate-spin items-center justify-center">
+          <Loader className="text-muted-foreground h-8 w-8" />
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pb-20">
+          <div className="mt-2 flex flex-col gap-1 px-2 sm:px-4">
+            {notifications?.map((notif: Notification) => {
+              const plainText = notif.post?.text?.replace(/<[^>]+>/g, "") || "";
+
+              return (
+                <div
+                  key={notif._id}
+                  className={`hover:bg-muted/50 flex items-start gap-4 rounded-xl bg-transparent p-3 transition-colors`}
+                >
+                  <div className="relative mt-1">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={notif.sender.avatarUrl?.url} />
+                      <AvatarFallback>
+                        {notif.sender.fullName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div
+                      className={`border-background absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 text-white ${
+                        notif.type === "like" || notif.type === "likeComment"
+                          ? "bg-red-500"
+                          : "bg-blue-500"
+                      }`}
+                    >
+                      {notif.type === "like" || notif.type === "likeComment" ? (
+                        <Heart className="h-2.5 w-2.5 fill-current" />
+                      ) : (
+                        <MessageCircle className="h-2.5 w-2.5 fill-current" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-1 text-sm">
+                    <p className="text-foreground leading-snug">
+                      <span className="font-semibold">
+                        {notif.sender.fullName}
+                      </span>{" "}
+                      <span className="text-muted-foreground">
+                        {notif.type === "like"
+                          ? "liked your post"
+                          : notif.type === "comment"
+                            ? "commented on your post"
+                            : notif.type === "follow"
+                              ? "started following you"
+                              : "liked your comment"}
+                      </span>
+                    </p>
+
+                    {plainText && (
+                      <p className="border-muted text-muted-foreground line-clamp-1 border-l-2 text-xs">
+                        "{plainText}"
+                      </p>
+                    )}
+
+                    <span className="text-muted-foreground/80 mt-0.5 text-[11px]">
+                      {getRelativeTime(notif.createdAt)}
+                    </span>
+                  </div>
+
+                  {!notif.isRead && (
+                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                  )}
+                </div>
+              );
+            })}
+
+            {!isLoading && notifications?.length === 0 && (
+              <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
+                <div className="bg-muted/50 text-muted-foreground flex h-16 w-16 items-center justify-center rounded-full">
+                  <BellRingIcon className="h-8 w-8 opacity-50" />
+                </div>
+                <p className="text-foreground mt-4 text-lg font-medium">
+                  Nothing to see here yet
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  When someone interacts with you, you'll see it here.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -41,7 +41,7 @@ interface PostCardProps {
 const PostCard = ({ post }: PostCardProps) => {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const user = useAuth((state) => state.user);
+  const { user, openVerifyPopup } = useAuth();
   const { mutate: deletePost } = useDeletePost();
   const hasMultipleImages = (post?.images?.length ?? 0) > 1;
   const { data } = useComment(post._id);
@@ -198,7 +198,9 @@ const PostCard = ({ post }: PostCardProps) => {
 
             <button
               className="group flex cursor-pointer items-center gap-2 transition-colors hover:text-blue-500"
-              onClick={handleCommentClick}
+              onClick={
+                user?.isEmailVerified ? handleCommentClick : openVerifyPopup
+              }
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors group-hover:bg-blue-500/10">
                 <CommentIcon size={20} />

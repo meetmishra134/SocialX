@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader } from "lucide-react";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import type { UserCardType } from "@/types/user.types";
@@ -10,9 +9,9 @@ const FriendSuggestionWidget = () => {
 
   if (isLoading || isRefetching) {
     return (
-      <Card className="flex w-76 items-center justify-center p-4 shadow-md">
-        <Loader className="text-muted-foreground animate-spin" />
-      </Card>
+      <div className="bg-card flex h-32 w-full max-w-[350px] items-center justify-center rounded-2xl border">
+        <Loader className="text-muted-foreground animate-spin" size={24} />
+      </div>
     );
   }
 
@@ -21,61 +20,55 @@ const FriendSuggestionWidget = () => {
   }
 
   return (
-    <Card className="border-border w-76 overflow-hidden shadow-md">
-      <CardHeader className="bg-muted/30 border-b p-3">
-        <CardTitle className="text-muted-foreground text-center text-sm font-bold tracking-wider uppercase">
-          Discover new friends
-        </CardTitle>
-      </CardHeader>
+    <div className="bg-card w-full max-w-[350px] rounded-2xl border py-1">
+      <h2 className="text-foreground px-4 py-3 text-center text-lg font-extrabold">
+        Who to follow
+      </h2>
 
-      <CardContent className="p-3">
-        <div className="flex flex-col gap-4">
-          {friendsSuggestion.slice(0, 3).map((friend: UserCardType) => (
-            <div
-              key={friend._id}
-              className="flex items-center justify-between gap-2"
-            >
-              <Link
-                to={`/profile/${friend._id}`}
-                className="flex items-center gap-2 overflow-hidden transition-opacity hover:opacity-80"
-              >
-                <img
-                  src={friend.avatarUrl?.url || "/default-avatar.png"}
-                  alt={friend.fullName}
-                  className="h-10 w-10 shrink-0 rounded-full border object-cover"
-                />
-
-                <div className="flex flex-col truncate">
-                  <span className="truncate text-sm font-semibold hover:underline">
-                    {friend.fullName}
-                  </span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    @{friend.userName}
-                  </span>
-                </div>
-              </Link>
-
-              <div className="shrink-0">
-                <FollowButton
-                  userId={friend._id}
-                  initialIsFollowing={friend.isFollowing}
-                  followsMe={friend.followsMe}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 text-center">
-          <Link
-            to="/connect"
-            className="text-primary text-xs font-semibold hover:underline"
+      <div className="flex flex-col">
+        {friendsSuggestion.slice(0, 3).map((friend: UserCardType) => (
+          <div
+            key={friend._id}
+            className="hover:bg-muted/50 flex items-center justify-between px-4 py-3 transition-colors"
           >
-            View all suggestions →
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+            <Link
+              to={`/profile/${friend._id}`}
+              className="flex min-w-0 flex-1 items-center gap-3"
+            >
+              <img
+                src={friend.avatarUrl?.url || "/default-avatar.png"}
+                alt={friend.fullName}
+                className="bg-muted h-10 w-10 shrink-0 rounded-full object-cover"
+              />
+
+              <div className="flex min-w-0 flex-col">
+                <span className="text-foreground truncate text-[15px] leading-tight font-bold hover:underline">
+                  {friend.fullName}
+                </span>
+                <span className="text-muted-foreground truncate text-[15px] leading-tight">
+                  @{friend.userName}
+                </span>
+              </div>
+            </Link>
+
+            <div className="ml-3 shrink-0">
+              <FollowButton
+                userId={friend._id}
+                initialIsFollowing={friend.isFollowing}
+                followsMe={friend.followsMe}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Link
+        to="/connect"
+        className="text-primary hover:bg-muted/50 block rounded-b-2xl px-4 py-4 text-center text-[15px] font-normal transition-colors"
+      >
+        Show more
+      </Link>
+    </div>
   );
 };
 

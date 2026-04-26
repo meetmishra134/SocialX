@@ -14,6 +14,7 @@ import {
 } from "../controllers/user.controller";
 import { verifyJwt } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/multer";
+import { requireVerification } from "../middlewares/requireVerification";
 
 const router = Router();
 router.route("/bookmarks").get(verifyJwt, getBookmarkedPosts);
@@ -24,7 +25,9 @@ router.route("/notifications").get(verifyJwt, getUserNotifications);
 router.route("/mark-notification-read").post(verifyJwt, markNotificationRead);
 router.route("/discovery").get(verifyJwt, userDiscoveryList);
 router.route("/:userId").get(verifyJwt, getUserProfile);
-router.route("/follow/:userId").post(verifyJwt, followUser);
+router
+  .route("/follow/:userId")
+  .post(verifyJwt, requireVerification, followUser);
 router.route("/unfollow/:userId").post(verifyJwt, unfollowUser);
 router.route("/get-followers/:userId").get(verifyJwt, getFollowers);
 router.route("/get-following/:userId").get(verifyJwt, getFollowing);

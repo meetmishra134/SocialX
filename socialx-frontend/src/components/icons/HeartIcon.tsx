@@ -1,6 +1,6 @@
 import { useLike } from "@/hooks/useLike";
 import { cn } from "@/lib/utils";
-
+import { motion } from "motion/react";
 import type { Post } from "@/types/post.types";
 
 interface HeartIconProps {
@@ -10,11 +10,14 @@ interface HeartIconProps {
 }
 
 const HeartIcon = ({ size = 20, post, currentUserId }: HeartIconProps) => {
-  const { mutate: toggleLike, isPending } = useLike();
+  const { toggleLike, isPending } = useLike();
   const isLiked = post.likes?.includes(currentUserId) || false;
   const likesCount = post.likes?.length || 0;
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 300 }}
       onClick={() => toggleLike(post._id)}
       disabled={isPending}
       className="group flex cursor-pointer items-center gap-1.5 transition-colors hover:text-red-500"
@@ -47,7 +50,7 @@ const HeartIcon = ({ size = 20, post, currentUserId }: HeartIconProps) => {
       >
         {likesCount}
       </span>
-    </button>
+    </motion.button>
   );
 };
 

@@ -9,7 +9,7 @@ export const NotificationSchema = z.object({
     avatarUrl: z.object({ url: z.string() }).optional(),
   }),
   recipient: z.string(),
-  type: z.enum(["like", "comment", "follow"]),
+  type: z.enum(["like", "comment", "follow", "likeComment"]),
   post: z.object({ _id: z.string(), text: z.string() }).optional(),
   isRead: z.boolean(),
   createdAt: z.string(),

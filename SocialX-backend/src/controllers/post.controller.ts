@@ -143,7 +143,7 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const post = await Post.findById(postId).select("likes author");
   if (!post) {
-    return res.status(404).json(new ApiResponse(404, null, "Post not found"));
+    throw new ApiError(404, "Post not found");
   }
   const userIdString = loggedInUserId.toString();
   const hasLiked = post.likes.some((id) => id.toString() === userIdString);
@@ -154,6 +154,12 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
       { $pull: { likes: loggedInUserId } },
       { new: true, select: "likes" },
     );
+    await Notification.deleteMany({
+      recipient: post.author.toString(),
+      sender: loggedInUserId,
+      type: "like",
+      post: postId,
+    });
   } else {
     updatedPost = await Post.findByIdAndUpdate(
       postId,
@@ -236,7 +242,9 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
     _id: commentId,
     author: loggedInUserId,
   });
-  res.status(200).json(new ApiResponse(200, "Comment deleted successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, "Comment deleted successfully"));
 });
 
 //* View comment on a post
@@ -297,6 +305,62 @@ const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
+const likeDislikeComment = asyncHandler(async (req: Request, res: Response) => {
+  const { _id: loggedInUserId } = req.user;
+  const { commentId } = req.params;
+  const comment = await Comment.findById(commentId).select("likes author post");
+  if (!comment) {
+    throw new ApiError(404, "Comment not found");
+  }
+  const userIdString = loggedInUserId.toString();
+  const hasLiked = comment.likes.some((id) => id.toString() === userIdString);
+  let updatedComment;
+  if (hasLiked) {
+    updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        $pull: { likes: loggedInUserId },
+      },
+      { new: true, select: "likes" },
+    );
+    await Notification.deleteMany({
+      recipient: comment.author.toString(),
+      sender: loggedInUserId,
+      type: "likeComment",
+      post: comment.post,
+    });
+  } else {
+    updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        $addToSet: { likes: loggedInUserId },
+      },
+      { new: true, select: "likes author post" },
+    );
+  }
+  const authorIdString = updatedComment?.author?.toString();
+  if (authorIdString && authorIdString !== userIdString && !hasLiked) {
+    const notification = await Notification.create({
+      recipient: updatedComment?.author,
+      sender: loggedInUserId,
+      type: "likeComment",
+      post: comment.post,
+    });
+    await notification.populate("sender", "userName avatarUrl fullName");
+    globalThis.io.to(authorIdString).emit("new_notification", notification);
+  }
+  const payload = {
+    postId: comment.post.toString(),
+    commentId,
+    likes: updatedComment?.likes || [],
+  };
+  globalThis.io.emit("comment_like_updated", payload);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, payload, "Comment like status updated successfully"),
+    );
+});
 
 export {
   createPost,
@@ -309,4 +373,5 @@ export {
   getUserPosts,
   toggleBookmark,
   searchPostByTopic,
+  likeDislikeComment,
 };

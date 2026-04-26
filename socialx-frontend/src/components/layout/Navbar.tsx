@@ -5,7 +5,6 @@ import { Button } from "../ui/button";
 
 import HomeIcon from "../icons/HomeIcon";
 import UsersIcon from "../icons/UsersIcon";
-
 import UserIcon from "../icons/UserIcon";
 import UserMenu from "../ui/UserMenu";
 import { useAuth } from "@/store/authStore";
@@ -16,15 +15,17 @@ interface NavbarProps {
 
 const Navbar = ({ onOpenPost }: NavbarProps) => {
   const location = useLocation();
-  const user = useAuth((state) => state.user);
+  const { user, openVerifyPopup } = useAuth();
+
   const isHomeActive =
     location.pathname.startsWith("/feed/foryou") ||
     location.pathname.startsWith("/feed/following");
+
   return (
-    <nav className="flex h-full w-full flex-col items-center py-4 lg:items-start lg:p-4">
+    <nav className="flex h-full w-full flex-col items-center py-2 lg:items-start lg:px-4">
       <Link
         to="/feed/foryou"
-        className="flex w-full items-center justify-center gap-2 lg:justify-start lg:px-8"
+        className="mb-2 flex w-fit items-center gap-2 rounded-full p-2.5"
       >
         <img
           src="../../../images/SocialXLogo.png"
@@ -34,53 +35,54 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
         <h1 className="hidden text-2xl font-bold lg:block">SocialX</h1>
       </Link>
 
-      <div className="w-full">
-        <ul className="mt-6 flex flex-col gap-4 px-2 lg:px-4">
+      <div className="flex w-full flex-1 flex-col items-center lg:items-start">
+        <ul className="flex w-full flex-col items-center gap-1 lg:items-start">
           <NavItems
             name="Home"
             path="/feed/foryou"
-            icon={(isActive) => <HomeIcon isFilled={isActive} size={25} />}
+            icon={(isActive) => <HomeIcon isFilled={isActive} size={27} />}
             forceActive={isHomeActive}
           />
           <NavItems
             name="Connect"
             path="/connect"
-            icon={(isActive) => <UsersIcon isFilled={isActive} size={25} />}
+            icon={(isActive) => <UsersIcon isFilled={isActive} size={27} />}
           />
           <NavItems
             name="Bookmarks"
             path="/bookmarks"
             icon={(isActive) => (
-              <Bookmark size={25} fill={isActive ? "currentColor" : "none"} />
+              <Bookmark size={27} fill={isActive ? "currentColor" : "none"} />
             )}
           />
           <NavItems
             name="Notifications"
             path="/notifications"
             icon={(isActive) => (
-              <BellRing fill={isActive ? "currentColor" : "none"} />
+              <BellRing size={27} fill={isActive ? "currentColor" : "none"} />
             )}
           />
           <NavItems
             name="Profile"
             path={`/profile/${user?._id}`}
-            icon={(isActive) => <UserIcon isFilled={isActive} size={25} />}
+            icon={(isActive) => <UserIcon isFilled={isActive} size={27} />}
           />
         </ul>
-      </div>
 
-      <div className="mt-4 w-full px-2 lg:px-4">
         <Button
-          className="w-full cursor-pointer rounded-full font-bold"
-          onClick={onOpenPost}
+          className="mt-4 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full lg:h-10 lg:w-[90%] lg:justify-center"
+          onClick={user?.isEmailVerified ? onOpenPost : openVerifyPopup}
         >
-          <span className="hidden lg:inline">Post</span>
+          <span className="hidden text-lg font-bold lg:inline">Post</span>
           <span className="lg:hidden">
-            <SquarePenIcon size={40} />
+            <SquarePenIcon size={24} />
           </span>
         </Button>
       </div>
-      <UserMenu />
+
+      <div className="mt-auto w-full pb-4">
+        <UserMenu />
+      </div>
     </nav>
   );
 };
@@ -100,10 +102,10 @@ const NavItems = ({ name, path, icon, forceActive }: NavItemsProps) => {
         const actuallyActive =
           forceActive !== undefined ? forceActive : isActive;
 
-        return `hover:bg-muted flex cursor-pointer items-start justify-center gap-3 rounded-full p-3 lg:justify-start lg:px-4 lg:py-2 ${
+        return `group flex w-fit items-center gap-5 rounded-full p-3 transition-colors ${
           actuallyActive
-            ? "text-foreground bg-muted/50 font-semibold"
-            : "text-foreground"
+            ? "bg-muted text-foreground font-bold" // Active state stands out more
+            : "text-foreground hover:bg-muted/60"
         }`;
       }}
     >
@@ -113,8 +115,13 @@ const NavItems = ({ name, path, icon, forceActive }: NavItemsProps) => {
 
         return (
           <>
-            {icon(actuallyActive)}
-            <span className="hidden text-xl lg:block">{name}</span>
+            <div className="flex items-center justify-center transition-transform group-hover:scale-105">
+              {icon(actuallyActive)}
+            </div>
+
+            <span className="hidden text-[1.25rem] lg:block lg:pr-4">
+              {name}
+            </span>
           </>
         );
       }}

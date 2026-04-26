@@ -16,20 +16,20 @@ const BookmarksPage = () => {
 
         <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-xs">
           <Lock className="h-3.5 w-3.5" />
-          <span>Only you can see what you've saved</span>
+          <span className="text-sm">Only you can see what you've saved</span>
         </div>
       </div>
 
       <div className="flex flex-col">
         {posts?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-4 py-32 text-center">
+          <div className="flex flex-col items-center justify-center px-4 py-40 text-center">
             <div className="bg-muted mb-6 flex h-20 w-20 items-center justify-center rounded-full">
               <BookmarkX className="text-muted-foreground h-10 w-10 opacity-50" />
             </div>
             <h3 className="mb-2 text-xl font-semibold">No bookmarks yet</h3>
             <p className="text-muted-foreground mb-8 max-w-sm">
-              Don't lose track of great posts. When you see something you want
-              to remember, tap the bookmark icon to save it here.
+              When you see something you want to remember, tap the bookmark icon
+              to save it here.
             </p>
             <Button
               asChild

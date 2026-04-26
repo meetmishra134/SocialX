@@ -4,6 +4,7 @@ import { userService } from "@/services/user.services";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/store/authStore";
 
 interface FollowButtonProps {
   userId: string;
@@ -19,6 +20,7 @@ const FollowButton = ({
   followsMe,
   className,
 }: FollowButtonProps) => {
+  const { user, openVerifyPopup } = useAuth();
   const queryClient = useQueryClient();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isHovered, setIsHovered] = useState(false);
@@ -91,7 +93,7 @@ const FollowButton = ({
         "w-28 cursor-pointer transition-all duration-200 ease-in-out",
         className,
       )}
-      onClick={handleFollowToggle}
+      onClick={user?.isEmailVerified ? handleFollowToggle : openVerifyPopup}
       variant={buttonVariant}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

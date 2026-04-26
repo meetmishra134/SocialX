@@ -49,15 +49,15 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   user.emailVerificationToken = hashedToken;
   user.emailVerificationExpiry = tokenExpiry;
   await user.save({ validateBeforeSave: false });
-  await sendEmail({
-    email: user?.email,
-    subject: "Verify your email",
-    mailgenContent: () =>
-      emailVerificationMailGenContent(
-        user.userName,
-        `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
-      ),
-  });
+  // await sendEmail({
+  //   email: user?.email,
+  //   subject: "Verify your email",
+  //   mailgenContent: () =>
+  //     emailVerificationMailGenContent(
+  //       user.userName,
+  //       `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
+  //     ),
+  // });
   const createdUser = await User.findById(user._id).select(
     "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry",
   );

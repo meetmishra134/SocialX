@@ -52,7 +52,6 @@ const VerifyEmail = () => {
           {status === "Verifying" && (
             <>
               <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
-                {/* animate-spin makes the icon rotate continuously */}
                 <Loader2 className="text-primary h-8 w-8 animate-spin" />
               </div>
               <CardTitle className="text-2xl font-bold">
