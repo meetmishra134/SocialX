@@ -1,5 +1,23 @@
 import { z } from "zod";
-
+export interface Comments {
+  _id: string;
+  author: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+  likes: string[];
+  post: string;
+}
+export interface PaginatedComments {
+  comments: Comments[];
+  hasMore: boolean;
+  nextPage: number | null;
+}
+export interface PaginatedPosts {
+  posts: Post[];
+  hasMore: boolean;
+  nextPage: number | null;
+}
 export const PostSchema = z.object({
   _id: z.string(),
   author: z.object({

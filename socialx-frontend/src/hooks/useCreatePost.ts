@@ -12,12 +12,22 @@ export const useCreatePost = () => {
       queryClient.invalidateQueries({ queryKey: ["GlobalFeed"] });
       queryClient.invalidateQueries({ queryKey: ["userPosts"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+            error?: string;
+          };
+        };
+        message?: string;
+      };
+
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.response?.data.error ||
-        error?.message ||
-        "Failed to create post.";
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "An error occurred while adding the comment.";
       toast.error(errorMessage, {
         position: "top-center",
       });

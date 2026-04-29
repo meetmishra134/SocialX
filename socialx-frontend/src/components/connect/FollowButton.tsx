@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/store/authStore";
+import type { UserProfile } from "@/types/user.types";
 
 interface FollowButtonProps {
   userId: string;
@@ -44,25 +45,28 @@ const FollowButton = ({
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["discover-users"] });
 
-      queryClient.setQueriesData({ queryKey: ["profile"] }, (oldData: any) => {
-        if (!oldData) return oldData;
+      queryClient.setQueriesData(
+        { queryKey: ["profile"] },
+        (oldData: UserProfile) => {
+          if (!oldData) return oldData;
 
-        const updatedData = { ...oldData };
+          const updatedData = { ...oldData };
 
-        if (updatedData.isOwnProfile) {
-          updatedData.followingCount = newState
-            ? updatedData.followingCount + 1
-            : updatedData.followingCount - 1;
-        }
+          if (updatedData.isOwnProfile) {
+            updatedData.followingCount = newState
+              ? updatedData.followingCount + 1
+              : updatedData.followingCount - 1;
+          }
 
-        if (updatedData._id === userId) {
-          updatedData.followersCount = newState
-            ? updatedData.followersCount + 1
-            : updatedData.followersCount - 1;
-        }
+          if (updatedData._id === userId) {
+            updatedData.followersCount = newState
+              ? updatedData.followersCount + 1
+              : updatedData.followersCount - 1;
+          }
 
-        return updatedData;
-      });
+          return updatedData;
+        },
+      );
       if (onSuccess) onSuccess(userId, newState);
     } catch (error) {
       setIsFollowing(previousState);

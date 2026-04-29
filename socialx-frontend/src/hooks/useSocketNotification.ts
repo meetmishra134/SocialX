@@ -26,7 +26,7 @@ export const useSocketNotification = () => {
         message = `❤️${notification.sender?.fullName} liked your comment.`;
       }
       if (message) {
-        toast(message, { position: "top-right" });
+        toast(message, { position: "top-center" });
       }
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });

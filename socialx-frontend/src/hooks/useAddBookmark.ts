@@ -1,6 +1,7 @@
 import { postServices } from "@/services/post.services";
 import { useAuth } from "@/store/authStore";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useAddBookmark = (postId: string) => {
   const user = useAuth((state) => state.user);
@@ -17,6 +18,9 @@ export const useAddBookmark = (postId: string) => {
         bookmarks: isBookmarked
           ? user.bookmarks!.filter((id) => id !== postId)
           : [...(user.bookmarks || []), postId],
+      });
+      toast.success(isBookmarked ? "Bookmark removed" : "Bookmark added", {
+        position: "top-center",
       });
     },
 

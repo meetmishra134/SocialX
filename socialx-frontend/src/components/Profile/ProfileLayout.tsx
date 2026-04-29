@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/store/authStore";
 import { Skeleton } from "../ui/skeleton";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import type { UserProfile } from "@/types/user.types";
 
 //     _id: "post1",
 //     author: {
@@ -68,7 +69,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
   const { data: profile, isFetching } = useProfileData(userId as string);
   const { data: posts, isError, isLoading } = useGetUserPosts(userId as string);
   const handleOptimisticStats = (userId: string, isNowFollowing: boolean) => {
-    queryClient.setQueryData(["profile", userId], (oldData: any) => {
+    queryClient.setQueryData(["profile", userId], (oldData: UserProfile) => {
       if (!oldData) return oldData;
       return {
         ...oldData,

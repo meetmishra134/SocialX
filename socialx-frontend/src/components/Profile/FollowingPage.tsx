@@ -1,4 +1,4 @@
-import type { UserCardType } from "@/types/user.types";
+import type { Following, UserCardType } from "@/types/user.types";
 import UserCard from "../connect/UserCard";
 
 import { useFollowing } from "@/hooks/useConnections";
@@ -14,10 +14,13 @@ const FollowingPage = () => {
   const handleFollow = (userId: string, isNowFollowing: boolean) => {
     if (!isNowFollowing) {
       setTimeout(() => {
-        queryclient.setQueryData(["following", userId], (oldData: any) => {
-          if (!oldData) return [];
-          return oldData.filter((user) => user._id !== userId);
-        });
+        queryclient.setQueryData(
+          ["following", userId],
+          (oldData: Following[]) => {
+            if (!oldData) return [];
+            return oldData.filter((user) => user._id !== userId);
+          },
+        );
       }, 2000);
     }
   };

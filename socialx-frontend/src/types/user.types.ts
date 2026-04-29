@@ -1,4 +1,5 @@
 import z from "zod";
+
 export interface User {
   _id: string;
   fullName: string;
@@ -12,6 +13,39 @@ export interface User {
   avatarUrl?: { url: string };
   createdAt: string;
   updatedAt: string;
+}
+export interface UserProfile {
+  _id: string;
+  fullName: string;
+  userName: string;
+  bio?: string;
+  avatarUrl?: string;
+  isEmailVerified: boolean;
+  followersCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+  followsMe: boolean;
+  isOwnProfile: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface Followers {
+  _id: string;
+  fullName: string;
+  userName: string;
+  avatarUrl?: { url: string };
+  isFollowing: boolean;
+  followsMe: boolean;
+  isOwnProfile: boolean;
+}
+export interface Following {
+  _id: string;
+  fullName: string;
+  userName: string;
+  avatarUrl?: { url: string };
+  isFollowing: boolean;
+  followsMe: boolean;
+  isOwnProfile: boolean;
 }
 export const userCardSchema = z.object({
   _id: z.string(),

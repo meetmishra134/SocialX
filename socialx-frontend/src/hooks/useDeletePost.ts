@@ -13,13 +13,25 @@ export const useDeletePost = () => {
       queryclient.invalidateQueries({ queryKey: ["GlobalFeed"] });
       queryclient.invalidateQueries({ queryKey: ["userPosts"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+            error?: string;
+          };
+        };
+        message?: string;
+      };
+
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.response?.data.error ||
-        error?.message ||
-        "An error occurred while deleting post.";
-      toast.error(errorMessage, { position: "top-center" });
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "An error occurred while adding the comment.";
+      toast.error(errorMessage, {
+        position: "top-center",
+      });
     },
   });
 };

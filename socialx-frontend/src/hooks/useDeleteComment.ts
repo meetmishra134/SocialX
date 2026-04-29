@@ -11,14 +11,27 @@ export const useDeleteComment = (commentId: string) => {
         data?.data?.message || data?.message || "Comment deletedd successfully";
       toast.success(successMessage, { position: "top-center" });
       queryClient.invalidateQueries({ queryKey: ["Comments"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+            error?: string;
+          };
+        };
+        message?: string;
+      };
+
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.response?.data.error ||
-        error?.message ||
-        "An error occurred while deleting the comment.";
-      toast.error(errorMessage, { position: "top-center" });
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "An error occurred while adding the comment.";
+      toast.error(errorMessage, {
+        position: "top-center",
+      });
     },
   });
 };

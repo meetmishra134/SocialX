@@ -215,6 +215,7 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
       sender: loggedInUserId,
       type: "comment",
       post: post._id,
+      comment: comments._id,
       isRead: false,
     });
     await notification.populate("sender", "userName avatarUrl fullName");
@@ -238,14 +239,15 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
   if (comment.author.toString() !== loggedInUserId.toString()) {
     throw new ApiError(403, "Unauthorized to delete this comment");
   }
+  await Notification.findOneAndDelete({
+    comment: commentId,
+    type: "comment",
+  });
   await Comment.findOneAndDelete({
     _id: commentId,
     author: loggedInUserId,
   });
-  await Notification.deleteMany({
-    recipient: comment.author.toString(),
-    sender: loggedInUserId.toHexString(),
-  });
+
   res
     .status(200)
     .json(new ApiResponse(200, null, "Comment deleted successfully"));

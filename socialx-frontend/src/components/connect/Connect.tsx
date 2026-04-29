@@ -12,7 +12,7 @@ const Connect = () => {
   useDocumentTitle("Connect");
   const handleFollowSuccess = (userId: string) => {
     setTimeout(() => {
-      queryClient.setQueryData(["discover-users"], (oldUsers: any[]) => {
+      queryClient.setQueryData(["discover-users"], (oldUsers: UserCardType[]) => {
         if (!oldUsers) return [];
         return oldUsers.filter((user) => user._id !== userId);
       });
