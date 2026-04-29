@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const FeedTab = () => {
   const location = useLocation();
@@ -7,6 +8,7 @@ const FeedTab = () => {
   const currentTab = location.pathname.includes("following")
     ? "following"
     : "foryou";
+  useDocumentTitle("Home");
   return (
     <div className="flex h-screen flex-col">
       <Tabs defaultValue={currentTab} className="flex h-full flex-col">

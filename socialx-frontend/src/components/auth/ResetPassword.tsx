@@ -13,6 +13,7 @@ import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const ResetPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,6 +29,7 @@ const ResetPassword = () => {
   } = useForm<UserResetForgotPasswordData>({
     resolver: zodResolver(userResetForgotPasswordValidator),
   });
+  useDocumentTitle("Reset Password");
   const onSubmit = async (data: UserResetForgotPasswordData) => {
     try {
       setIsSubmitting(true);

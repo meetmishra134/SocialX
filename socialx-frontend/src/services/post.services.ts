@@ -59,4 +59,8 @@ export const postServices = {
     const res = await api.post(`/posts/like-comment/${commentId}`);
     return res.data;
   },
+  getPostByTopic: async () => {
+    const res = await api.get("/posts/posts-by-topic");
+    return res.data.data.topics;
+  },
 };

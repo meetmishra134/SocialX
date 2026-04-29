@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useGetBookmarks } from "@/hooks/useGetBookmarks";
 import { motion } from "motion/react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const BookmarksPage = () => {
   const { data: posts } = useGetBookmarks();
-
+  useDocumentTitle("Bookmarks");
   return (
     <div className="border-border mx-auto min-h-screen w-full max-w-2xl border-x pb-20">
       <div className="bg-background/80 border-border sticky top-0 z-10 border-b p-4 backdrop-blur-md sm:px-6">

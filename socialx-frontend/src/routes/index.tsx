@@ -18,6 +18,7 @@ import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
 import DetailedPost from "@/components/posts/DetailedPost";
 import TopicFeed from "@/components/feed/TopicFeed";
 import Notifications from "@/components/notifications/Notifications";
+import PageNotFound from "@/components/ui/PageNotFound";
 
 export const router = createBrowserRouter([
   {
@@ -105,5 +106,9 @@ export const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPassword />,
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
   },
 ]);

@@ -20,6 +20,7 @@ import { useState } from "react";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
 import { authService } from "@/services/auth.services";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ const RegisterForm = () => {
   } = useForm<UserRegistrationData>({
     resolver: zodResolver(userRegistrationValidator),
   });
-
+  useDocumentTitle("Sign Up");
   const onSubmit = async (data: UserRegistrationData) => {
     try {
       setLoading(true);

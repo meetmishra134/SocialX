@@ -119,7 +119,7 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
             id="topics "
             placeholder={
               topics.length === 0
-                ? "Add topics to categorize your post (e.g., #technology, #health)"
+                ? "Add Topics - Press Enter or , to add"
                 : "Add more topics (max 5)"
             }
             className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"

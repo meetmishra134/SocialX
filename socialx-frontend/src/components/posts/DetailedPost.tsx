@@ -5,6 +5,7 @@ import { ArrowLeft, Loader } from "lucide-react";
 import CommentInput from "../comments/CommentInput";
 import Comment from "../comments/Comment";
 import { useLikeSync } from "@/hooks/useLikeSync";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const DetailedPost = () => {
   useLikeSync();
@@ -13,6 +14,8 @@ const DetailedPost = () => {
   const { data: post, isLoading, error } = useSinglePost(postId);
 
   const navigate = useNavigate();
+  const plainText = post?.text.replace(/<[^>]+>/g, "");
+  useDocumentTitle(post ? plainText.slice(0, 20) + "..." : "Post");
   return (
     <div>
       <div className="bg-background/30 sticky top-0 z-10 flex items-center gap-3 px-6 py-4 backdrop-blur-md">

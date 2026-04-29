@@ -19,7 +19,9 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(403, "User does not exist");
   }
   const isFollowing = user.followers.includes(loggedInUserId);
+  const followsMe = user.following.includes(loggedInUserId);
   const isOwnProfile = loggedInUserId.toString() === user._id.toString();
+
   const userDetails = {
     _id: user._id,
     userName: user.userName,
@@ -31,6 +33,7 @@ const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
     followingCount: user.following.length,
     isOwnProfile: isOwnProfile,
     isFollowing: isFollowing,
+    followsMe: followsMe,
   };
 
   return res
@@ -125,10 +128,12 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .clearCookie("accessToken", {
+      sameSite: "lax",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     })
     .clearCookie("refreshToken", {
+      sameSite: "lax",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     })
@@ -141,15 +146,24 @@ const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
   if (!me) {
     throw new ApiError(404, "User not found");
   }
+
   const excludedUserIds = [loggedInUserId, ...me.following];
   const users = await User.find({ _id: { $nin: excludedUserIds } })
     .select("userName fullName avatarUrl bio ")
     .limit(10)
     .lean();
-
+  const followMe = await User.find({
+    _id: { $in: users.map((user) => user._id) },
+    following: loggedInUserId,
+  })
+    .select("_id")
+    .lean();
   const formattedUsers = users.map((user) => ({
     ...user,
     isFollowing: false,
+    followsMe: followMe.some(
+      (follower) => follower._id.toString() === user._id.toString(),
+    ),
   }));
   return res
     .status(200)

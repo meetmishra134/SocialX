@@ -49,15 +49,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   user.emailVerificationToken = hashedToken;
   user.emailVerificationExpiry = tokenExpiry;
   await user.save({ validateBeforeSave: false });
-  // await sendEmail({
-  //   email: user?.email,
-  //   subject: "Verify your email",
-  //   mailgenContent: () =>
-  //     emailVerificationMailGenContent(
-  //       user.userName,
-  //       `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
-  //     ),
-  // });
+
   const createdUser = await User.findById(user._id).select(
     "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry",
   );
@@ -102,11 +94,13 @@ const googleLogin = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .cookie("accessToken", accessToken, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 30 * 60 * 1000, //30 minutes
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
     })
@@ -147,11 +141,13 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .cookie("accessToken", accessToken, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 30 * 60 * 1000, //30 minutes
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
     })
@@ -182,6 +178,7 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
   );
   const options = {
     httpOnly: true,
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     maxAge: 0,
   };
@@ -293,6 +290,7 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
       .status(200)
       .cookie("accessToken", accessToken, {
         httpOnly: true,
+        sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 60 * 1000, //30 minutes
       })

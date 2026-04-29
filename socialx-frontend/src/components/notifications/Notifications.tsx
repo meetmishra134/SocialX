@@ -9,13 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getRelativeTime } from "@/lib/relativeTime";
 import { useNotifications } from "@/hooks/useNotifications";
 import type { Notification } from "@/types/notification.types";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function NotificationsMenu() {
   const { notifications, isLoading, markAsRead } = useNotifications();
 
   const unreadCount =
     notifications?.filter((n: Notification) => !n.isRead).length || 0;
-
+  useDocumentTitle(`(${unreadCount > 0 ? unreadCount : ""}) Notifications`);
   return (
     <div className="bg-background relative flex h-full w-full flex-col overflow-hidden">
       <div className="border-border bg-background/80 sticky top-0 z-20 border-b p-4 backdrop-blur-md sm:px-6">

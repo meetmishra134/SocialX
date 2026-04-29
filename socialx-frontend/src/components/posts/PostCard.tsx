@@ -31,8 +31,9 @@ import { useComment } from "@/hooks/useComment";
 import TopicChip from "./TopicChip";
 import SharePosts from "./SharePosts";
 import { useState } from "react";
-import { Dialog, DialogContent } from "../ui/dialog";
+// import { Dialog, DialogContent } from "../ui/dialog";
 import ImagePreview from "../ui/ImagePreview";
+import { AnimatePresence } from "motion/react";
 
 interface PostCardProps {
   post: Post;
@@ -44,18 +45,18 @@ const PostCard = ({ post }: PostCardProps) => {
   const { user, openVerifyPopup } = useAuth();
   const { mutate: deletePost } = useDeletePost();
   const hasMultipleImages = (post?.images?.length ?? 0) > 1;
-  const { data } = useComment(post._id);
+  const { data } = useComment(post?._id);
   const comments = data?.pages.flatMap((page) => page.comments) || [];
   const hasSingleImage = post?.images && (post.images?.length ?? 0) === 1;
-  const previewImages = (post.images ?? []).map((image) =>
+  const previewImages = (post?.images ?? []).map((image) =>
     typeof image === "string" ? image : image.url,
   );
   const navigate = useNavigate();
-  const isAuthor = user?._id === post.author._id;
-  const rawText = post.text || "";
+  const isAuthor = user?._id === post?.author._id;
+  const rawText = post?.text || "";
   const trimmedText = rawText.replace(/(<p><br><\/p>)+$/g, "");
   const safeHTML = DOMPurify.sanitize(trimmedText);
-  const postTitle = post.text
+  const postTitle = post?.text
     ? post.text.replace(/<[^>]+>/g, "").slice(0, 100)
     : "Check out this post on SocialX!";
 
@@ -63,7 +64,7 @@ const PostCard = ({ post }: PostCardProps) => {
     navigate(`/post/${postId}`);
   };
   const handleCommentClick = () => {
-    navigate(`/post/${post._id}`, { state: { autoFocusComment: true } });
+    navigate(`/post/${post?._id}`, { state: { autoFocusComment: true } });
   };
 
   return (
@@ -73,22 +74,22 @@ const PostCard = ({ post }: PostCardProps) => {
           <div className="flex flex-row items-start gap-2.5">
             <Avatar className="h-10 w-10 shrink-0">
               <AvatarImage
-                src={post.author.avatarUrl?.url}
-                alt={post.author.fullName}
+                src={post?.author.avatarUrl?.url}
+                alt={post?.author.fullName}
               />
-              <AvatarFallback>{post.author.fullName[0]}</AvatarFallback>
+              <AvatarFallback>{post?.author.fullName[0]}</AvatarFallback>
             </Avatar>
             <div className="flex min-w-0 flex-col">
               <Link
-                to={`/profile/${post.author._id}`}
+                to={`/profile/${post?.author._id}`}
                 className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-1.5"
               >
                 <h4 className="hover:decoration-muted-foreground cursor-pointer truncate text-sm font-semibold hover:underline">
-                  {post.author.fullName}
+                  {post?.author.fullName}
                 </h4>
                 <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs sm:text-sm">
                   <span className="truncate text-xs">
-                    @{post.author.userName}
+                    @{post?.author.userName}
                   </span>
                   <span className="shrink-0">·</span>
                   <span className="shrink-0 text-xs">
@@ -119,7 +120,7 @@ const PostCard = ({ post }: PostCardProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => deletePost(post._id)}
+                  onClick={() => deletePost(post?._id)}
                   className="text-destructive focus:text-destructive cursor-pointer"
                 >
                   <Trash2 className="text-shadow-destructive text-destructive h-4 w-4" />
@@ -134,7 +135,7 @@ const PostCard = ({ post }: PostCardProps) => {
           className="cursor-pointer p-1.5 pt-0 sm:p-3 sm:pt-1.5"
           onClick={(e) => {
             if ((e.target as HTMLElement).tagName === "IMG") return;
-            handlePostClick(post._id);
+            handlePostClick(post?._id);
           }}
         >
           <div
@@ -163,7 +164,7 @@ const PostCard = ({ post }: PostCardProps) => {
             {hasMultipleImages && (
               <Carousel className="group relative w-full">
                 <CarouselContent>
-                  {post.images?.map((image, index) => {
+                  {post?.images?.map((image, index) => {
                     const imgSrc =
                       typeof image === "string" ? image : image?.url;
 
@@ -209,25 +210,23 @@ const PostCard = ({ post }: PostCardProps) => {
             </button>
 
             <div>
-              <SharePosts postId={post._id} postTitle={postTitle} />
+              <SharePosts postId={post?._id} postTitle={postTitle} />
             </div>
           </div>
 
-          <BookmarkIcon postId={post._id} size={20} />
+          <BookmarkIcon postId={post?._id} size={20} />
         </div>
       </Card>
-      {post.images && post.images.length > 0 && (
-        <Dialog open={isPreviewing} onOpenChange={setIsPreviewing}>
-          <DialogContent className="flex h-[90vh] max-w-[95vw] items-center justify-center border-none bg-black/90 p-0 shadow-none md:max-w-[80vw]">
-            <ImagePreview
-              images={previewImages}
-              isFullScreen={true}
-              initialIndex={selectedImageIndex}
-              onClose={() => setIsPreviewing(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      <AnimatePresence>
+        {isPreviewing && (post.images?.length ?? 0) > 0 && (
+          <ImagePreview
+            images={previewImages}
+            isFullScreen={true}
+            initialIndex={selectedImageIndex}
+            onClose={() => setIsPreviewing(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

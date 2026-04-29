@@ -21,7 +21,7 @@ const FriendSuggestionWidget = () => {
 
   return (
     <div className="bg-card w-full max-w-[350px] rounded-2xl border py-1">
-      <h2 className="text-foreground px-4 py-3 text-center text-lg font-extrabold">
+      <h2 className="text-foreground px-4 py-2 text-center text-lg font-bold">
         Who to follow
       </h2>
 
@@ -42,10 +42,10 @@ const FriendSuggestionWidget = () => {
               />
 
               <div className="flex min-w-0 flex-col">
-                <span className="text-foreground truncate text-[15px] leading-tight font-bold hover:underline">
+                <span className="text-foreground truncate text-[13px] leading-tight font-bold hover:underline">
                   {friend.fullName}
                 </span>
-                <span className="text-muted-foreground truncate text-[15px] leading-tight">
+                <span className="text-muted-foreground truncate text-[12px] leading-tight">
                   @{friend.userName}
                 </span>
               </div>
@@ -64,7 +64,7 @@ const FriendSuggestionWidget = () => {
 
       <Link
         to="/connect"
-        className="text-primary hover:bg-muted/50 block rounded-b-2xl px-4 py-4 text-center text-[15px] font-normal transition-colors"
+        className="text-primary hover:bg-muted/50 block rounded-b-2xl px-4 py-3 text-center text-[13px] font-normal transition-colors"
       >
         Show more
       </Link>

@@ -34,7 +34,9 @@ const GlobalFeed = () => {
         [1, 2, 3].map((index) => <SkeletonCard key={index} />)
       ) : isError ? (
         <div className="flex min-h-[80vh] items-center justify-center">
-          <p className="text-lg capitalize sm:text-xl">Error loading posts.</p>
+          <p className="text-md text-center capitalize sm:text-xl">
+            Something Went Wrong or No Posts Available.
+          </p>
         </div>
       ) : (
         <>

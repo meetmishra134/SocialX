@@ -12,8 +12,8 @@ const UsersIcon = ({ isFilled, size = 25 }: UserIconProps) => {
       fill={isFilled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className="lucide lucide-users-round-icon lucide-users-round"
     >
       <path d="M18 21a8 8 0 0 0-16 0" />

@@ -10,6 +10,7 @@ import FollowButton from "../connect/FollowButton";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/store/authStore";
 import { Skeleton } from "../ui/skeleton";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 //     _id: "post1",
 //     author: {
@@ -77,6 +78,9 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
       };
     });
   };
+  useDocumentTitle(
+    profile ? `${profile.fullName} (@${profile.userName})` : "Loading...",
+  );
   return (
     <div>
       <div className="bg-background/80 sticky top-0 z-50 flex items-center gap-2 border-b p-2 backdrop-blur-md">
@@ -148,7 +152,7 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
               @{profile?.userName}
             </p>
           )}
-          <p className="mt-2 text-[0.9rem] leading-relaxed"></p>
+          <p className="mt-2 text-[0.9rem] leading-relaxed">{profile?.bio}</p>
         </div>
         <div className="absolute top-0 right-2">
           {profile?.isOwnProfile ? (

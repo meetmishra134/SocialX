@@ -1,4 +1,4 @@
-import { BellRing, Bookmark, SquarePenIcon } from "lucide-react";
+import { Bookmark, SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
@@ -8,6 +8,8 @@ import UsersIcon from "../icons/UsersIcon";
 import UserIcon from "../icons/UserIcon";
 import UserMenu from "../ui/UserMenu";
 import { useAuth } from "@/store/authStore";
+import BellRing from "../icons/BellRing";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface NavbarProps {
   onOpenPost: () => void;
@@ -16,11 +18,13 @@ interface NavbarProps {
 const Navbar = ({ onOpenPost }: NavbarProps) => {
   const location = useLocation();
   const { user, openVerifyPopup } = useAuth();
-
   const isHomeActive =
     location.pathname.startsWith("/feed/foryou") ||
     location.pathname.startsWith("/feed/following");
-
+  const { notifications } = useNotifications();
+  const unreadCount = notifications
+    ? notifications.filter((n) => !n.isRead).length
+    : 0;
   return (
     <nav className="flex h-full w-full flex-col items-center py-2 lg:items-start lg:px-4">
       <Link
@@ -59,7 +63,11 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             name="Notifications"
             path="/notifications"
             icon={(isActive) => (
-              <BellRing size={27} fill={isActive ? "currentColor" : "none"} />
+              <BellRing
+                isFilled={isActive}
+                size={27}
+                unreadCount={unreadCount}
+              />
             )}
           />
           <NavItems

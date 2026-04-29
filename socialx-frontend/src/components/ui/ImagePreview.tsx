@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { X } from "lucide-react"; // <-- Added Close Icon
 import {
   Carousel,
   CarouselContent,
@@ -21,33 +22,59 @@ export default function ImagePreview({
   images,
   isFullScreen = false,
   initialIndex = 0,
-
+  onClose,
   onImageClick,
 }: ImagePreviewProps) {
   if (!images || images.length === 0) return null;
 
-  return (
-    <div
-      className={`w-full overflow-hidden ${isFullScreen ? "" : "border-border bg-muted/30 rounded-xl border"}`}
-    >
-      <AnimatePresence mode="popLayout">
-        {images.length === 1 ? (
-          <SingleImagePreview
-            key="single"
-            src={images[0]}
-            isFullScreen={isFullScreen}
-            onImageClick={onImageClick}
-          />
-        ) : (
-          <ImageCarousel
-            key="carousel"
-            images={images}
-            isFullScreen={isFullScreen}
-            initialIndex={initialIndex}
-            onImageClick={onImageClick}
-          />
+  const content =
+    images.length === 1 ? (
+      <SingleImagePreview
+        key="single"
+        src={images[0]}
+        isFullScreen={isFullScreen}
+        onImageClick={onImageClick}
+      />
+    ) : (
+      <ImageCarousel
+        key="carousel"
+        images={images}
+        isFullScreen={isFullScreen}
+        initialIndex={initialIndex}
+        onImageClick={onImageClick}
+      />
+    );
+
+  if (isFullScreen) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-100 flex h-svh w-screen items-center justify-center bg-black/50 backdrop-blur-md"
+      >
+        <div className="absolute inset-0 cursor-zoom-out" onClick={onClose} />
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-110 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/25 sm:top-6 sm:right-6"
+          >
+            <X size={24} />
+          </button>
         )}
-      </AnimatePresence>
+
+        <div className="relative z-10 h-full w-full max-w-6xl p-4 sm:p-12">
+          {content}
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="border-border bg-muted/30 w-full overflow-hidden rounded-xl border">
+      <AnimatePresence mode="popLayout">{content}</AnimatePresence>
     </div>
   );
 }
@@ -70,13 +97,21 @@ function SingleImagePreview({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: isFullScreen ? 1 : 0.95 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`relative w-full overflow-hidden ${isFullScreen ? "flex h-full items-center justify-center p-4 sm:p-6 md:p-10" : "group aspect-video cursor-pointer"}`}
+      className={`relative w-full overflow-hidden ${
+        isFullScreen
+          ? "flex h-full items-center justify-center"
+          : "group aspect-video cursor-pointer"
+      }`}
       onClick={() => !isFullScreen && onImageClick?.(0)}
     >
       <motion.img
         src={src}
         alt="Preview"
-        className={`${isFullScreen ? "max-h-full max-w-full" : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"}`}
+        className={`${
+          isFullScreen
+            ? "h-full w-full object-contain"
+            : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        }`}
       />
       {!isFullScreen && (
         <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
@@ -101,14 +136,9 @@ function ImageCarousel({
 
   useEffect(() => {
     if (!api) return;
-
-    const syncCurrentIndex = () => {
-      setCurrentIndex(api.selectedScrollSnap());
-    };
-
+    const syncCurrentIndex = () => setCurrentIndex(api.selectedScrollSnap());
     api.on("select", syncCurrentIndex);
     api.on("reInit", syncCurrentIndex);
-
     return () => {
       api.off("select", syncCurrentIndex);
       api.off("reInit", syncCurrentIndex);
@@ -117,7 +147,6 @@ function ImageCarousel({
 
   useEffect(() => {
     if (!api || !isFullScreen || initialIndex === undefined) return;
-
     api.scrollTo(initialIndex, true);
   }, [api, isFullScreen, initialIndex]);
 
@@ -140,13 +169,17 @@ function ImageCarousel({
               className={`${isFullScreen ? "flex h-full items-center justify-center" : ""}`}
             >
               <div
-                className={`relative w-full overflow-hidden ${isFullScreen ? "flex h-full max-h-full items-center justify-center" : "aspect-video cursor-pointer"}`}
+                className={`relative w-full overflow-hidden ${
+                  isFullScreen
+                    ? "flex h-full max-h-full items-center justify-center"
+                    : "aspect-video cursor-pointer"
+                }`}
                 onClick={() => !isFullScreen && onImageClick?.(index)}
               >
                 <img
                   src={src}
                   alt={`Preview ${index + 1}`}
-                  className={`${isFullScreen ? "max-h-[90vh] max-w-full object-contain" : "h-full w-full object-cover"}`}
+                  className={`${isFullScreen ? "h-full w-full object-contain" : "h-full w-full object-cover"}`}
                 />
               </div>
             </CarouselItem>
@@ -164,9 +197,7 @@ function ImageCarousel({
           }`}
         />
 
-        <div
-          className={`absolute bottom-3 left-1/2 z-50 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md`}
-        >
+        <div className="absolute bottom-3 left-1/2 z-50 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md">
           {images.map((_, i) => (
             <div
               key={i}

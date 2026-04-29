@@ -242,6 +242,10 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
     _id: commentId,
     author: loggedInUserId,
   });
+  await Notification.deleteMany({
+    recipient: comment.author.toString(),
+    sender: loggedInUserId.toHexString(),
+  });
   res
     .status(200)
     .json(new ApiResponse(200, null, "Comment deleted successfully"));
@@ -361,6 +365,22 @@ const likeDislikeComment = asyncHandler(async (req: Request, res: Response) => {
       new ApiResponse(200, payload, "Comment like status updated successfully"),
     );
 });
+const getPostsByTopic = asyncHandler(async (req: Request, res: Response) => {
+  const topics = await Post.aggregate([
+    { $unwind: "$topics" },
+    {
+      $group: {
+        _id: "$topics",
+        postCount: { $sum: 1 },
+      },
+    },
+    { $sort: { postCount: -1 } },
+    { $limit: 10 },
+  ]);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { topics }, "Topics fetched successfully"));
+});
 
 export {
   createPost,
@@ -374,4 +394,5 @@ export {
   toggleBookmark,
   searchPostByTopic,
   likeDislikeComment,
+  getPostsByTopic,
 };

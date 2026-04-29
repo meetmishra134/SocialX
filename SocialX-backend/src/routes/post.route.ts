@@ -12,6 +12,7 @@ import {
   viewComments,
   viewPost,
   likeDislikeComment,
+  getPostsByTopic,
 } from "../controllers/post.controller";
 import { verifyJwt } from "../middlewares/auth.middleware";
 import { requireVerification } from "../middlewares/requireVerification";
@@ -22,6 +23,7 @@ router
   .route("/upload-post")
   .post(verifyJwt, requireVerification, upload.array("files", 4), createPost);
 router.route("/search").get(verifyJwt, searchPostByTopic);
+router.route("/posts-by-topic").get(verifyJwt, getPostsByTopic);
 router.route("/view-post/:postId").get(verifyJwt, viewPost);
 router.route("/:userId").get(verifyJwt, getUserPosts);
 router.route("/bookmark/:postId").post(verifyJwt, toggleBookmark);

@@ -23,6 +23,7 @@ import { authService } from "@/services/auth.services";
 import { GoogleLogin } from "@react-oauth/google";
 import { api } from "@/lib/axios";
 import axios from "axios";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ const LoginForm = () => {
   } = useForm<UserLoginData>({
     resolver: zodResolver(userLoginValidator),
   });
-
+  useDocumentTitle("Login");
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       setLoading(true);
