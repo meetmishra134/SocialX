@@ -13,7 +13,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
 export default cloudinary;
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 9000;
 
 connectDatabase()
   .then(() => {
