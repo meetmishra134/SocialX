@@ -105,7 +105,7 @@ const PendingVerification = () => {
             ) : countdown > 0 ? (
               `Resend Email (${countdown}s)`
             ) : (
-              "Resend Email"
+              "Send Email"
             )}
           </Button>
 
