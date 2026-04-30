@@ -4,21 +4,19 @@ import { v2 as cloudinary } from "cloudinary";
 import connectDatabase from "./config/database";
 import { httpServer } from "./app";
 
-dotenv.config({
-  path: "./.env",
-});
+dotenv.config();
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME as string,
   api_key: process.env.CLOUDINARY_API_KEY as string,
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
 export default cloudinary;
-const port = process.env.PORT || 9000;
+const port = Number(process.env.PORT) || 9000;
 
 connectDatabase()
   .then(() => {
-    httpServer.listen(port, () => {
-      console.log(`Server is running on port  http://localhost:${port}`);
+    httpServer.listen(port, "0.0.0.0", () => {
+      console.log(`Server is running on port ${port}`);
     });
   })
   .catch((error) => {
