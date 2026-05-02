@@ -16,7 +16,7 @@ const GlobalFeed = () => {
     hasNextPage,
     fetchNextPage,
   } = usePosts();
-  console.log("pages[0]:", data?.pages[0]);
+  // console.log("pages[0]:", data?.pages[0]);
   // console.log("posts:", posts);
   const posts =
     data?.pages
@@ -28,7 +28,7 @@ const GlobalFeed = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-4 p-4"
+      className="flex flex-col gap-y-4 px-3 py-4"
     >
       {isLoading ? (
         [1, 2, 3].map((index) => <SkeletonCard key={index} />)

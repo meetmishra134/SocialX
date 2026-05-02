@@ -9,7 +9,7 @@ interface HeartIconProps {
   currentUserId: string;
 }
 
-const HeartIcon = ({ size = 20, post, currentUserId }: HeartIconProps) => {
+const HeartIcon = ({ size = 21, post, currentUserId }: HeartIconProps) => {
   const { toggleLike, isPending } = useLike();
   const isLiked = post.likes?.includes(currentUserId) || false;
   const likesCount = post.likes?.length || 0;

@@ -1,17 +1,18 @@
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { useAuth } from "@/store/authStore";
+import { useProfileData } from "@/hooks/useProfileData";
 
 const FollowTabs = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = useAuth((state) => state.user);
+
   const activeTab = location.pathname.includes("following")
     ? "following"
     : "followers";
   const { userId } = useParams();
-  useDocumentTitle(`${user?.userName} - ${activeTab}`);
+  const { data: profile } = useProfileData(userId as string);
+  useDocumentTitle(`${profile?.userName} - ${activeTab}`);
   return (
     <div className="flex h-screen flex-col">
       <Tabs value={activeTab} className="flex h-full flex-col">

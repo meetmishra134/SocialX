@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import "yet-another-react-lightbox/styles.css";
 
 import {
   Carousel,
@@ -28,21 +27,20 @@ import { getRelativeTime } from "@/lib/relativeTime";
 import { useDeletePost } from "@/hooks/useDeletePost";
 import { Link, useNavigate } from "react-router-dom";
 import { useComment } from "@/hooks/useComment";
-import TopicChip from "./TopicChip";
 import SharePosts from "./SharePosts";
 import { useState } from "react";
-// import { Dialog, DialogContent } from "../ui/dialog";
 import ImagePreview from "../ui/ImagePreview";
 import { AnimatePresence } from "motion/react";
 
 interface PostCardProps {
   post: Post;
+  variant?: "detailed" | "feed" | "profile";
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, variant }: PostCardProps) => {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const { user, openVerifyPopup } = useAuth();
+  const { user } = useAuth();
   const { mutate: deletePost } = useDeletePost();
   const hasMultipleImages = (post?.images?.length ?? 0) > 1;
   const { data } = useComment(post?._id);
@@ -66,10 +64,16 @@ const PostCard = ({ post }: PostCardProps) => {
   const handleCommentClick = () => {
     navigate(`/post/${post?._id}`, { state: { autoFocusComment: true } });
   };
-
+  const iNotFeed = variant === "detailed" || variant === "profile";
   return (
     <>
-      <Card className="border-border bg-card mx-auto w-full max-w-2xl gap-0 overflow-visible rounded-2xl border py-3 shadow-sm transition-all hover:shadow-md">
+      <Card
+        className={`bg-card mx-auto w-full max-w-2xl gap-0 overflow-visible py-3 ${
+          iNotFeed
+            ? "rounded-none border-0 shadow-none"
+            : "rounded-xl border border-gray-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+        } `}
+      >
         <CardHeader className="flex flex-row items-start justify-between gap-3 px-4 pb-2 sm:px-6">
           <div className="flex flex-row items-start gap-2.5">
             <Avatar className="h-10 w-10 shrink-0">
@@ -79,32 +83,23 @@ const PostCard = ({ post }: PostCardProps) => {
               />
               <AvatarFallback>{post?.author.fullName[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex min-w-0 flex-col">
-              <Link
-                to={`/profile/${post?.author._id}`}
-                className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-1.5"
-              >
-                <h4 className="hover:decoration-muted-foreground cursor-pointer truncate text-sm font-semibold hover:underline">
-                  {post?.author.fullName}
-                </h4>
-                <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs sm:text-sm">
-                  <span className="truncate text-xs">
-                    @{post?.author.userName}
-                  </span>
-                  <span className="shrink-0">·</span>
-                  <span className="shrink-0 text-xs">
-                    {getRelativeTime(post.createdAt)}
-                  </span>
-                </div>
-              </Link>
-              {post.topics && post.topics.length > 0 && (
-                <div className="mt-2.5 -ml-[47px] flex flex-wrap gap-1.5 sm:mt-1 sm:ml-0">
-                  {post.topics.map((topic, index) => (
-                    <TopicChip key={index} topic={topic} />
-                  ))}
-                </div>
-              )}
-            </div>
+
+            <Link
+              to={`/profile/${post?.author._id}`}
+              className="flex min-w-0 flex-col"
+            >
+              <h4 className="truncate text-sm leading-tight font-semibold text-gray-100">
+                {post?.author.fullName}
+              </h4>
+
+              <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
+                <span className="truncate">@{post?.author.userName}</span>
+                <span>·</span>
+                <span className="shrink-0">
+                  {getRelativeTime(post.createdAt)}
+                </span>
+              </div>
+            </Link>
           </div>
 
           {isAuthor && (
@@ -139,9 +134,27 @@ const PostCard = ({ post }: PostCardProps) => {
           }}
         >
           <div
-            className="prose dark:prose-invert ml-4 max-w-none px-0 text-sm"
+            className="prose dark:prose-invert ml-4 max-w-none px-0 text-[15px] leading-relaxed"
             dangerouslySetInnerHTML={{ __html: safeHTML }}
           ></div>
+          {post.topics && post.topics.length > 0 && (
+            <div className="mt-2 ml-4 flex flex-wrap gap-x-2">
+              {post.topics.map((topic, index) => (
+                <span
+                  key={index}
+                  className="cursor-pointer text-sm text-blue-400 transition-colors hover:text-blue-300 hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(
+                      `/topic/${encodeURIComponent(topic.toLowerCase())}`,
+                    );
+                  }}
+                >
+                  #{topic}
+                </span>
+              ))}
+            </div>
+          )}
 
           <div className="mt-2 px-2">
             {hasSingleImage && (
@@ -199,9 +212,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
             <button
               className="group flex cursor-pointer items-center gap-2 transition-colors hover:text-blue-500"
-              onClick={
-                user?.isEmailVerified ? handleCommentClick : openVerifyPopup
-              }
+              onClick={handleCommentClick}
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors group-hover:bg-blue-500/10">
                 <CommentIcon size={20} />

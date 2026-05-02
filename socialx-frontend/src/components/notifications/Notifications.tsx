@@ -16,7 +16,7 @@ export default function NotificationsMenu() {
 
   const unreadCount =
     notifications?.filter((n: Notification) => !n.isRead).length || 0;
-  useDocumentTitle(`(${unreadCount > 0 ? unreadCount : ""}) Notifications`);
+  useDocumentTitle(`${unreadCount > 0 ? unreadCount : "0"} Notifications`);
   return (
     <div className="bg-background relative flex h-full w-full flex-col overflow-hidden">
       <div className="border-border bg-background/80 sticky top-0 z-20 border-b p-4 backdrop-blur-md sm:px-6">

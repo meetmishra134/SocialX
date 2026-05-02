@@ -16,7 +16,16 @@ const FriendSuggestionWidget = () => {
   }
 
   if (!friendsSuggestion || friendsSuggestion.length === 0) {
-    return null;
+    return (
+      <div className="bg-card w-full max-w-[350px] rounded-2xl border py-1">
+        <h2 className="text-foreground px-4 py-2 text-center text-lg font-bold">
+          Who to follow
+        </h2>
+        <p className="text-muted-foreground px-4 py-6 text-center text-sm">
+          No suggestions available right now.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -56,6 +65,7 @@ const FriendSuggestionWidget = () => {
                 userId={friend._id}
                 initialIsFollowing={friend.isFollowing}
                 followsMe={friend.followsMe}
+                isLoading={false}
               />
             </div>
           </div>

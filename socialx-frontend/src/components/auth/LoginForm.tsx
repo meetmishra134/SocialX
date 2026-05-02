@@ -20,7 +20,7 @@ import { Spinner } from "../ui/spinner";
 import { useAuth } from "@/store/authStore";
 
 import { authService } from "@/services/auth.services";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -39,7 +39,9 @@ const LoginForm = () => {
     resolver: zodResolver(userLoginValidator),
   });
   useDocumentTitle("Login");
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse,
+  ) => {
     try {
       setLoading(true);
       const res = await api.post("/auth/google", {
@@ -68,7 +70,7 @@ const LoginForm = () => {
       setLoading(true);
       const response = await authService.login(data);
       login(response.data.data.user);
-      console.log(response.data);
+      // console.log(response.data);
       toast.success(response.data?.message, { position: "top-center" });
       return navigate("/feed/foryou", {
         state: { email: data.email },
@@ -102,6 +104,7 @@ const LoginForm = () => {
             src="../../../images/social.webp"
             alt="Login"
             className="h-80 w-100 object-cover"
+            loading="lazy"
           />
         </div>
       </div>

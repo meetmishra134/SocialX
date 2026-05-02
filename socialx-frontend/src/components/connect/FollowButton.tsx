@@ -11,6 +11,7 @@ interface FollowButtonProps {
   userId: string;
   initialIsFollowing?: boolean | undefined;
   followsMe?: boolean;
+  isLoading: boolean;
   onSuccess?: (userId: string, isNowFollowing: boolean) => void;
   className?: string;
 }
@@ -19,9 +20,10 @@ const FollowButton = ({
   initialIsFollowing,
   onSuccess,
   followsMe,
+  isLoading,
   className,
 }: FollowButtonProps) => {
-  const { user, openVerifyPopup } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isHovered, setIsHovered] = useState(false);
@@ -71,6 +73,7 @@ const FollowButton = ({
     } catch (error) {
       setIsFollowing(previousState);
       console.error(error);
+
       toast.error("Failed to follow user", {
         position: "top-center",
       });
@@ -91,13 +94,24 @@ const FollowButton = ({
     buttonText = "Follow Back";
     buttonVariant = "default";
   }
+  if (isLoading) {
+    return (
+      <Button
+        variant="secondary"
+        className={`${className} cursor-not-allowed opacity-50`}
+        disabled
+      >
+        <span className="animate-pulse">Loading...</span>
+      </Button>
+    );
+  }
   return (
     <Button
       className={cn(
-        "w-28 cursor-pointer transition-all duration-200 ease-in-out",
+        `{w-28 duration-200} ${user?._id === userId ? "hidden" : "block"} cursor-pointer transition-all ease-in-out`,
         className,
       )}
-      onClick={user?.isEmailVerified ? handleFollowToggle : openVerifyPopup}
+      onClick={handleFollowToggle}
       variant={buttonVariant}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

@@ -57,7 +57,10 @@ const CommentInput = () => {
               errors.text ? "Comment is required" : "Write a comment..."
             }
             className={`flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-50 sm:text-base ${errors.text ? "placeholder:text-destructive text-xs" : ""}`}
-            {...register("text", { required: true })}
+            {...register("text", {
+              required: true,
+              validate: (value) => value.trim().length > 0,
+            })}
             disabled={isPending}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {

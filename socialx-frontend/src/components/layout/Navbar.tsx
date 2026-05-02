@@ -35,6 +35,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
           src="../../../images/SocialXLogo.png"
           alt="SocialX"
           className="h-10 w-auto lg:h-12"
+          loading="lazy"
         />
         <h1 className="hidden text-2xl font-bold lg:block">SocialX</h1>
       </Link>

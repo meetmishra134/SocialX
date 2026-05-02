@@ -35,6 +35,7 @@ const FollowersPage = () => {
               userId={user._id}
               initialIsFollowing={user.isFollowing}
               followsMe={user.followsMe}
+              isLoading={false}
             />
           }
         />

@@ -11,7 +11,7 @@ export const usePosts = () => {
       });
       return response;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+
     initialPageParam: 1,
 
     getNextPageParam: (lastPage) => {

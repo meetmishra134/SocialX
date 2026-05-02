@@ -1,6 +1,5 @@
-import { ArrowLeft, Hash } from "lucide-react";
+import { ArrowLeft, Hash, Loader } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Spinner } from "../ui/spinner";
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
 import { useSearch } from "@/hooks/useSearch";
@@ -31,11 +30,10 @@ const TopicFeed = () => {
         </div>
       </div>
 
-      {/* The Feed */}
       <div className="flex flex-col gap-4 p-4">
         {isLoading ? (
-          <div className="min-h-[70vh]">
-            <Spinner className="mx-auto mt-10" />
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <Loader className="mx-auto mt-10" />
           </div>
         ) : posts?.length === 0 ? (
           <div className="text-muted-foreground mt-20 text-center">

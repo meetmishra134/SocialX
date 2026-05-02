@@ -78,6 +78,7 @@ const RegisterForm = () => {
               src="../../../images/register.webp"
               alt="Register"
               className="h-80 w-110 object-cover"
+              loading="lazy"
             />
           </div>
         </div>

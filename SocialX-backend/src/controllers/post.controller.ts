@@ -278,6 +278,7 @@ const viewComments = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
+//* Toogle bookmark 
 const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const { _id: loggedInUserId } = req.user;
@@ -311,6 +312,7 @@ const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
+//* Like or dislike a comment
 const likeDislikeComment = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const { commentId } = req.params;
@@ -367,6 +369,7 @@ const likeDislikeComment = asyncHandler(async (req: Request, res: Response) => {
       new ApiResponse(200, payload, "Comment like status updated successfully"),
     );
 });
+//* Get top 10 topics with most posts
 const getPostsByTopic = asyncHandler(async (req: Request, res: Response) => {
   const topics = await Post.aggregate([
     { $unwind: "$topics" },

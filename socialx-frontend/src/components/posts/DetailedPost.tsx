@@ -17,37 +17,42 @@ const DetailedPost = () => {
   const plainText = post?.text.replace(/<[^>]+>/g, "");
   useDocumentTitle(post ? plainText.slice(0, 20) + "..." : "Post");
   return (
-    <div>
-      <div className="bg-background/30 sticky top-0 z-10 flex items-center gap-3 px-6 py-4 backdrop-blur-md">
+    <div className="pb-20">
+      <div className="bg-background/80 sticky top-0 z-10 flex items-center gap-3 border-b border-gray-700 px-4 py-3 backdrop-blur-md">
         <button
           onClick={() => navigate(-1)}
-          className="hover:bg-muted cursor-pointer rounded-full p-1 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10 active:scale-95"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
         </button>
-        <h2 className="text-xl font-semibold">Post</h2>
+        <h2 className="text-base font-semibold">Post</h2>
       </div>
+
       {isLoading && (
-        <div className="flex min-h-[70vh] items-center justify-center">
-          <Loader className="animate-spin" size={30} />
+        <div className="flex min-h-[60vh] items-center justify-center text-gray-400">
+          <Loader className="animate-spin" size={28} />
         </div>
       )}
+
       {error && (
-        <div className="flex min-h-[70vh] items-center justify-center">
-          <p className="text-muted-foreground">Failed to load post.</p>
+        <div className="flex min-h-[60vh] items-center justify-center text-gray-500">
+          Failed to load post.
         </div>
       )}
+
       {post && (
         <>
-          <PostCard post={post} />
-          <div className="border-border border-b px-4 py-3">
+          <div className="border-b border-gray-700">
+            <PostCard post={post} />
+          </div>
+
+          <div className="border-b border-gray-700 px-4 py-3">
             <CommentInput />
           </div>
         </>
       )}
 
-      {/* Comments List */}
-      <div className="mt-4 px-4">
+      <div className="divide-y divide-gray-700">
         <Comment />
       </div>
     </div>

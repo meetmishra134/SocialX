@@ -95,14 +95,19 @@ const EditProfileForm = ({ setOpen }: EditProfileFormProps) => {
       </div>
       <div className="flex flex-col gap-2">
         <Label className="text-sm font-medium">UserName</Label>
-        <Input placeholder="eg John doe" {...register("userName")} />
+        <Input
+          placeholder="eg John doe"
+          {...register("userName", {
+            validate: (value) => value.trim().length > 0,
+          })}
+        />
       </div>
       <div className="flex flex-col gap-2">
         <Label className="text-sm font-medium">Bio</Label>
         <Textarea
           placeholder="Write something about yourself"
           className="resize-none"
-          {...register("bio")}
+          {...register("bio", { validate: (value) => value.trim().length > 0 })}
         />
       </div>
       <div className="flex justify-center pt-2 md:justify-end">

@@ -7,6 +7,5 @@ export const useProfileData = (userId: string) => {
     queryFn: () => userService.getUserProfile(userId as string),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
-    refetchInterval: 2 * 60 * 1000,
   });
 };

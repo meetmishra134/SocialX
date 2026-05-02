@@ -53,6 +53,7 @@ const FollowingPage = () => {
               initialIsFollowing={user.isFollowing}
               followsMe={user.followsMe}
               onSuccess={handleFollow}
+              isLoading={false}
             />
           }
         />

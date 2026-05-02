@@ -11,18 +11,18 @@ const FeedTab = () => {
   useDocumentTitle("Home");
   return (
     <div className="flex h-screen flex-col">
-      <Tabs defaultValue={currentTab} className="flex h-full flex-col">
+      <Tabs value={currentTab} className="flex h-full flex-col">
         <TabsList className="bg-background sticky top-0 z-10 grid w-full grid-cols-2">
           <TabsTrigger
             value="foryou"
-            className="cursor-pointer"
+            className="relative cursor-pointer text-sm font-medium text-gray-400 transition-colors data-[state=active]:text-white"
             onClick={() => navigate("/feed/foryou")}
           >
             For You
           </TabsTrigger>
           <TabsTrigger
             value="following"
-            className="cursor-pointer"
+            className="relative cursor-pointer text-sm font-medium text-gray-400 transition-colors data-[state=active]:text-white"
             onClick={() => navigate("/feed/following")}
           >
             Following

@@ -8,8 +8,8 @@ const SkeletonCard = () => {
         <div className="5 flex flex-row gap-2">
           <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
           <div className="flex min-w-0 flex-col">
-            <Skeleton className="h-4 w-24 rounded" />
-            <Skeleton className="mt-1 h-3 w-16 rounded" />
+            <Skeleton className="h-4 w-[200px] rounded" />
+            <Skeleton className="mt-1 h-3 w-[150px] rounded" />
           </div>
         </div>
       </CardHeader>

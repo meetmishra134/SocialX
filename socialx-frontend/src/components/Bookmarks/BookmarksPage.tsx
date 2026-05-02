@@ -23,21 +23,25 @@ const BookmarksPage = () => {
 
       <div className="flex flex-col">
         {posts?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-4 py-40 text-center">
-            <div className="bg-muted mb-6 flex h-20 w-20 items-center justify-center rounded-full">
-              <BookmarkX className="text-muted-foreground h-10 w-10 opacity-50" />
+          <div className="flex min-h-[70vh] flex-col items-center justify-center px-3 text-center">
+            <div className="bg-muted mb-2.5 flex h-16 w-16 items-center justify-center rounded-full">
+              <BookmarkX className="text-muted-foreground h-8 w-8 opacity-60" />
             </div>
-            <h3 className="mb-2 text-xl font-semibold">No bookmarks yet</h3>
-            <p className="text-muted-foreground mb-8 max-w-sm">
-              When you see something you want to remember, tap the bookmark icon
-              to save it here.
+
+            <p className="text-foreground mt-4 text-lg font-medium">
+              No bookmarks to see here yet
             </p>
+
+            <p className="text-muted-foreground text-sm">
+              When you save posts, they will appear here for you
+            </p>
+
             <Button
               asChild
               variant="outline"
-              className="rounded-full font-semibold"
+              className="mt-5 rounded-full px-5 text-sm font-medium"
             >
-              <Link to="/feed/foryou">Explore the Feed</Link>
+              <Link to="/feed/foryou">Explore Feed</Link>
             </Button>
           </div>
         ) : (

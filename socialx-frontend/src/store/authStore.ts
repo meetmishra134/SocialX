@@ -29,7 +29,7 @@ export const useAuth = create<AuthState>((set) => ({
       isCheckingAuth: false,
     });
 
-    console.log("User logged in:", user);
+    // console.log("User logged in:", user);
   },
   updateUser: (updatedUser) =>
     set(() => ({

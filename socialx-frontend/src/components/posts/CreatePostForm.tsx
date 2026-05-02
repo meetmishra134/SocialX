@@ -82,7 +82,6 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
     }
     topics.forEach((topic) => formData.append("topics", topic));
     console.log(data);
-    // Example API Call:
     createPost(formData, {
       onSuccess: () => {
         reset();
@@ -108,31 +107,16 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
           />
         )}
       />
-      <div className="flex flex-col gap-2 rounded-xl border p-3">
-        <Label htmlFor="topics">Topics</Label>
-        {topics.length < 5 && (
-          <Input
-            type="text"
-            value={topicInput}
-            onKeyDown={handleKeyDown}
-            onChange={(e) => setTopicInput(e.target.value)}
-            id="topics "
-            placeholder={
-              topics.length === 0
-                ? "Add Topics - Press Enter or , to add"
-                : "Add more topics (max 5)"
-            }
-            className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"
-          />
-        )}
-        <div className="flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-col gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 focus-within:border-gray-400">
           {topics.map((topic, index) => (
             <span
               key={index}
-              className="bg-primary/10 text-primary flex items-center gap-1 rounded-full px-3 py-1 text-sm"
+              className="flex items-center gap-1 text-sm text-blue-400"
             >
               #{topic}
               <button
+                type="button"
                 className="hover:text-red-500"
                 onClick={() => handleTopicDelete(index)}
               >
@@ -140,6 +124,17 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
               </button>
             </span>
           ))}
+
+          {topics.length < 5 && (
+            <input
+              type="text"
+              value={topicInput}
+              onKeyDown={handleKeyDown}
+              onChange={(e) => setTopicInput(e.target.value)}
+              placeholder="To add a topic press enter or , (max 5)"
+              className="min-w-[100px] flex-1 bg-transparent text-sm text-gray-300 outline-none"
+            />
+          )}
         </div>
       </div>
 

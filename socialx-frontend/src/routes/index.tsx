@@ -1,24 +1,48 @@
+import { lazy, Suspense } from "react";
 import LoginForm from "@/components/auth/LoginForm";
-import RegisterForm from "@/components/auth/RegisterForm";
+
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import ProtectedRoutes from "./ProtectedRoutes";
 import Layout from "@/components/layout/Layout";
 import FeedTab from "@/components/feed/FeedTab";
-
-import Bookmarks from "@/components/Bookmarks/BookmarksPage";
-import Connect from "@/components/connect/Connect";
-import Profile from "@/components/Profile/Profile";
-import FollowersPage from "@/components/Profile/FollowersPage";
-import FollowingPage from "@/components/Profile/FollowingPage";
-import GlobalFeed from "@/components/feed/GlobalFeed";
-import FollowingFeed from "@/components/feed/FollowingFeed";
-import VerifyEmail from "@/components/auth/VerifyEmail";
-import ResetPassword from "@/components/auth/ResetPassword";
-import ForgotPasswordPending from "@/components/auth/ForgotPasswordPending";
-import DetailedPost from "@/components/posts/DetailedPost";
-import TopicFeed from "@/components/feed/TopicFeed";
-import Notifications from "@/components/notifications/Notifications";
 import PageNotFound from "@/components/ui/PageNotFound";
+import { Loader } from "lucide-react";
+import FeedSkeleton from "@/components/ui/FeedSkeleton";
+import ProfileSkeleton from "@/components/ui/ProfileSkeleton";
+
+const RegisterForm = lazy(() => import("@/components/auth/RegisterForm"));
+const Bookmarks = lazy(() => import("@/components/Bookmarks/BookmarksPage"));
+const Connect = lazy(() => import("@/components/connect/Connect"));
+const Profile = lazy(() => import("@/components/Profile/Profile"));
+const Notifications = lazy(
+  () => import("@/components/notifications/Notifications"),
+);
+const DetailedPost = lazy(() => import("@/components/posts/DetailedPost"));
+const ResetPassword = lazy(() => import("@/components/auth/ResetPassword"));
+const FollowersPage = lazy(() => import("@/components/Profile/FollowersPage"));
+const FollowingPage = lazy(() => import("@/components/Profile/FollowingPage"));
+const GlobalFeed = lazy(() => import("@/components/feed/GlobalFeed"));
+const FollowingFeed = lazy(() => import("@/components/feed/FollowingFeed"));
+const VerifyEmail = lazy(() => import("@/components/auth/VerifyEmail"));
+const ForgotPasswordPending = lazy(
+  () => import("@/components/auth/ForgotPasswordPending"),
+);
+
+const TopicFeed = lazy(() => import("@/components/feed/TopicFeed"));
+
+export const withSuspense = (
+  Component: React.ReactElement,
+): React.ReactElement => (
+  <Suspense
+    fallback={
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Loader size={25} />
+      </div>
+    }
+  >
+    {Component}
+  </Suspense>
+);
 
 export const router = createBrowserRouter([
   {
@@ -34,11 +58,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "/topic/:topic",
-            element: <TopicFeed />,
+            element: withSuspense(<TopicFeed />),
           },
           {
             path: "/post/:postId",
-            element: <DetailedPost />,
+            element: withSuspense(<DetailedPost />),
           },
           {
             path: "feed",
@@ -46,40 +70,53 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: "foryou",
-                element: <GlobalFeed />,
+                element: (
+                  <Suspense fallback={<FeedSkeleton />}>
+                    <GlobalFeed />
+                  </Suspense>
+                ),
               },
               {
                 path: "following",
-                element: <FollowingFeed />,
+                element: (
+                  <Suspense fallback={<FeedSkeleton />}>
+                    <FollowingFeed />
+                  </Suspense>
+                ),
               },
             ],
           },
 
           {
             path: "/bookmarks",
-            element: <Bookmarks />,
+            element: withSuspense(<Bookmarks />),
           },
           {
             path: "/notifications",
-            element: <Notifications />,
+            element: withSuspense(<Notifications />),
           },
           {
             path: "profile/:userId",
-            element: <Profile />,
+            element: (
+              <Suspense fallback={<ProfileSkeleton />}>
+                <Profile />
+              </Suspense>
+            ),
+
             children: [
               {
                 path: "followers",
-                element: <FollowersPage />,
+                element: withSuspense(<FollowersPage />),
               },
               {
                 path: "following",
-                element: <FollowingPage />,
+                element: withSuspense(<FollowingPage />),
               },
             ],
           },
           {
             path: "connect",
-            element: <Connect />,
+            element: withSuspense(<Connect />),
           },
         ],
       },
@@ -92,20 +129,20 @@ export const router = createBrowserRouter([
 
   {
     path: "/register",
-    element: <RegisterForm />,
+    element: withSuspense(<RegisterForm />),
   },
 
   {
     path: "/verify-email",
-    element: <VerifyEmail />,
+    element: withSuspense(<VerifyEmail />),
   },
   {
     path: "/forgot-password",
-    element: <ForgotPasswordPending />,
+    element: withSuspense(<ForgotPasswordPending />),
   },
   {
     path: "/reset-password",
-    element: <ResetPassword />,
+    element: withSuspense(<ResetPassword />),
   },
   {
     path: "*",
