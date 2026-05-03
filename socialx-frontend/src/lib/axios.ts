@@ -32,7 +32,7 @@ api.interceptors.response.use(
 
       try {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh-token}`,
+          `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
           {},
           { withCredentials: true },
         );
