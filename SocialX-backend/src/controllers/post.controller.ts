@@ -179,17 +179,15 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
     globalThis.io.to(authorIdString).emit("new_notification", notification);
   }
 
-  const payload = {
-    postId,
-    likes: updatedPost?.likes || [],
-  };
-  globalThis.io.emit("like_updated", payload);
+  // const payload = {
+  //   postId,
+  //   likes: updatedPost?.likes || [],
+  // };
+  // globalThis.io.emit("like_updated", payload);
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, payload, "Post like status updated successfully"),
-    );
+    .json(new ApiResponse(200, null, "Post like status updated successfully"));
 });
 
 //* Comment on a post
@@ -278,7 +276,7 @@ const viewComments = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
-//* Toogle bookmark 
+//* Toogle bookmark
 const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const { _id: loggedInUserId } = req.user;
@@ -357,16 +355,11 @@ const likeDislikeComment = asyncHandler(async (req: Request, res: Response) => {
     await notification.populate("sender", "userName avatarUrl fullName");
     globalThis.io.to(authorIdString).emit("new_notification", notification);
   }
-  const payload = {
-    postId: comment.post.toString(),
-    commentId,
-    likes: updatedComment?.likes || [],
-  };
-  globalThis.io.emit("comment_like_updated", payload);
+
   return res
     .status(200)
     .json(
-      new ApiResponse(200, payload, "Comment like status updated successfully"),
+      new ApiResponse(200, null, "Comment like status updated successfully"),
     );
 });
 //* Get top 10 topics with most posts

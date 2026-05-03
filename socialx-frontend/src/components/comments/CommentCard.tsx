@@ -11,21 +11,29 @@ import { Heart, MoreHorizontal, Trash2 } from "lucide-react";
 import type { CommentType } from "@/types/comment.types";
 import { useDeleteComment } from "@/hooks/useDeleteComment";
 import { useAuth } from "@/store/authStore";
-import { useLike } from "@/hooks/useLike";
+import { useCommentLike } from "@/hooks/useCommentLike";
 
 interface CommentCardProps {
   comment: CommentType;
+  toggleCommentLike: ReturnType<typeof useCommentLike>["toggleCommentLike"];
+  isPending: boolean;
+  postId: string;
 }
 
-const CommentCard = ({ comment }: CommentCardProps) => {
+const CommentCard = ({
+  comment,
+  toggleCommentLike,
+  isPending,
+  postId,
+}: CommentCardProps) => {
   const { mutate: deleteComment } = useDeleteComment(comment._id);
-  const { toogleCommentLike, isCommentLikePending } = useLike();
+
   const user = useAuth((state) => state.user);
   const isMyComment = user?._id === comment.author._id;
   const isLiked = comment.likes?.includes(user?._id as string) || false;
   const likesCount = comment.likes?.length || 0;
   return (
-    <div className="group flex gap-3 py-4">
+    <div className="group flex gap-3 px-3 py-4">
       <Avatar className="mt-0.5 h-8 w-8 shrink-0 sm:h-10 sm:w-10">
         <AvatarImage
           src={comment.author.avatarUrl.url}
@@ -55,7 +63,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground h-6 w-6 shrink-0 rounded-full opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+                  className="text-muted-foreground h-6 w-6 shrink-0 rounded-full opacity-100"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -79,8 +87,10 @@ const CommentCard = ({ comment }: CommentCardProps) => {
 
         <div className="mt-2 flex gap-4">
           <button
-            onClick={() => toogleCommentLike(comment._id)}
-            disabled={isCommentLikePending}
+            onClick={() =>
+              toggleCommentLike({ commentId: comment._id, postId })
+            }
+            disabled={isPending}
             className={`group flex cursor-pointer items-center gap-1 transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
               isLiked
                 ? "text-red-500"
@@ -102,7 +112,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
             </div>
 
             <span className="pr-2 text-xs font-medium tabular-nums">
-              {likesCount > 0 ? likesCount : ""}
+              {likesCount > 0 ? likesCount : "0"}
             </span>
           </button>
         </div>

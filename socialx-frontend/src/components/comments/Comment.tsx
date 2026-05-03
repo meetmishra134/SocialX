@@ -4,11 +4,14 @@ import { useComment } from "@/hooks/useComment";
 import { useParams } from "react-router-dom";
 import { LoaderIcon, MessagesSquareIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCommentLikeSync } from "@/hooks/useCommentLikeSync";
+import { useCommentLike } from "@/hooks/useCommentLike";
+import { useAuth } from "@/store/authStore";
 
 const Comment = () => {
   const { postId } = useParams();
-  useCommentLikeSync(postId as string);
+  const { toggleCommentLike, isPending } = useCommentLike(
+    useAuth((state) => state.user)?._id as string,
+  );
   const {
     data,
     hasNextPage,
@@ -43,7 +46,12 @@ const Comment = () => {
                 exit={{ opacity: 0, x: 20, filter: "blur(10px)" }} // Keeping our slide-out fix!
                 transition={{ duration: 0.3 }}
               >
-                <CommentCard comment={comment} />
+                <CommentCard
+                  comment={comment}
+                  toggleCommentLike={toggleCommentLike}
+                  isPending={isPending}
+                  postId={postId as string}
+                />
               </motion.div>
             ))}
 

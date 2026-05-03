@@ -4,10 +4,8 @@ import { motion } from "motion/react";
 import { usePosts } from "@/hooks/usePosts";
 import SkeletonCard from "../posts/SkeletonCard";
 import { ArrowDownIcon, Loader } from "lucide-react";
-import { useLikeSync } from "@/hooks/useLikeSync";
 
 const GlobalFeed = () => {
-  useLikeSync();
   const {
     isLoading,
     isError,

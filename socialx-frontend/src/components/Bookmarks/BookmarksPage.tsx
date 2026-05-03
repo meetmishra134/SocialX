@@ -1,6 +1,6 @@
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
-import { Lock, BookmarkX } from "lucide-react";
+import { Lock, BookmarkX, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useGetBookmarks } from "@/hooks/useGetBookmarks";
@@ -8,7 +8,7 @@ import { motion } from "motion/react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const BookmarksPage = () => {
-  const { data: posts } = useGetBookmarks();
+  const { data: posts, isLoading, isError } = useGetBookmarks();
   useDocumentTitle("Bookmarks");
   return (
     <div className="border-border mx-auto min-h-screen w-full max-w-2xl border-x pb-20">
@@ -22,6 +22,16 @@ const BookmarksPage = () => {
       </div>
 
       <div className="flex flex-col">
+        {isError ? (
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <p className="text-muted-foreground">Failed to load bookmarks.</p>
+          </div>
+        ) : null}
+        {isLoading ? (
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <Loader className="animate-spin" size={25} />
+          </div>
+        ) : null}
         {posts?.length === 0 ? (
           <div className="flex min-h-[70vh] flex-col items-center justify-center px-3 text-center">
             <div className="bg-muted mb-2.5 flex h-16 w-16 items-center justify-center rounded-full">

@@ -36,7 +36,7 @@ export const withSuspense = (
   <Suspense
     fallback={
       <div className="flex min-h-[70vh] items-center justify-center">
-        <Loader size={25} />
+        <Loader size={25} className="animate-spin" />
       </div>
     }
   >

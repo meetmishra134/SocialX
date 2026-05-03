@@ -3,10 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Post } from "@/types/post.types";
 import PostCard from "../posts/PostCard";
 import { useSearch } from "@/hooks/useSearch";
-import { useLikeSync } from "@/hooks/useLikeSync";
 
 const TopicFeed = () => {
-  useLikeSync();
   const { topic } = useParams();
   const navigate = useNavigate();
   const { data: posts, isLoading } = useSearch(topic);
@@ -33,7 +31,7 @@ const TopicFeed = () => {
       <div className="flex flex-col gap-4 p-4">
         {isLoading ? (
           <div className="flex min-h-[70vh] items-center justify-center">
-            <Loader className="mx-auto mt-10" />
+            <Loader className="mx-auto mt-10 animate-spin" />
           </div>
         ) : posts?.length === 0 ? (
           <div className="text-muted-foreground mt-20 text-center">

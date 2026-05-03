@@ -7,7 +7,7 @@ import FollowButton from "./FollowButton";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const Connect = () => {
-  const { data: users, isLoading, isFetching } = useDiscovery();
+  const { data: users, isLoading, isFetching,isError } = useDiscovery();
   const queryClient = useQueryClient();
   useDocumentTitle("Connect");
   const handleFollowSuccess = (userId: string) => {
@@ -32,9 +32,14 @@ const Connect = () => {
       </div>
 
       <div className="flex flex-col gap-3">
+        {isError ? (  
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <p className="text-muted-foreground">Failed to load users.</p>
+          </div>
+        ) : null}
         {isLoading ? (
-          <div className="text-muted-foreground flex min-h-[70vh] items-center justify-center">
-            <Loader className="mx-auto animate-spin" />
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <Loader className="animate-spin" size={25} />
           </div>
         ) : null}
         {users?.length === 0 ? (

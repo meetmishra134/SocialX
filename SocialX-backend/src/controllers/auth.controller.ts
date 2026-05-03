@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/api.response";
 import { asyncHandler } from "../utils/async-handler";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 import type { Request, Response } from "express";
 import {
   emailVerificationMailGenContent,
@@ -13,6 +13,7 @@ import {
 } from "../utils/mail";
 import { RefreshTokenPayload } from "../types/jwt.types";
 import { OAuth2Client } from "google-auth-library";
+import path from "path";
 const generateAccessAndRefreshToken = async (userId: Types.ObjectId) => {
   try {
     const user = await User.findById(userId);
@@ -97,19 +98,24 @@ const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 30 * 60 * 1000, //30 minutes
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined,
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined,
     })
     .json(
       new ApiResponse(
         200,
         {
           user,
-          accessToken,
         },
         " login successful",
       ),
@@ -144,19 +150,24 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 30 * 60 * 1000, //30 minutes
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined, // 👈 Added for mobile stability
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined, // 👈 Added for mobile stability
     })
     .json(
       new ApiResponse(
         200,
         {
           user: loggedInUser,
-          accessToken: accessToken,
         },
         "User login successful",
       ),
@@ -181,12 +192,14 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     maxAge: 0,
+    path: "/",
+    domain: process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined, // 👈 Added for mobile stability
   };
   return res
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User logged out successfully"));
+    .json(new ApiResponse(200, null, "User logged out successfully"));
 });
 //* Current User
 const currentUser = asyncHandler(async (req: Request, res: Response) => {
@@ -293,12 +306,18 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 60 * 1000, //30 minutes
+        path: "/",
+        domain:
+          process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined,
       })
       .cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+        path: "/",
+        domain:
+          process.env.NODE_ENV === "production" ? ".socialx.tech" : undefined,
       })
       .json(
         new ApiResponse(

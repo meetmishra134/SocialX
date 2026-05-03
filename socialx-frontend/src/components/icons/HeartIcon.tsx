@@ -2,6 +2,7 @@ import { useLike } from "@/hooks/useLike";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import type { Post } from "@/types/post.types";
+import { useAuth } from "@/store/authStore";
 
 interface HeartIconProps {
   post: Post;
@@ -10,7 +11,8 @@ interface HeartIconProps {
 }
 
 const HeartIcon = ({ size = 21, post, currentUserId }: HeartIconProps) => {
-  const { toggleLike, isPending } = useLike();
+  const user = useAuth((state) => state.user);
+  const { toggleLike, isPending } = useLike(user?._id || "");
   const isLiked = post.likes?.includes(currentUserId) || false;
   const likesCount = post.likes?.length || 0;
   return (

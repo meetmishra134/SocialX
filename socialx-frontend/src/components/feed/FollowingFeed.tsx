@@ -4,10 +4,8 @@ import { motion } from "motion/react";
 import { useFollowingPosts } from "@/hooks/useFollwingPosts";
 import SkeletonCard from "../posts/SkeletonCard";
 import { ArrowDownIcon, Loader } from "lucide-react";
-import { useLikeSync } from "@/hooks/useLikeSync";
 
 const FollowingFeed = () => {
-  useLikeSync();
   const {
     isError,
     data,

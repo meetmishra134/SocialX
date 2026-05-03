@@ -62,6 +62,8 @@ const LoginForm = () => {
           },
         );
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,34 +182,29 @@ const LoginForm = () => {
                   )}
                 </Button>
 
-                {/* 2. The Visual Divider */}
                 <div className="relative my-4 w-full">
                   <div className="absolute inset-0 flex items-center">
                     <span className="border-border w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    {/* Note: Change 'bg-background' to whatever your card's background color class is if needed */}
                     <span className="bg-background text-muted-foreground px-2">
                       Or
                     </span>
                   </div>
                 </div>
 
-                {/* 3. The Google Login Button */}
-                <div className="mb-2 w-full px-2">
-                  {/* Assuming you are using @react-oauth/google */}
+                <div className="flex w-full justify-center">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={() => console.log("Login Failed")}
                     useOneTap
-                    width="100%"
+                    width="320"
                     size="large"
                     theme="filled_black"
                     text="continue_with"
                   />
                 </div>
 
-                {/* 4. Your Existing Sign Up Link */}
                 <p className="text-muted-foreground mt-2 text-sm">
                   Don't have an account?{" "}
                   <Link
