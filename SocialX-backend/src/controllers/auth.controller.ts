@@ -6,14 +6,13 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { Types } from "mongoose";
 import type { Request, Response } from "express";
-import {
-  emailVerificationMailGenContent,
-  forgotPasswordMailGenContent,
-  sendEmail,
-} from "../utils/mail";
 import { RefreshTokenPayload } from "../types/jwt.types";
 import { OAuth2Client } from "google-auth-library";
-import path from "path";
+import {
+  getPasswordResetEmailTemplate,
+  getVerificationEmailTemplate,
+} from "../utils/email.template";
+import { sendEmail } from "../utils/email";
 const generateAccessAndRefreshToken = async (userId: Types.ObjectId) => {
   try {
     const user = await User.findById(userId);
@@ -260,16 +259,16 @@ const resendEmailVerification = asyncHandler(
     user.emailVerificationExpiry = tokenExpiry;
 
     await user.save({ validateBeforeSave: false });
-
-    await sendEmail({
-      email: user?.email,
-      subject: "Verify your email",
-      mailgenContent: () =>
-        emailVerificationMailGenContent(
-          user.userName,
-          `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`,
-        ),
-    });
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`;
+    const emailHtml = getVerificationEmailTemplate(
+      user.userName,
+      verificationLink,
+    );
+    sendEmail({
+      to: user.email,
+      subject: "Verify your SocialX Account",
+      htmlContent: emailHtml,
+    }).catch((err) => console.error("Failed to resend background email:", err));
     return res
       .status(200)
       .json(new ApiResponse(200, "Mail has been sent to your email"));
@@ -346,24 +345,18 @@ const forgotPasswordRequest = asyncHandler(
     user.forgotPasswordToken = hashedToken;
     user.forgotPasswordExpiry = tokenExpiry;
     await user.save({ validateBeforeSave: false });
-
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${unHashedToken}`;
+    const emailHtml = getPasswordResetEmailTemplate(user.userName, resetLink);
     await sendEmail({
-      email: user?.email,
-      subject: "Verify your email",
-      mailgenContent: () =>
-        forgotPasswordMailGenContent(
-          user.userName,
-          `${process.env.FRONTEND_URL}/reset-password?token=${unHashedToken}`,
-        ),
-    });
+      to: user.email,
+      subject: "Reset your SocialX Password",
+      htmlContent: emailHtml,
+    }).catch((err) =>
+      console.error("Failed to send password reset email:", err),
+    );
     return res
       .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "Password reset email has been sent to your email",
-        ),
-      );
+      .json(new ApiResponse(200, "Password reset email sent successfully"));
   },
 );
 //* Reset forgot password

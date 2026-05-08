@@ -7,9 +7,6 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  // if (res.headersSent) {
-  //   return;
-  // }
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
       statusCode: err.statusCode,
@@ -18,7 +15,6 @@ export const errorHandler = (
       success: false,
     });
   }
-  //   console.error("Unhandled error:", err);
 
   return res.status(500).json({
     success: false,

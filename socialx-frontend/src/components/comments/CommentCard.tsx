@@ -7,11 +7,13 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { Heart, MoreHorizontal, Trash2 } from "lucide-react";
+import { Heart, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { CommentType } from "@/types/comment.types";
 import { useDeleteComment } from "@/hooks/useDeleteComment";
 import { useAuth } from "@/store/authStore";
 import { useCommentLike } from "@/hooks/useCommentLike";
+import { useState } from "react";
+import CommentInput from "./CommentInput";
 
 interface CommentCardProps {
   comment: CommentType;
@@ -26,6 +28,7 @@ const CommentCard = ({
   isPending,
   postId,
 }: CommentCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
   const { mutate: deleteComment } = useDeleteComment(comment._id);
 
   const user = useAuth((state) => state.user);
@@ -76,46 +79,65 @@ const CommentCard = ({
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer text-neutral-300"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
 
-        <span className="text-foreground/90 mt-1 text-sm wrap-break-word whitespace-pre-wrap">
-          {comment.text}
-        </span>
+        {isEditing ? (
+          <CommentInput
+            initialValue={comment?.text}
+            isEditMode={true}
+            commentId={comment?._id}
+            onSuccess={() => setIsEditing(false)}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <span className="text-foreground/90 mt-1 text-sm wrap-break-word whitespace-pre-wrap">
+            {comment?.text}
+          </span>
+        )}
 
-        <div className="mt-2 flex gap-4">
-          <button
-            onClick={() =>
-              toggleCommentLike({ commentId: comment._id, postId })
-            }
-            disabled={isPending}
-            className={`group flex cursor-pointer items-center gap-1 transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-              isLiked
-                ? "text-red-500"
-                : "text-muted-foreground hover:text-red-500"
-            }`}
-          >
-            <div
-              className={`flex items-center justify-center rounded-full p-1.5 transition-colors duration-200 ${
+        {!isEditing && (
+          <div className="mt-2 flex gap-4">
+            <button
+              onClick={() =>
+                toggleCommentLike({ commentId: comment._id, postId })
+              }
+              disabled={isPending}
+              className={`group flex cursor-pointer items-center gap-1 transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                 isLiked
-                  ? "bg-red-500/10 text-red-500"
-                  : "text-muted-foreground group-hover:bg-red-500/10 group-hover:text-red-500"
+                  ? "text-red-500"
+                  : "text-muted-foreground hover:text-red-500"
               }`}
             >
-              <Heart
-                className="h-4 w-4 transition-transform active:scale-75"
-                fill={isLiked ? "currentColor" : "none"}
-                strokeWidth={isLiked ? 0 : 2}
-              />
-            </div>
+              <div
+                className={`flex items-center justify-center rounded-full p-1.5 transition-colors duration-200 ${
+                  isLiked
+                    ? "bg-red-500/10 text-red-500"
+                    : "text-muted-foreground group-hover:bg-red-500/10 group-hover:text-red-500"
+                }`}
+              >
+                <Heart
+                  className="h-4 w-4 transition-transform active:scale-75"
+                  fill={isLiked ? "currentColor" : "none"}
+                  strokeWidth={isLiked ? 0 : 2}
+                />
+              </div>
 
-            <span className="pr-2 text-xs font-medium tabular-nums">
-              {likesCount > 0 ? likesCount : "0"}
-            </span>
-          </button>
-        </div>
+              <span className="pr-2 text-xs font-medium tabular-nums">
+                {likesCount > 0 ? likesCount : "0"}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

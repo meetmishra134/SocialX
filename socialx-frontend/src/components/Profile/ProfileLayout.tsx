@@ -138,12 +138,14 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
             <>
               <Button
                 size="sm"
-                className="rounded-full px-4"
+                className="cursor-pointer rounded-full px-4"
                 onClick={() => setOpen(!open)}
               >
                 Edit
               </Button>
-              <ProfileSettings />
+              <div className="lg:hidden">
+                <ProfileSettings />
+              </div>
             </>
           ) : (
             <FollowButton

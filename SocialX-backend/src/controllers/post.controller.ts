@@ -10,6 +10,7 @@ import { UploadApiResponse } from "cloudinary";
 import cloudinary from "../server";
 import { User } from "../models/user.model";
 import { Notification } from "../models/notification.model";
+import mongoose from "mongoose";
 
 //* Create a post (Text || Image)
 const createPost = asyncHandler(async (req: Request, res: Response) => {
@@ -141,7 +142,11 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
 const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const { postId } = req.params;
-  const post = await Post.findById(postId).select("likes author");
+  if (!mongoose.isValidObjectId(postId)) {
+    throw new ApiError(400, "Invalid Post ID format");
+  }
+  const targetPostId = new mongoose.Types.ObjectId(postId as string);
+  const post = await Post.findById(targetPostId).select("likes author");
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
@@ -150,7 +155,7 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
   let updatedPost;
   if (hasLiked) {
     updatedPost = await Post.findByIdAndUpdate(
-      postId,
+      targetPostId,
       { $pull: { likes: loggedInUserId } },
       { new: true, select: "likes" },
     );
@@ -158,11 +163,11 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
       recipient: post.author.toString(),
       sender: loggedInUserId,
       type: "like",
-      post: postId,
+      post: targetPostId,
     });
   } else {
     updatedPost = await Post.findByIdAndUpdate(
-      postId,
+      targetPostId,
       { $addToSet: { likes: loggedInUserId } },
       { new: true, select: "likes author" },
     );
@@ -173,18 +178,11 @@ const likeDislikePost = asyncHandler(async (req: Request, res: Response) => {
       recipient: updatedPost.author,
       sender: loggedInUserId,
       type: "like",
-      post: postId,
+      post: targetPostId,
     });
     await notification.populate("sender", "userName avatarUrl fullName");
     globalThis.io.to(authorIdString).emit("new_notification", notification);
   }
-
-  // const payload = {
-  //   postId,
-  //   likes: updatedPost?.likes || [],
-  // };
-  // globalThis.io.emit("like_updated", payload);
-
   return res
     .status(200)
     .json(new ApiResponse(200, null, "Post like status updated successfully"));
@@ -195,15 +193,19 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
   const { postId } = req.params;
   const { comment } = req.body;
+  if (!mongoose.isValidObjectId(postId)) {
+    throw new ApiError(400, "Invalid Post ID format");
+  }
+  const targetPostId = new mongoose.Types.ObjectId(postId as string);
 
-  const post = await Post.findById(postId);
+  const post = await Post.findById(targetPostId);
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
 
   const comments = await Comment.create({
     author: loggedInUserId,
-    post: postId,
+    post: targetPostId,
     text: comment,
   });
 
@@ -212,7 +214,7 @@ const commentOnPost = asyncHandler(async (req: Request, res: Response) => {
       recipient: post.author,
       sender: loggedInUserId,
       type: "comment",
-      post: post._id,
+      post: targetPostId,
       comment: comments._id,
       isRead: false,
     });
@@ -276,25 +278,61 @@ const viewComments = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
+//* Edit Comment on a post
+const editComment = asyncHandler(async (req: Request, res: Response) => {
+  const { _id: loggedInUserId } = req.user;
+  const { commentId } = req.params;
+  const { text } = req.body;
+
+  const comment = await Comment.findById(commentId);
+  if (!comment) {
+    throw new ApiError(404, "Comment not found");
+  }
+  if (comment.author.toString() !== loggedInUserId.toString()) {
+    throw new ApiError(403, "Unauthorized to edit this comment");
+  }
+  const updatedComment = await Comment.findByIdAndUpdate(
+    commentId,
+    { text },
+    { new: true },
+  ).populate("author", "userName fullName avatarUrl");
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { comment: updatedComment },
+        "Comment updated successfully",
+      ),
+    );
+});
 //* Toogle bookmark
 const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const { _id: loggedInUserId } = req.user;
-  const post = await Post.findById(postId);
+
+  if (!mongoose.isValidObjectId(postId)) {
+    throw new ApiError(400, "Invalid Post ID format");
+  }
+  const targetPostId = new mongoose.Types.ObjectId(postId as string);
+
+  const post = await Post.findById(targetPostId);
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
+
   const hasBookmarked = await User.exists({
     _id: loggedInUserId,
-    bookmarks: postId,
+    bookmarks: targetPostId,
   });
+
   if (hasBookmarked) {
     await User.findByIdAndUpdate(loggedInUserId, {
-      $pull: { bookmarks: postId },
+      $pull: { bookmarks: targetPostId },
     });
   } else {
     await User.findByIdAndUpdate(loggedInUserId, {
-      $addToSet: { bookmarks: postId },
+      $addToSet: { bookmarks: targetPostId },
     });
   }
 
@@ -389,6 +427,7 @@ export {
   viewComments,
   viewPost,
   getUserPosts,
+  editComment,
   toggleBookmark,
   searchPostByTopic,
   likeDislikeComment,

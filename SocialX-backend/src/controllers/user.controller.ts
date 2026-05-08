@@ -8,6 +8,7 @@ import { Post } from "../models/post.model";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 import fs from "fs/promises";
 import { Notification } from "../models/notification.model";
+import mongoose from "mongoose";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -125,6 +126,9 @@ const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
     },
   );
   await User.findByIdAndDelete(loggedInUserId);
+  await Notification.deleteMany({
+    $or: [{ sender: loggedInUserId }, { recipient: loggedInUserId }],
+  });
   return res
     .status(200)
     .clearCookie("accessToken", {
@@ -179,7 +183,10 @@ const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
 const followUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
-
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid User ID format");
+  }
+  const targetObjectId = new mongoose.Types.ObjectId(userId as string);
   if (loggedInUserId.toString() === userId) {
     throw new ApiError(400, "You cannot follow yourself");
   }
@@ -189,25 +196,27 @@ const followUser = asyncHandler(async (req: Request, res: Response) => {
   }
   const alreadyFollowing = await User.exists({
     _id: loggedInUserId,
-    following: userId,
+    following: targetObjectId,
   });
   if (alreadyFollowing) {
     throw new ApiError(400, "You are already following this user");
   }
   await User.findByIdAndUpdate(loggedInUserId, {
-    $addToSet: { following: userId },
+    $addToSet: { following: targetObjectId },
   });
-  await User.findByIdAndUpdate(userId, {
+  await User.findByIdAndUpdate(targetObjectId, {
     $addToSet: { followers: loggedInUserId },
   });
   if (userToFollow.isEmailVerified) {
     const notification = await Notification.create({
-      recipient: userId,
+      recipient: targetObjectId,
       sender: loggedInUserId,
       type: "follow",
     });
     await notification.populate("sender", "userName avatarUrl fullName");
-    globalThis.io.to(userId).emit("new_notification", notification);
+    globalThis.io
+      .to(targetObjectId.toString())
+      .emit("new_notification", notification);
   }
   return res
     .status(200)
@@ -217,24 +226,29 @@ const followUser = asyncHandler(async (req: Request, res: Response) => {
 const unfollowUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { _id: loggedInUserId } = req.user;
+  const userIdStr = Array.isArray(userId) ? userId[0] : userId;
+  if (!mongoose.isValidObjectId(userIdStr)) {
+    throw new ApiError(400, "Invalid User ID format");
+  }
+  const targetObjectId = new mongoose.Types.ObjectId(userIdStr);
   if (loggedInUserId.toString() === userId) {
     throw new ApiError(400, "You cannot unfollow yourself");
   }
   const isFollowing = await User.exists({
     _id: loggedInUserId,
-    following: userId,
+    following: targetObjectId,
   });
   if (!isFollowing) {
     throw new ApiError(400, "You are not following this user");
   }
   await User.findByIdAndUpdate(loggedInUserId, {
-    $pull: { following: userId },
+    $pull: { following: targetObjectId },
   });
-  await User.findByIdAndUpdate(userId, {
+  await User.findByIdAndUpdate(targetObjectId, {
     $pull: { followers: loggedInUserId },
   });
   await Notification.deleteMany({
-    recipient: userId,
+    recipient: targetObjectId,
     sender: loggedInUserId,
     type: "follow",
   });

@@ -24,9 +24,11 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const login = useAuth((state) => state.login);
   const navigate = useNavigate();
 
@@ -156,13 +158,29 @@ const LoginForm = () => {
                       Forgot?
                     </p>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="********"
-                    {...register("password", { required: true })}
-                    className={`${errors.password ? "border-destructive" : ""}`}
-                  />
+
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="********"
+                      {...register("password", { required: true })}
+                      className={`pr-10 ${errors.password ? "border-destructive" : ""}`}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer transition-colors"
+                    >
+                      {showPassword ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
                   {errors.password && (
                     <p className="text-destructive text-xs">
                       {errors.password.message}
@@ -205,7 +223,7 @@ const LoginForm = () => {
                   />
                 </div>
 
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p className="text-muted-foreground mt-2.5 text-sm">
                   Don't have an account?{" "}
                   <Link
                     to="/register"

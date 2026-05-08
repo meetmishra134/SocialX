@@ -26,7 +26,7 @@ const GlobalFeed = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-y-4 px-3 py-4"
+      className="mx-auto flex w-full max-w-2xl flex-col gap-y-4 px-3 py-2"
     >
       {isLoading ? (
         [1, 2, 3].map((index) => <SkeletonCard key={index} />)

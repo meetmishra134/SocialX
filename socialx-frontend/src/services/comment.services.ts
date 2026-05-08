@@ -29,4 +29,14 @@ export const commentServices = {
     const res = await api.delete(`/posts/delete-comment/${commentId}`);
     return res.data;
   },
+  editComment: async ({
+    commentId,
+    text,
+  }: {
+    commentId: string;
+    text: string;
+  }) => {
+    const res = await api.patch(`/posts/edit-comment/${commentId}`, { text });
+    return res.data;
+  },
 };

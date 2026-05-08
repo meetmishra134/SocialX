@@ -21,9 +21,11 @@ import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
 import { authService } from "@/services/auth.services";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { Eye, EyeOff } from "lucide-react";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const {
     register,
@@ -142,14 +144,38 @@ const RegisterForm = () => {
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="********"
-                    className={`${errors.password ? "border-destructive" : ""}`}
-                    {...register("password", { required: true })}
-                  />
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <p
+                      className="text-muted-foreground cursor-pointer text-sm hover:text-neutral-200 hover:underline"
+                      onClick={() => navigate("/forgot-password")}
+                    >
+                      Forgot?
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="********"
+                      {...register("password", { required: true })}
+                      className={`pr-10 ${errors.password ? "border-destructive" : ""}`}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer transition-colors"
+                    >
+                      {showPassword ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
                   {errors.password && (
                     <p className="text-destructive text-xs">
                       {errors.password.message}

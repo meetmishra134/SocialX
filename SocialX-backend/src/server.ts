@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
-
 import connectDatabase from "./config/database";
 import { httpServer } from "./app";
+import { initNotificationCleanup } from "./cron/notificationCleaner.cron";
+import { initWeekelyHighlightCron } from "./cron/weekelyHighlights.cron";
 
 dotenv.config();
 cloudinary.config({
@@ -16,6 +17,8 @@ const port = Number(process.env.PORT) || 9000;
 connectDatabase()
   .then(() => {
     httpServer.listen(port, "0.0.0.0", () => {
+      initNotificationCleanup();
+      initWeekelyHighlightCron();
       console.log(`Server is running on port ${port}`);
     });
   })

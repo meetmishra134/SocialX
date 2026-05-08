@@ -19,6 +19,7 @@ import {
   userResetForgotPasswordValidator,
 } from "../validators/auth.validator";
 import { verifyJwt } from "../middlewares/auth.middleware";
+import { rateLimiterMiddleware } from "../middlewares/rateLimiter.middleware";
 
 //! Unsecured Routes....
 const router = Router();
@@ -33,7 +34,11 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/google").post(googleLogin);
 router
   .route("/forgot-password")
-  .post(validate(userForgotPasswordValidator), forgotPasswordRequest);
+  .post(
+    validate(userForgotPasswordValidator),
+    rateLimiterMiddleware,
+    forgotPasswordRequest,
+  );
 router
   .route("/reset-password/:resetToken")
   .post(validate(userResetForgotPasswordValidator), resetForgotPassword);
@@ -43,6 +48,6 @@ router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/current-user").get(verifyJwt, currentUser);
 router
   .route("/resend-email-verification")
-  .post(verifyJwt, resendEmailVerification);
+  .post(verifyJwt, rateLimiterMiddleware, resendEmailVerification);
 
 export default router;

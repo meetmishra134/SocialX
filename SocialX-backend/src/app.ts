@@ -10,6 +10,7 @@ import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import path from "path";
+import rateLimit from "express-rate-limit";
 
 declare global {
   var io: Server;

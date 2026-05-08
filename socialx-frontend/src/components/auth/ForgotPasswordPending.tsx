@@ -27,7 +27,8 @@ const ForgotPasswordPending = () => {
     try {
       setIsSubmitting(true);
       const res = await api.post("/auth/forgot-password", data);
-      toast.success(res.data || "Reset link sent to your email!", {
+
+      toast.success(res.data?.data || "Reset link sent to your email!", {
         position: "top-center",
       });
     } catch (error: unknown) {

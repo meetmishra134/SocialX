@@ -13,6 +13,7 @@ import {
   viewPost,
   likeDislikeComment,
   getPostsByTopic,
+  editComment,
 } from "../controllers/post.controller";
 import { verifyJwt } from "../middlewares/auth.middleware";
 
@@ -31,6 +32,7 @@ router.route("/comment/:postId").post(verifyJwt, commentOnPost);
 router.route("/like/:postId").post(verifyJwt, likeDislikePost);
 router.route("/like-comment/:commentId").post(verifyJwt, likeDislikeComment);
 router.route("/comments/:postId").get(verifyJwt, viewComments);
+router.route("/edit-comment/:commentId").patch(verifyJwt, editComment);
 
 router.route("/delete-comment/:commentId").delete(verifyJwt, deleteComment);
 

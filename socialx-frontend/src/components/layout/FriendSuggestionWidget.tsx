@@ -7,14 +7,6 @@ import FollowButton from "../connect/FollowButton";
 const FriendSuggestionWidget = () => {
   const { data: friendsSuggestion, isLoading, isRefetching } = useDiscovery();
 
-  if (isLoading || isRefetching) {
-    return (
-      <div className="bg-card flex h-32 w-full max-w-[350px] items-center justify-center rounded-2xl border">
-        <Loader className="text-muted-foreground animate-spin" size={24} />
-      </div>
-    );
-  }
-
   if (!friendsSuggestion || friendsSuggestion.length === 0) {
     return (
       <div className="bg-card w-full max-w-[350px] rounded-2xl border py-1">
@@ -35,41 +27,47 @@ const FriendSuggestionWidget = () => {
       </h2>
 
       <div className="flex flex-col">
-        {friendsSuggestion.slice(0, 3).map((friend: UserCardType) => (
-          <div
-            key={friend._id}
-            className="hover:bg-muted/50 flex items-center justify-between px-4 py-3 transition-colors"
-          >
-            <Link
-              to={`/profile/${friend._id}`}
-              className="flex min-w-0 flex-1 items-center gap-3"
-            >
-              <img
-                src={friend.avatarUrl?.url || "/default-avatar.png"}
-                alt={friend.fullName}
-                className="bg-muted h-10 w-10 shrink-0 rounded-full object-cover"
-              />
-
-              <div className="flex min-w-0 flex-col">
-                <span className="text-foreground truncate text-[13px] leading-tight font-bold hover:underline">
-                  {friend.fullName}
-                </span>
-                <span className="text-muted-foreground truncate text-[12px] leading-tight">
-                  @{friend.userName}
-                </span>
-              </div>
-            </Link>
-
-            <div className="ml-3 shrink-0">
-              <FollowButton
-                userId={friend._id}
-                initialIsFollowing={friend.isFollowing}
-                followsMe={friend.followsMe}
-                isLoading={false}
-              />
-            </div>
+        {isLoading || isRefetching ? (
+          <div className="flex h-32 items-center justify-center">
+            <Loader className="text-muted-foreground animate-spin" size={24} />
           </div>
-        ))}
+        ) : (
+          friendsSuggestion.slice(0, 3).map((friend: UserCardType) => (
+            <div
+              key={friend._id}
+              className="hover:bg-muted/50 flex items-center justify-between px-4 py-3 transition-colors"
+            >
+              <Link
+                to={`/profile/${friend._id}`}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                <img
+                  src={friend.avatarUrl?.url || "/default-avatar.png"}
+                  alt={friend.fullName}
+                  className="bg-muted h-10 w-10 shrink-0 rounded-full object-cover"
+                />
+
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-foreground truncate text-[13px] leading-tight font-bold hover:underline">
+                    {friend.fullName}
+                  </span>
+                  <span className="text-muted-foreground truncate text-[12px] leading-tight">
+                    @{friend.userName}
+                  </span>
+                </div>
+              </Link>
+
+              <div className="ml-3 shrink-0">
+                <FollowButton
+                  userId={friend._id}
+                  initialIsFollowing={friend.isFollowing}
+                  followsMe={friend.followsMe}
+                  isLoading={false}
+                />
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <Link
