@@ -31,6 +31,7 @@ import SharePosts from "./SharePosts";
 import { useState } from "react";
 import ImagePreview from "../ui/ImagePreview";
 import { AnimatePresence } from "motion/react";
+import CommentInput from "../comments/CommentInput";
 
 interface PostCardProps {
   post: Post;
@@ -40,10 +41,12 @@ interface PostCardProps {
 const PostCard = ({ post, variant }: PostCardProps) => {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [focusTrigger, setFocusTrigger] = useState(0);
   const { user } = useAuth();
   const { mutate: deletePost } = useDeletePost();
   const hasMultipleImages = (post?.images?.length ?? 0) > 1;
-  const { data } = useComment(post?._id);
+  const { data } = useComment(post?._id, !!post);
   const comments = data?.pages.flatMap((page) => page.comments) || [];
   const hasSingleImage = post?.images && (post.images?.length ?? 0) === 1;
   const previewImages = (post?.images ?? []).map((image) =>
@@ -59,10 +62,20 @@ const PostCard = ({ post, variant }: PostCardProps) => {
     : "Check out this post on SocialX!";
 
   const handlePostClick = (postId: string) => {
-    navigate(`/post/${postId}`);
+    navigate(`/post/${postId}`, { state: { autoFocusComment: true } });
   };
   const handleCommentClick = () => {
-    navigate(`/post/${post?._id}`, { state: { autoFocusComment: true } });
+    if (variant === "detailed") {
+      setIsCommentOpen(false);
+    } else {
+      setIsCommentOpen((prev) => {
+        const next = !prev;
+        if (next) {
+          setFocusTrigger((prev) => prev + 1);
+        }
+        return next;
+      });
+    }
   };
   const iNotFeed = variant === "detailed" || variant === "profile";
   return (
@@ -70,9 +83,9 @@ const PostCard = ({ post, variant }: PostCardProps) => {
       <Card
         className={`bg-card mx-auto w-full max-w-2xl gap-0 overflow-visible py-3 ${
           iNotFeed
-            ? "rounded-none border-0 shadow-none"
+            ? "border-border bg-background rounded-none border-x-0 border-t-0 border-b shadow-none"
             : "rounded-xl border border-gray-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-        } `}
+        }`}
       >
         <CardHeader className="flex flex-row items-start justify-between gap-3 px-4 pb-2 sm:px-6">
           <div className="flex flex-row items-start gap-2.5">
@@ -226,6 +239,11 @@ const PostCard = ({ post, variant }: PostCardProps) => {
           </div>
 
           <BookmarkIcon postId={post?._id} size={20} />
+        </div>
+        <div className="mt-1.5 px-2">
+          {isCommentOpen && (
+            <CommentInput postId={post?._id} focusTrigger={focusTrigger} />
+          )}
         </div>
       </Card>
       <AnimatePresence>

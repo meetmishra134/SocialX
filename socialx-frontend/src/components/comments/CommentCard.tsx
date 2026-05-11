@@ -61,7 +61,7 @@ const CommentCard = ({
           </div>
 
           {isMyComment && (
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -81,7 +81,9 @@ const CommentCard = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer text-neutral-300"
-                  onClick={() => setIsEditing(true)}
+                  onClick={() =>
+                    requestAnimationFrame(() => setIsEditing(true))
+                  }
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit
@@ -93,11 +95,13 @@ const CommentCard = ({
 
         {isEditing ? (
           <CommentInput
+            key={comment?._id}
             initialValue={comment?.text}
-            isEditMode={true}
+            isEditMode={isEditing}
             commentId={comment?._id}
             onSuccess={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)}
+            postId={postId}
           />
         ) : (
           <span className="text-foreground/90 mt-1 text-sm wrap-break-word whitespace-pre-wrap">

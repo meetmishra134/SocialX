@@ -1,7 +1,7 @@
 import { commentServices } from "@/services/comment.services";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export const useComment = (postId: string | undefined) => {
+export const useComment = (postId: string | undefined, postLoaded: boolean) => {
   return useInfiniteQuery({
     queryKey: ["Comments", postId],
     queryFn: ({ pageParam }) =>
@@ -10,10 +10,11 @@ export const useComment = (postId: string | undefined) => {
         pageParam,
         limit: 3,
       }),
+
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       return lastPage.nextPage ?? undefined;
     },
-    enabled: !!postId,
+    enabled: !!postId && postLoaded,
   });
 };

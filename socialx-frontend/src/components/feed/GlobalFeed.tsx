@@ -39,7 +39,7 @@ const GlobalFeed = () => {
       ) : (
         <>
           {posts?.map((post: Post) => (
-            <PostCard key={post._id} post={post} />
+            <PostCard key={post._id} post={post} variant="feed" />
           ))}
 
           <div className="flex w-full justify-center py-6">
@@ -47,7 +47,7 @@ const GlobalFeed = () => {
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
               >
                 {isFetchingNextPage ? (
                   <Loader className="animate-spin" />

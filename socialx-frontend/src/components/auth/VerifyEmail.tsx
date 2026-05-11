@@ -90,9 +90,7 @@ const VerifyEmail = () => {
             </p>
           )}
 
-          {status === "Success" && (
-            <p>Your account is ready. Redirecting you to the login page...</p>
-          )}
+          {status === "Success" && <p>Redirecting ...</p>}
 
           {status === "Error" && (
             <div className="space-y-4">

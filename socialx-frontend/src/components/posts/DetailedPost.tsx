@@ -9,9 +9,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const DetailedPost = () => {
   const { postId } = useParams();
-
   const { data: post, isLoading, error } = useSinglePost(postId);
-
   const navigate = useNavigate();
   const plainText = post?.text.replace(/<[^>]+>/g, "");
   useDocumentTitle(post ? plainText.slice(0, 20) + "..." : "Post");
@@ -42,11 +40,11 @@ const DetailedPost = () => {
       {post && (
         <>
           <div className="border-b border-gray-700">
-            <PostCard post={post} />
+            <PostCard post={post} variant="detailed" />
           </div>
 
           <div className="border-b border-gray-700 px-4 py-3">
-            <CommentInput />
+            <CommentInput postId={postId as string} />
           </div>
         </>
       )}

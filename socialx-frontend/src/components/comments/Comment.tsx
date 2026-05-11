@@ -6,12 +6,14 @@ import { LoaderIcon, MessagesSquareIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCommentLike } from "@/hooks/useCommentLike";
 import { useAuth } from "@/store/authStore";
+import { useSinglePost } from "@/hooks/useSinglePost";
 
 const Comment = () => {
   const { postId } = useParams();
   const { toggleCommentLike, isPending } = useCommentLike(
     useAuth((state) => state.user)?._id as string,
   );
+  const { data: post } = useSinglePost(postId);
   const {
     data,
     hasNextPage,
@@ -19,7 +21,7 @@ const Comment = () => {
     isLoading,
     isError,
     isFetchingNextPage,
-  } = useComment(postId);
+  } = useComment(postId, !!post);
   const comments = data?.pages.flatMap((page) => page.comments) || [];
   return (
     <div>

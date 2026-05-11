@@ -144,16 +144,7 @@ const RegisterForm = () => {
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <p
-                      className="text-muted-foreground cursor-pointer text-sm hover:text-neutral-200 hover:underline"
-                      onClick={() => navigate("/forgot-password")}
-                    >
-                      Forgot?
-                    </p>
-                  </div>
-
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Input
                       id="password"

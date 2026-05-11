@@ -5,30 +5,34 @@ import { SendHorizontal, X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useForm } from "react-hook-form";
 import { useCreateComment } from "@/hooks/useCreateComment";
-import { useLocation, useParams } from "react-router-dom";
+
 import { useEffect } from "react";
 import { useEditComment } from "@/hooks/useEditComment";
 
 interface CommentInputProps {
+  postId: string; // Optional, only needed for creating a comment
   initialValue?: string;
   isEditMode?: boolean;
+  isCommentInputOpen?: boolean;
   commentId?: string;
   onCancel?: () => void;
   onSuccess?: () => void;
+  focusTrigger?: number;
 }
 
 const CommentInput = ({
+  postId,
   initialValue,
   isEditMode,
   commentId,
   onCancel,
   onSuccess,
+
+  focusTrigger,
 }: CommentInputProps) => {
   const user = useAuth((state) => state.user);
-  const { postId } = useParams() as { postId: string };
   const { mutate: createComment, isPending } = useCreateComment();
   const { mutate: editComment, isPending: isEditPending } = useEditComment();
-  const location = useLocation();
 
   const {
     register,
@@ -41,13 +45,11 @@ const CommentInput = ({
       text: initialValue || "",
     },
   });
-
   useEffect(() => {
-    if (location.state?.autoFocusComment || isEditMode) {
+    if (!isEditMode && focusTrigger) {
       setFocus("text");
     }
-  }, [location.state, setFocus, isEditMode]);
-
+  }, [focusTrigger, isEditMode, setFocus]);
   const onSubmit = (data: { text: string }) => {
     if (isEditMode && commentId) {
       editComment(
@@ -75,7 +77,6 @@ const CommentInput = ({
     <div
       className={`flex w-full items-start gap-2 ${isEditMode ? "mt-2" : ""}`}
     >
-      {/* FIX 3: Hide Avatar if in Edit Mode */}
       {!isEditMode && (
         <Avatar className="mt-1 h-7 w-7 sm:h-10 sm:w-10">
           <AvatarImage src={user?.avatarUrl?.url} alt={user?.userName} />
@@ -89,6 +90,7 @@ const CommentInput = ({
           className="bg-muted/50 focus-within:border-border focus-within:bg-background relative flex items-center rounded-2xl border border-transparent p-1 shadow-sm transition-colors duration-200"
         >
           <Textarea
+            autoFocus={isEditMode}
             placeholder={
               errors.text ? "Comment is required" : "Write a comment..."
             }
@@ -105,14 +107,13 @@ const CommentInput = ({
                 e.preventDefault();
                 handleSubmit(onSubmit)();
               }
-              // FIX 1: Use "Escape" instead of "ESC"
+
               if (e.key === "Escape" && isEditMode && onCancel) {
                 onCancel();
               }
             }}
           />
 
-          {/* FIX 2: Group buttons in a flex container so they don't overlap */}
           <div className="absolute right-2 bottom-1 flex items-center gap-1">
             {isEditMode && (
               <Button

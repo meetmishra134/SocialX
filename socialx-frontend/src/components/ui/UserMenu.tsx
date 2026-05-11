@@ -14,12 +14,14 @@ import { toast } from "sonner";
 import { userService } from "@/services/user.services";
 import DeleteAccountModal from "./DeleteAccountModal";
 import { useState } from "react";
+import { Skeleton } from "./skeleton";
 
 const UserMenu = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { fullName, userName, avatarUrl } =
     useAuth((state) => state.user) || {};
   const logout = useAuth((state) => state.logout);
+  const isCheckingAuth = useAuth((state) => state.isCheckingAuth);
   const clearSession = useAuth((state) => state.clearSession);
   const navigate = useNavigate();
   const handleLogout = async () => {
@@ -54,6 +56,17 @@ const UserMenu = () => {
       }
     }
   };
+  if (isCheckingAuth) {
+    return (
+      <div className="mt-auto flex w-full items-center gap-2 rounded-full p-2">
+        <Skeleton className="size-9 shrink-0 rounded-full sm:size-10" />
+        <div className="hidden flex-1 flex-col gap-1 lg:flex">
+          <Skeleton className="h-3.5 w-24 rounded" />
+          <Skeleton className="h-3 w-16 rounded" />
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <DropdownMenu>
