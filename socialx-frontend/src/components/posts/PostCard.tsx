@@ -242,7 +242,11 @@ const PostCard = ({ post, variant }: PostCardProps) => {
         </div>
         <div className="mt-1.5 px-2">
           {isCommentOpen && (
-            <CommentInput postId={post?._id} focusTrigger={focusTrigger} />
+            <CommentInput
+              postId={post?._id}
+              focusTrigger={focusTrigger}
+              setIsCommentInputOpen={setIsCommentOpen}
+            />
           )}
         </div>
       </Card>

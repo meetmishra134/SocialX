@@ -13,7 +13,7 @@ interface CommentInputProps {
   postId: string; // Optional, only needed for creating a comment
   initialValue?: string;
   isEditMode?: boolean;
-  isCommentInputOpen?: boolean;
+  setIsCommentInputOpen?: (open: boolean) => void; // Optional, only needed if parent component manages the open state
   commentId?: string;
   onCancel?: () => void;
   onSuccess?: () => void;
@@ -27,7 +27,7 @@ const CommentInput = ({
   commentId,
   onCancel,
   onSuccess,
-
+  setIsCommentInputOpen,
   focusTrigger,
 }: CommentInputProps) => {
   const user = useAuth((state) => state.user);
@@ -67,6 +67,7 @@ const CommentInput = ({
         {
           onSuccess: () => {
             reset();
+            setIsCommentInputOpen?.(false);
           },
         },
       );
