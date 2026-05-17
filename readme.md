@@ -1,48 +1,168 @@
-# SocialX- A Fullstack Social Media Application*[Live Demo](https://socialx.tech)* | 💻 **[Source Code](https://github.com/meetmishra134/socialx)**
+# SocialX
+
+A next-generation social networking platform designed for developers — enabling seamless interaction, real-time engagement, and structured community collaboration.
+
+## 📌 Overview
+
+SocialX is a feature-rich social networking application where users can connect, share posts, join topic-specific communities, and engage with peers in real time. The project focuses on scalability, clean UI/UX, secure authentication, optimistic interactions, and a fully responsive design across all devices.
 
 ---
 
-## 📸 Preview
+## ✨ Features
 
+- 🔐 JWT Authentication, Google OAuth and Email Verification
+- 👤 User Profiles with Bio and Avatar
+- 📝 Rich Text Post Creation with Image Uploads and Topic Tags
+- ❤️ Like and Bookmark System with Optimistic UI
+- 💬 Threaded Comments with Like Support
+- 👥 Follow / Unfollow with Friend Suggestions
+- 🏘️ Communities — Create, Join, Post, and Moderate Topic-Specific Groups
+- 🔔 Real-Time Notifications via WebSockets (Likes, Comments, Follows, Community Activity)
+- 📨 Weekly Email Digest for Top Posts (via Resend SDK)
+- 🧹 Automated Notification Cleanup via Cron Jobs
+- 📱 Fully Responsive Design across Desktop and Mobile
+- ⚡ Optimistic UI Updates with Automatic Rollback on Failure
+- 🌐 Global Feed and Personalized Following Feed
 
-## ✨ Key Engineering Features
-
-- *Zero-Latency Interactions (Optimistic UI):* Implemented React Query cache manipulation to instantly reflect "Likes" and "Follows" on the frontend before the server responds, completely bypassing network latency.
-- *Real-Time Event Engine:* Utilized Socket.io to create targeted WebSocket rooms based on MongoDB ObjectIds. This ensures immediate delivery of feed updates and notifications without broadcasting to the entire server or relying on inefficient HTTP polling.
-- *Enterprise-Grade Authentication:* - Integrated standard JWT authentication using strict, HTTP-only, SameSite=lax, secure cookies to prevent XSS attacks.
-  - Implemented seamless Google OAuth integration.
-  - Engineered an automated account verification and password reset flow using Amazon SES and Nodemailer.
-- *Secure Production Deployment:* Manually provisioned and deployed on an AWS EC2 Linux instance. Configured an Nginx reverse proxy to route HTTP and WebSocket traffic to a PM2-managed Node.js cluster, all secured behind Cloudflare's Full (Strict) SSL.
+---
 
 ## 🛠️ Tech Stack
 
-*Frontend Architecture:*
-- React.js (Vite)
+### Frontend
+
+- TypeScript
+- React + Vite
 - Tailwind CSS
-- Cloudinary (Image Upload)
-- React Query (Server State & Optimistic Updates)
-- Zustand / Redux Toolkit (Client State)
-- @react-oauth/google
+- Zustand (Client State)
+- TanStack Query (Server State)
+- Socket.io Client (Real-Time)
+- Axios
 
-*Backend Architecture:*
-- Node.js & Express.js
-- Socket.io (Real-time WebSockets)
-- MongoDB (Mongoose)
-- Amazon SES (Simple Email Service)
+### Backend
 
-*DevOps & Infrastructure:*
-- AWS EC2
-- Nginx (Reverse Proxy)
-- PM2 (Process Manager)
-- Cloudflare (DNS & SSL)
+- TypeScript + Zod (Validation)
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- Socket.io (WebSockets)
+- JWT Authentication
+- Resend SDK (Transactional Emails)
+- Cloudinary (Media Storage)
+- Node-Cron (Scheduled Jobs)
+- Multer (File Uploads)
+
+### Deployment
+
+- AWS EC2 Instance
+- Cloudflare DNS Management
+- Nginx
 
 ---
 
-## 🚀 Local Development Setup
+## ⚙️ Installation
 
-Follow these steps to run the SocialX environment on your local machine.
+### 1️⃣ Clone Repository
 
-### 1. Clone the repository
 ```bash
-git clone https://github.com/meetmishra134/socialx.git
-cd socialx
+git clone https://github.com/your-username/socialx.git
+```
+
+### 2️⃣ Install Frontend Dependencies
+
+```bash
+cd socialx-frontend
+npm install
+```
+
+### 3️⃣ Install Backend Dependencies
+
+```bash
+cd SocialX-backend
+npm install
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create a `.env` file inside the `SocialX-backend` folder:
+
+```env
+PORT=5000
+MONGO_URL=your_mongodb_uri
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+FRONTEND_URL=localhost_or_deployed_url
+NODE_ENV=production_or_development
+ACCESS_TOKEN_SECRET=your_access_token_secret
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+RESEND_API_KEY=your_resend_api_key
+```
+
+Create a `.env` file inside the `socialx-frontend` folder:
+
+```env
+VITE_API_URL=your_api_url
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
+VITE_GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+VITE_SERVER_URL=your_backend_url_with_port
+```
+
+---
+
+## ▶️ Running the Project
+
+### Start Backend
+
+```bash
+cd SocialX-backend
+npm run dev
+```
+
+### Start Frontend
+
+```bash
+cd socialx-frontend
+npm run dev
+```
+
+---
+
+## 🏘️ Community Feature
+
+SocialX introduces structured Community Spaces that go beyond the global feed:
+
+- **Create Communities** around academic subjects, career topics, campus life, or technical domains
+- **Join and Leave** communities freely with real-time member count updates
+- **Community Feed** — isolated from the global feed to maintain content relevance
+- **Real-Time Alerts** — members receive instant notifications when new posts are published in their communities
+- **Moderation Rights** — community creators can remove members and delete posts
+- **Community Discovery** — browse and join new communities from the Explore page
+
+---
+
+## 🚀 Future Improvements
+
+- Real-Time Chat between users
+- Story Feature
+- Video Uploads
+- AI-Powered Content Recommendations
+- Invite-Only Communities
+- CI/CD With Docker & Kubernetes
+
+---
+
+## 🤝 Contributors
+
+- Meet Mishra
+- Nakshatra Agrawal
+- Krishna Joshi
+
+---
+
+## ⭐ Support
+
+If you like this project, give it a ⭐ on GitHub!
