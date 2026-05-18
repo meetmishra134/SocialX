@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import type { CommunityCardProps } from "./CommunityCard";
 import { useGetCommunityNotifications } from "@/hooks/useCommunity";
 import type { Notification } from "@/types/notification.types";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const colorMap: Record<string, { bg: string; text: string }> = {
   A: { bg: "#EEEDFE", text: "#534AB7" },
@@ -31,6 +32,7 @@ const JoinedCommunityRow = ({ community }: CommunityCardProps) => {
   const unreadNotificationCount = notifications.filter(
     (n: Notification) => !n.isRead,
   ).length;
+  useDocumentTitle("My Communities");
   return (
     <div
       onClick={() => navigate(`/communities/${community._id}`)}

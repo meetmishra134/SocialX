@@ -13,25 +13,27 @@ const MobileNav = () => {
   const { notifications } = useNotifications();
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
+
   const isHomeActive = location.pathname.startsWith("/feed");
 
   const navClass = (path: string) =>
-    `flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
+    `flex w-16 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
       location.pathname.includes(path)
         ? "text-primary"
         : "text-muted-foreground"
     }`;
 
   return (
-    <nav className="bg-background/80 pb-safe fixed right-0 bottom-0 left-0 z-50 flex h-16 items-center justify-between border-t border-neutral-700 backdrop-blur-md sm:hidden">
+    <nav className="bg-background/80 pb-safe fixed right-0 bottom-0 left-0 z-50 flex h-16 items-center justify-around border-t border-neutral-700 backdrop-blur-md sm:hidden">
+      {/* HOME */}
       <Link
         to="/feed/foryou"
-        className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
+        className={`flex w-16 flex-col items-center justify-center gap-1 transition-colors duration-200 ${
           isHomeActive ? "text-primary" : "text-muted-foreground"
         }`}
       >
         <HomeIcon isFilled={isHomeActive} size={24} />
-        <span className="text-[11px]">Home</span>
+        <span className="text-[10px]">Home</span>
       </Link>
 
       <Link to="/explore" className={navClass("/explore")}>
@@ -39,7 +41,7 @@ const MobileNav = () => {
           strokeWidth={location.pathname.includes("/explore") ? 2.5 : 1.5}
           size={24}
         />
-        <span className="text-[11px]">Explore</span>
+        <span className="text-[10px]">Explore</span>
       </Link>
 
       <Link to="/myCommunities" className={navClass("/myCommunities")}>
@@ -47,7 +49,7 @@ const MobileNav = () => {
           size={24}
           isFilled={location.pathname.includes("/myCommunities")}
         />
-        <span className="text-[11px]">Community</span>
+        <span className="text-[10px]">Communities</span>
       </Link>
 
       <Link to="/notifications" className={navClass("/notifications")}>
@@ -56,19 +58,20 @@ const MobileNav = () => {
           size={24}
           unreadCount={unreadCount}
         />
-        <span className="text-[11px]">Alerts</span>
+        <span className="text-[10px]">Alerts</span>
       </Link>
 
+      {/* PROFILE */}
       <Link
         to={user ? `/profile/${user._id}` : "/login"}
-        className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
+        className={`flex w-16 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
           location.pathname.includes("/profile")
             ? "text-primary"
             : "text-muted-foreground"
         }`}
       >
         <UserIcon isFilled={location.pathname.includes("/profile")} size={24} />
-        <span className="text-[11px]">Profile</span>
+        <span className="text-[10px]">Profile</span>
       </Link>
     </nav>
   );

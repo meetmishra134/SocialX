@@ -5,6 +5,7 @@ import Connect from "./Connect";
 import CommunityCard from "../communities/CommunityCard";
 import { useDiscoverCommunities } from "@/hooks/useCommunity";
 import { Skeleton } from "../ui/skeleton";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const ExploreTab = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const ExploreTab = () => {
     data?.pages.flatMap((page) =>
       Array.isArray(page) ? page : (page?.communities ?? []),
     ) ?? [];
-
+  useDocumentTitle("Explore");
   return (
     <div className="border-border mx-auto min-h-screen w-full max-w-2xl border-x pb-20">
       <Tabs

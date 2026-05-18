@@ -61,7 +61,7 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             icon={(isActive) => <UsersIcon size={27} isFilled={isActive} />}
           />
           <NavItems
-            name="Notifications"
+            name="Alerts"
             path="/notifications"
             icon={(isActive) => (
               <BellRing
