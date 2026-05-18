@@ -37,10 +37,18 @@ export const postServices = {
     const res = await api.get(`/posts/view-post/${postId}`);
     return res.data.data.post;
   },
-  fetchPostsByTopic: async (topic: string) => {
-    const res = await api.get(`/posts/search`, {
-      params: { topic },
-    });
+  fetchPostsByTopic: async ({
+    pageParam = 1,
+    limit = 10,
+    topic,
+  }: {
+    pageParam: number;
+    limit: number;
+    topic: string;
+  }) => {
+    const res = await api.get(
+      `/posts/search/?topic=${topic}&page=${pageParam}&limit=${limit}`,
+    );
     return res.data.data.posts;
   },
   toggleLike: async (postId: string) => {
@@ -51,8 +59,18 @@ export const postServices = {
     const res = await api.post(`/posts/bookmark/${postId}`);
     return res.data;
   },
-  getUserPosts: async (userId: string) => {
-    const res = await api.get(`/posts/${userId}`);
+  getUserPosts: async ({
+    userId,
+    pageParam = 1,
+    limit = 10,
+  }: {
+    userId: string;
+    pageParam: number;
+    limit: number;
+  }) => {
+    const res = await api.get(
+      `/posts/${userId}?page=${pageParam}&limit=${limit}`,
+    );
     return res.data.data.posts;
   },
   toggleCommentLike: async (commentId: string) => {

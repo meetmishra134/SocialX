@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useState } from "react";
@@ -11,7 +11,8 @@ import { SquarePenIcon } from "lucide-react";
 const Layout = () => {
   const { user } = useAuth() || {};
   const [open, setOpen] = useState<boolean>(false);
-
+  const location = useLocation();
+  const isHomePage = location.pathname.startsWith("/feed");
   const handleOpenPost = () => {
     setOpen(true);
   };
@@ -27,12 +28,14 @@ const Layout = () => {
         <CreatePost open={open} setOpen={setOpen} />
         {user && !user.isEmailVerified && <PendingVerification />}
 
-        <button
-          onClick={handleOpenPost}
-          className="bg-primary text-primary-foreground fixed right-4 bottom-18 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 sm:hidden"
-        >
-          <SquarePenIcon size={24} />
-        </button>
+        {isHomePage ? (
+          <button
+            onClick={handleOpenPost}
+            className="bg-primary text-primary-foreground fixed right-4 bottom-18 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 sm:hidden"
+          >
+            <SquarePenIcon size={24} />
+          </button>
+        ) : null}
       </main>
 
       <aside className="sticky top-0 hidden h-screen border-l border-neutral-600 lg:col-span-3 lg:block">

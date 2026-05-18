@@ -12,12 +12,12 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth.services";
 import { toast } from "sonner";
 import { userService } from "@/services/user.services";
-import DeleteAccountModal from "./DeleteAccountModal";
 import { useState } from "react";
 import { Skeleton } from "./skeleton";
+import DeleteModal from "./DeleteModal";
 
 const UserMenu = () => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const { fullName, userName, avatarUrl } =
     useAuth((state) => state.user) || {};
   const logout = useAuth((state) => state.logout);
@@ -84,43 +84,40 @@ const UserMenu = () => {
             <div className="relative hidden flex-1 flex-col lg:flex">
               <p className="text-sm font-semibold">{fullName}</p>
               <p className="text-muted-foreground text-xs">{userName}</p>
-
               <button className="absolute top-1 right-0 cursor-pointer rounded-full">
                 <Ellipsis />
               </button>
-
-              <DropdownMenuContent className="md:bg-popover bg-background/60 ml-2 w-56 rounded-md border p-1 shadow-lg backdrop-blur-md">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleLogout();
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    setShowDeleteModal(true);
-                  }}
-                >
-                  <UserRoundXIcon className="mr-2 h-4 w-4" />
-                  <span>Delete Account</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
             </div>
           </div>
         </DropdownMenuTrigger>
+
+        {/* moved outside trigger ↓ */}
+        <DropdownMenuContent className="md:bg-popover bg-background/60 ml-2 w-56 rounded-md border p-1 shadow-lg backdrop-blur-md">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => handleLogout()}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <UserRoundXIcon className="mr-2 h-4 w-4" />
+            <span>Delete Account</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
       </DropdownMenu>
-      <DeleteAccountModal
-        isOpen={showDeleteModal}
-        setIsOpen={setShowDeleteModal}
+
+      <DeleteModal
+        title="Delete Account"
+        description="You will lose all your data and posts. This action cannot be undone."
+        showDeleteDialog={showDeleteDialog}
+        setShowDeleteDialog={setShowDeleteDialog}
         onConfirm={handleDeleteProfile}
       />
     </>

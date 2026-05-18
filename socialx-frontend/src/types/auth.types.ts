@@ -8,7 +8,7 @@ export const userRegistrationValidator = z.object({
     .max(20),
   userName: z.string().trim().min(2).max(20).toLowerCase(),
   email: z.email("Email is required and it must be valid").trim().toLowerCase(),
-  password: z.string("Password is required").min(6).max(10),
+  password: z.string("Password is required").min(6).max(15),
   bio: z.string().max(200).optional(),
   avatarUrl: z
     .object({
@@ -26,7 +26,7 @@ export const userLoginValidator = z.object({
     .string("Password is required")
     .trim()
     .min(6, "password must be atleast 6 characters")
-    .max(10, "Password must be atmost 10 characters"),
+    .max(15, "Password must be atmost 15 characters"),
 });
 
 export const userResetForgotPasswordValidator = z
@@ -35,12 +35,12 @@ export const userResetForgotPasswordValidator = z
       .string("New password is required")
       .trim()
       .min(6, "New password must be atleast 6 characters")
-      .max(10, "New password must be atmost 10 characters"),
+      .max(15, "New password must be atmost 15 characters"),
     confirmPassword: z
       .string("Confirm password is required")
       .trim()
       .min(6, "Confirm password must be atleast 6 characters")
-      .max(10, "Confirm password must be atmost 10 characters"),
+      .max(15, "Confirm password must be atmost 15 characters"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",

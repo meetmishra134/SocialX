@@ -40,6 +40,7 @@ export const PostSchema = z.object({
     )
     .optional(),
   likes: z.array(z.string()).optional(),
+  communityId: z.string().optional(),
 });
 
 export type Post = z.infer<typeof PostSchema>;

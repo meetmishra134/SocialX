@@ -62,6 +62,9 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
 
 const searchPostByTopic = asyncHandler(async (req: Request, res: Response) => {
   const { topic } = req.query;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
   if (!topic || typeof topic !== "string") {
     throw new ApiError(400, "Topic query parameter is required");
   }
@@ -69,10 +72,16 @@ const searchPostByTopic = asyncHandler(async (req: Request, res: Response) => {
     topics: { $regex: `^${topic}$`, $options: "i" },
   })
     .sort({ createdAt: -1 })
-    .populate("author", "userName avatarUrl fullName");
+    .populate("author", "userName avatarUrl fullName")
+    .skip(skip)
+    .limit(limit);
+  const totalPosts = await Post.countDocuments({
+    topics: { $regex: `^${topic}$`, $options: "i" },
+  });
+  const hasMore = skip + posts.length < totalPosts;
   return res
     .status(200)
-    .json(new ApiResponse(200, { posts }, "Posts fetched successfully"));
+    .json(new ApiResponse(200, { posts, hasMore, nextPage: hasMore ? page + 1 : null }, "Posts fetched successfully"));
 });
 
 //* View single post
@@ -93,13 +102,28 @@ const viewPost = asyncHandler(async (req: Request, res: Response) => {
 //* View all posts
 const getUserPosts = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
   const posts = await Post.find({ author: userId })
     .sort({ createdAt: -1 })
-    .populate("author", "userName fullName avatarUrl");
-
+    .populate("author", "userName fullName avatarUrl")
+    .skip(skip)
+    .limit(limit);
+  const totalPosts = await Post.countDocuments({
+    author: userId,
+    communityId: null,
+  });
+  const hasMore = skip + posts.length < totalPosts;
   return res
     .status(200)
-    .json(new ApiResponse(200, { posts }, "Posts fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { posts, hasMore, nextPage: hasMore ? page + 1 : null },
+        "Posts fetched successfully",
+      ),
+    );
 });
 
 //* Delete a post

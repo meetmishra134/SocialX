@@ -1,53 +1,68 @@
-import type { UserCardType } from "@/types/user.types";
+import type { PaginatedUsers, UserCardType } from "@/types/user.types";
 import UserCard from "./UserCard";
 import { useDiscovery } from "@/hooks/useDiscovery";
-import { Loader } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { ArrowDownIcon, Loader } from "lucide-react";
+import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import FollowButton from "./FollowButton";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const Connect = () => {
-  const { data: users, isLoading, isFetching,isError } = useDiscovery();
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useDiscovery();
   const queryClient = useQueryClient();
   useDocumentTitle("Connect");
+
+  const users =
+    data?.pages
+      .flatMap((page) => (Array.isArray(page) ? page : (page?.users ?? [])))
+      .filter((user): user is UserCardType => !!user?._id) ?? [];
+
   const handleFollowSuccess = (userId: string) => {
     setTimeout(() => {
       queryClient.setQueryData(
         ["discover-users"],
-        (oldUsers: UserCardType[]) => {
-          if (!oldUsers) return [];
-          return oldUsers.filter((user) => user._id !== userId);
+        (old: InfiniteData<PaginatedUsers>) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: PaginatedUsers) => ({
+              ...page,
+              users: page.users.filter((u: UserCardType) => u._id !== userId),
+            })),
+          };
         },
       );
     }, 1000);
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-3 md:p-2">
-      <div className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-10 mb-2 border-b p-1.5 backdrop-blur md:p-2.5">
-        <h2 className="text-xl font-bold">Connect </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Connect learn and grow together
-        </p>
-      </div>
+    <div className="flex flex-col gap-3">
+      {isError ? (
+        <div className="flex min-h-[70vh] items-center justify-center">
+          <p className="text-muted-foreground">Failed to load users.</p>
+        </div>
+      ) : null}
 
-      <div className="flex flex-col gap-3">
-        {isError ? (  
-          <div className="flex min-h-[70vh] items-center justify-center">
-            <p className="text-muted-foreground">Failed to load users.</p>
-          </div>
-        ) : null}
-        {isLoading ? (
-          <div className="flex min-h-[70vh] items-center justify-center">
-            <Loader className="animate-spin" size={25} />
-          </div>
-        ) : null}
-        {users?.length === 0 ? (
-          <div className="text-muted-foreground flex min-h-[70vh] items-center justify-center text-center">
-            No new developers to discover right now.
-          </div>
-        ) : (
-          users?.map((user: UserCardType) => (
+      {isLoading ? (
+        <div className="flex min-h-[70vh] items-center justify-center">
+          <Loader className="animate-spin" size={25} />
+        </div>
+      ) : null}
+
+      {!isLoading && users.length === 0 ? (
+        <div className="text-muted-foreground flex min-h-[70vh] items-center justify-center text-center">
+          No new users to discover right now.
+        </div>
+      ) : (
+        <>
+          {users.map((user: UserCardType) => (
             <UserCard
               user={user}
               key={user._id}
@@ -61,11 +76,26 @@ const Connect = () => {
                 />
               }
             />
-          ))
-        )}
-      </div>
+          ))}
+
+          <div className="flex w-full justify-center py-6">
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+              >
+                {isFetchingNextPage ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  <ArrowDownIcon className="animate-bounce" />
+                )}
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
-
 export default Connect;

@@ -18,15 +18,24 @@ const RichTextEditor = ({
 
   // 1. INITIALIZATION EFFECT (Runs once on mount)
   useEffect(() => {
+    const Link = Quill.import("formats/link") as unknown as {
+      sanitize?: (url: string) => string;
+    };
+    Link.sanitize = (url: string) => {
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return `https://${url}`;
+      }
+      return url;
+    };
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
         placeholder: placeholder || "Write your content here...",
         modules: {
           toolbar: [
-            [{ header: [1, 2, 3, false] }],
             ["bold", "italic", "underline", "strike"],
             [{ list: "ordered" }, { list: "bullet" }],
+            ["link"],
           ],
         },
       });
@@ -45,6 +54,8 @@ const RichTextEditor = ({
         }
       });
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
 
   // 2. THE SYNC EFFECT (Runs when React Hook Form changes the value)

@@ -32,19 +32,24 @@ import { useState } from "react";
 import ImagePreview from "../ui/ImagePreview";
 import { AnimatePresence } from "motion/react";
 import CommentInput from "../comments/CommentInput";
+import { useDeleteCommunityPost } from "@/hooks/useCommunity";
 
 interface PostCardProps {
   post: Post;
+  communityCreator?: boolean;
   variant?: "detailed" | "feed" | "profile";
 }
 
-const PostCard = ({ post, variant }: PostCardProps) => {
+const PostCard = ({ post, variant, communityCreator }: PostCardProps) => {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [focusTrigger, setFocusTrigger] = useState(0);
   const { user } = useAuth();
   const { mutate: deletePost } = useDeletePost();
+  const { mutate: deleteCommunityPost } = useDeleteCommunityPost(
+    post.communityId as string,
+  );
   const hasMultipleImages = (post?.images?.length ?? 0) > 1;
   const { data } = useComment(post?._id, !!post);
   const comments = data?.pages.flatMap((page) => page.comments) || [];
@@ -54,13 +59,21 @@ const PostCard = ({ post, variant }: PostCardProps) => {
   );
   const navigate = useNavigate();
   const isAuthor = user?._id === post?.author._id;
+  const isCommunityCreator = communityCreator;
+  const canDelete = isAuthor || isCommunityCreator;
   const rawText = post?.text || "";
   const trimmedText = rawText.replace(/(<p><br><\/p>)+$/g, "");
   const safeHTML = DOMPurify.sanitize(trimmedText);
   const postTitle = post?.text
     ? post.text.replace(/<[^>]+>/g, "").slice(0, 100)
     : "Check out this post on SocialX!";
-
+  const handleDeletePost = () => {
+    if (post.communityId) {
+      deleteCommunityPost(post._id);
+    } else {
+      deletePost(post._id);
+    }
+  };
   const handlePostClick = (postId: string) => {
     navigate(`/post/${postId}`, { state: { autoFocusComment: true } });
   };
@@ -115,7 +128,7 @@ const PostCard = ({ post, variant }: PostCardProps) => {
             </Link>
           </div>
 
-          {isAuthor && (
+          {canDelete && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -128,7 +141,7 @@ const PostCard = ({ post, variant }: PostCardProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => deletePost(post?._id)}
+                  onClick={() => handleDeletePost()}
                   className="text-destructive focus:text-destructive cursor-pointer"
                 >
                   <Trash2 className="text-shadow-destructive text-destructive h-4 w-4" />
@@ -143,11 +156,12 @@ const PostCard = ({ post, variant }: PostCardProps) => {
           className="cursor-pointer p-1.5 pt-0 sm:p-3 sm:pt-1.5"
           onClick={(e) => {
             if ((e.target as HTMLElement).tagName === "IMG") return;
+            if ((e.target as HTMLElement).tagName === "A") return;
             handlePostClick(post?._id);
           }}
         >
           <div
-            className="prose dark:prose-invert ml-4 max-w-none px-0 text-[15px] leading-relaxed"
+            className="prose dark:prose-invert ml-4 max-w-none px-0 text-[15px] leading-relaxed [&_a]:text-blue-400 [&_a]:underline [&_a]:hover:text-blue-300"
             dangerouslySetInnerHTML={{ __html: safeHTML }}
           ></div>
           {post.topics && post.topics.length > 0 && (

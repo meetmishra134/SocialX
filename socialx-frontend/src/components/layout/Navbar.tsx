@@ -1,15 +1,15 @@
-import { Bookmark, SquarePenIcon } from "lucide-react";
+import { Compass, SquarePenIcon } from "lucide-react";
 import type { JSX } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 
 import HomeIcon from "../icons/HomeIcon";
-import UsersIcon from "../icons/UsersIcon";
 import UserIcon from "../icons/UserIcon";
 import UserMenu from "../ui/UserMenu";
 import { useAuth } from "@/store/authStore";
 import BellRing from "../icons/BellRing";
 import { useNotifications } from "@/hooks/useNotifications";
+import UsersIcon from "../icons/UsersIcon";
 
 interface NavbarProps {
   onOpenPost: () => void;
@@ -49,16 +49,16 @@ const Navbar = ({ onOpenPost }: NavbarProps) => {
             forceActive={isHomeActive}
           />
           <NavItems
-            name="Connect"
-            path="/connect"
-            icon={(isActive) => <UsersIcon isFilled={isActive} size={27} />}
+            name="Explore"
+            path="/explore"
+            icon={(isActive) => (
+              <Compass strokeWidth={isActive ? 2.5 : 1.5} size={27} />
+            )}
           />
           <NavItems
-            name="Bookmarks"
-            path="/bookmarks"
-            icon={(isActive) => (
-              <Bookmark size={27} fill={isActive ? "currentColor" : "none"} />
-            )}
+            name="Communities"
+            path="/myCommunities"
+            icon={(isActive) => <UsersIcon size={27} isFilled={isActive} />}
           />
           <NavItems
             name="Notifications"

@@ -1,12 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import type { UserCardType } from "@/types/user.types";
 import FollowButton from "../connect/FollowButton";
 
 const FriendSuggestionWidget = () => {
-  const { data: friendsSuggestion, isLoading, isRefetching } = useDiscovery();
-
+  const navigate = useNavigate();
+  const { data, isLoading, isRefetching } = useDiscovery();
+  const friendsSuggestion =
+    data?.pages
+      .flatMap((page) => (Array.isArray(page) ? page : (page?.users ?? [])))
+      .filter((user): user is UserCardType => !!user?._id) ?? [];
   if (!friendsSuggestion || friendsSuggestion.length === 0) {
     return (
       <div className="bg-card w-full max-w-[350px] rounded-2xl border py-1">
@@ -70,12 +74,12 @@ const FriendSuggestionWidget = () => {
         )}
       </div>
 
-      <Link
-        to="/connect"
-        className="text-primary hover:bg-muted/50 block rounded-b-2xl px-4 py-3 text-center text-[13px] font-normal transition-colors"
+      <p
+        onClick={() => navigate("/explore?tab=people")}
+        className="text-primary hover:bg-muted/50 block cursor-pointer rounded-b-2xl px-4 py-3 text-center text-[13px] font-normal transition-colors"
       >
         Show more
-      </Link>
+      </p>
     </div>
   );
 };

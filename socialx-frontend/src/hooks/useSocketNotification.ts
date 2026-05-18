@@ -24,6 +24,8 @@ export const useSocketNotification = () => {
         queryClient.invalidateQueries({ queryKey: ["profile", user._id] });
       } else if (notification.type === "likeComment") {
         message = `❤️${notification.sender?.fullName} liked your comment.`;
+      } else if (notification.type === "community_join") {
+        message = `👥${notification.sender?.fullName} joined your community ${notification.communityName}.`;
       }
       if (message) {
         toast(message, { position: "top-center" });

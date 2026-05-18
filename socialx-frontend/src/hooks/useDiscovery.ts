@@ -1,10 +1,12 @@
 import { userService } from "@/services/user.services";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export const useDiscovery = () => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["discover-users"],
-    queryFn: () => userService.discoverUsers(),
-    staleTime: 1000 * 60 * 20, // 30 minutes
+    queryFn: ({ pageParam = 1 }) => userService.discoverUsers({ pageParam, limit: 10 }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    staleTime: 1000 * 60 * 20,
   });
 };

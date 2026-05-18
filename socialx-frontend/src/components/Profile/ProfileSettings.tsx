@@ -10,11 +10,12 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth.services";
 import { toast } from "sonner";
 import { userService } from "@/services/user.services";
-import DeleteAccountModal from "../ui/DeleteAccountModal";
+
 import { useState } from "react";
+import DeleteModal from "../ui/DeleteModal";
 
 const ProfileSettings = () => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const logout = useAuth((state) => state.logout);
   const clearSession = useAuth((state) => state.clearSession);
   const navigate = useNavigate();
@@ -65,30 +66,22 @@ const ProfileSettings = () => {
           align="end"
           className="bg-background w-44 rounded-md border p-1 shadow-md"
         >
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
-              handleLogout();
-            }}
-          >
+          <DropdownMenuItem onClick={() => handleLogout()}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
-              setShowDeleteModal(true);
-            }}
-          >
+          <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
             <UserRoundXIcon className="mr-2 h-4 w-4" />
             Delete account
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DeleteAccountModal
-        isOpen={showDeleteModal}
-        setIsOpen={setShowDeleteModal}
+      <DeleteModal
+        title="Delete Account"
+        description="You will lose all your data and posts. This action cannot be undone."
+        showDeleteDialog={showDeleteDialog}
+        setShowDeleteDialog={setShowDeleteDialog}
         onConfirm={handleDeleteProfile}
       />
     </>

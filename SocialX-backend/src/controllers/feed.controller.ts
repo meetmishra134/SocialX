@@ -11,7 +11,7 @@ const globalFeed = asyncHandler(async (req: Request, res: Response) => {
   limit = limit > 20 ? 20 : limit;
   const skip = (page - 1) * limit;
 
-  const posts = await Post.find()
+  const posts = await Post.find({ communityId: null })
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
@@ -21,7 +21,7 @@ const globalFeed = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Posts not found for global feed");
   }
 
-  const totalPosts = await Post.countDocuments();
+  const totalPosts = await Post.countDocuments({ communityId: null });
   const hasMore = skip + posts.length < totalPosts;
 
   return res
@@ -40,7 +40,10 @@ const followingFeed = asyncHandler(async (req: Request, res: Response) => {
   let limit = parseInt(req.query.limit as string) || 10;
   limit = limit > 20 ? 20 : limit;
   const skip = (page - 1) * limit;
-  const posts = await Post.find({ author: { $in: req.user.following } })
+  const posts = await Post.find({
+    author: { $in: req.user.following },
+    communityId: null,
+  })
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
@@ -50,6 +53,7 @@ const followingFeed = asyncHandler(async (req: Request, res: Response) => {
   }
   const totalPosts = await Post.countDocuments({
     author: { $in: req.user.following },
+    communityId: null,
   });
   const hasMore = skip + posts.length < totalPosts;
   return res

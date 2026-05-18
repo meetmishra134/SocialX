@@ -11,6 +11,19 @@ import { useNotifications } from "@/hooks/useNotifications";
 import type { Notification } from "@/types/notification.types";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
+const getCommunityName = (notif: Notification) => {
+  const fromPost =
+    notif.post?.communityId && typeof notif.post.communityId === "object"
+      ? notif.post.communityId.name
+      : null;
+
+  const fromDirect =
+    notif.communityId && typeof notif.communityId === "object"
+      ? notif.communityId.name
+      : null;
+
+  return fromPost ?? fromDirect ?? null;
+};
 export default function NotificationsMenu() {
   const { notifications, isLoading, markAsRead } = useNotifications();
 
@@ -49,7 +62,7 @@ export default function NotificationsMenu() {
           <div className="mt-2 flex flex-col gap-1 px-2 sm:px-4">
             {notifications?.map((notif: Notification) => {
               const plainText = notif.post?.text?.replace(/<[^>]+>/g, "") || "";
-
+              const communityName = getCommunityName(notif);
               return (
                 <div
                   key={notif._id}
@@ -90,8 +103,23 @@ export default function NotificationsMenu() {
                             ? "commented on your post"
                             : notif.type === "follow"
                               ? "started following you"
-                              : "liked your comment"}
+                              : notif.type === "likeComment"
+                                ? "liked your comment"
+                                : notif.type === "community_post"
+                                  ? "posted in"
+                                  : notif.type === "community_join"
+                                    ? "joined your community"
+                                    : ""}
                       </span>
+                      {communityName && (
+                        <span className="text-muted-foreground">
+                          {" "}
+                          {notif.type !== "community_join" ? "in" : " "}
+                          <span className="text-foreground font-medium">
+                            {communityName}
+                          </span>
+                        </span>
+                      )}
                     </p>
 
                     {plainText && (

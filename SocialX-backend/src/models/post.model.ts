@@ -6,6 +6,7 @@ export interface IPosts extends Document {
   topics: string[];
   images: { url: string; publicId: string }[];
   likes: mongoose.Types.ObjectId[];
+  communityId: mongoose.Types.ObjectId | null;
 }
 
 const postSchema = new mongoose.Schema<IPosts>(
@@ -49,6 +50,11 @@ const postSchema = new mongoose.Schema<IPosts>(
         ref: "User",
       },
     ],
+    communityId: {
+      type: Schema.Types.ObjectId,
+      ref: "Community",
+      default: null,
+    },
   },
   {
     timestamps: true,

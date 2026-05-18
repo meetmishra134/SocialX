@@ -1,11 +1,20 @@
 import { postServices } from "@/services/post.services";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-export const useGetUserPosts = (userName: string | undefined) => {
-  return useQuery({
-    queryKey: ["userPosts", userName],
-    queryFn: () => postServices.getUserPosts(userName as string),
-    enabled: !!userName,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+export const useGetUserPosts = (userId: string | undefined) => {
+  return useInfiniteQuery({
+    queryKey: ["userPosts", userId],
+    queryFn: ({ pageParam }) =>
+      postServices.getUserPosts({
+        userId: userId as string,
+        pageParam,
+        limit: 3,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.nextPage ?? undefined;
+    },
+    enabled: !!userId,
+    staleTime: 0,
   });
 };

@@ -10,9 +10,15 @@ import { Loader } from "lucide-react";
 import FeedSkeleton from "@/components/ui/FeedSkeleton";
 import ProfileSkeleton from "@/components/ui/ProfileSkeleton";
 
+const CommunityPage = lazy(
+  () => import("@/components/communities/CommunityPage"),
+);
+const ExploreTab = lazy(() => import("@/components/connect/ExploreTab"));
+const CommunitiesList = lazy(
+  () => import("@/components/communities/CommunitiesList"),
+);
 const RegisterForm = lazy(() => import("@/components/auth/RegisterForm"));
 const Bookmarks = lazy(() => import("@/components/Bookmarks/BookmarksPage"));
-const Connect = lazy(() => import("@/components/connect/Connect"));
 const Profile = lazy(() => import("@/components/Profile/Profile"));
 const Notifications = lazy(
   () => import("@/components/notifications/Notifications"),
@@ -92,8 +98,16 @@ export const router = createBrowserRouter([
             element: withSuspense(<Bookmarks />),
           },
           {
+            path: "/myCommunities",
+            element: withSuspense(<CommunitiesList />),
+          },
+          {
             path: "/notifications",
             element: withSuspense(<Notifications />),
+          },
+          {
+            path: "/communities/:communityId",
+            element: withSuspense(<CommunityPage />),
           },
           {
             path: "profile/:userId",
@@ -115,8 +129,8 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            path: "connect",
-            element: withSuspense(<Connect />),
+            path: "/explore",
+            element: withSuspense(<ExploreTab />),
           },
         ],
       },

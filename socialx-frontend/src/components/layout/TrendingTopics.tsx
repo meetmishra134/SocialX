@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Hash, ChevronRight } from "lucide-react";
+import { Hash, ChevronRight, Loader } from "lucide-react";
 import { useGetTopics } from "@/hooks/useGetTopics";
 
 interface TrendingTopic {
@@ -11,6 +11,7 @@ interface TrendingTopic {
 const TrendingTopics = () => {
   const { data: topics, isLoading } = useGetTopics();
   const trendingTopics = topics?.slice(0, 5) || [];
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -24,31 +25,33 @@ const TrendingTopics = () => {
     show: { opacity: 1, x: 0 },
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-muted/50 h-48 w-full animate-pulse rounded-2xl" />
-    );
-  }
-
   return (
-    <div className="bg-card sticky top-20 flex w-full flex-col gap-4 rounded-2xl border p-5 shadow-sm">
-      <div className="flex items-center justify-center gap-2 pb-2">
-        <h2 className="text-lg font-bold">Trending Topics</h2>
+    <div className="bg-card sticky top-20 flex w-full flex-col rounded-2xl border shadow-sm">
+      <div className="border-border border-b px-5 py-4">
+        <h2 className="text-center text-base font-bold">Trending Topics</h2>
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="flex flex-col"
-      >
-        {trendingTopics?.map((topic: TrendingTopic) => (
-          <motion.div key={topic._id} variants={itemVariants}>
-            <Link
-              to={`/topic/${topic._id}`}
-              className="group hover:bg-muted flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors"
-            >
-              <div className="flex w-full items-center justify-between">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader className="text-muted-foreground animate-spin" size={20} />
+        </div>
+      ) : trendingTopics.length === 0 ? (
+        <p className="text-muted-foreground py-8 text-center text-sm">
+          No trending topics yet
+        </p>
+      ) : (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col p-3"
+        >
+          {trendingTopics.map((topic: TrendingTopic) => (
+            <motion.div key={topic._id} variants={itemVariants}>
+              <Link
+                to={`/topic/${topic._id}`}
+                className="group hover:bg-muted flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <Hash
                     size={16}
@@ -59,19 +62,20 @@ const TrendingTopics = () => {
                   </span>
                 </div>
 
-                <span className="text-muted-foreground text-xs">
-                  {topic.postCount} {topic.postCount === 1 ? "post" : "posts"}
-                </span>
-              </div>
-
-              <ChevronRight
-                size={16}
-                className="text-muted-foreground -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
-              />
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground text-xs">
+                    {topic.postCount} {topic.postCount === 1 ? "post" : "posts"}
+                  </span>
+                  <ChevronRight
+                    size={16}
+                    className="text-muted-foreground -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
+                  />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 };

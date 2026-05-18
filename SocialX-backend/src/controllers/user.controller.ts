@@ -9,6 +9,7 @@ import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 import fs from "fs/promises";
 import { Notification } from "../models/notification.model";
 import mongoose from "mongoose";
+import { Community } from "../models/community.model";
 
 //* Get any user detail
 const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
@@ -114,38 +115,66 @@ const editUserProfile = asyncHandler(async (req: Request, res: Response) => {
 //* Delete a user profile
 const deleteUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
-  await Post.deleteMany({ author: loggedInUserId });
-  await User.updateMany(
-    { followers: loggedInUserId },
-    { $pull: { followers: loggedInUserId } },
-  );
-  await User.updateMany(
-    { following: loggedInUserId },
-    {
-      $pull: { following: loggedInUserId },
-    },
-  );
-  await User.findByIdAndDelete(loggedInUserId);
-  await Notification.deleteMany({
-    $or: [{ sender: loggedInUserId }, { recipient: loggedInUserId }],
-  });
+
+  await Promise.all([
+    Post.deleteMany({ author: loggedInUserId }),
+
+    Post.updateMany(
+      { likes: loggedInUserId },
+      { $pull: { likes: loggedInUserId } },
+    ),
+
+    User.updateMany(
+      { followers: loggedInUserId },
+      { $pull: { followers: loggedInUserId } },
+    ),
+
+    User.updateMany(
+      { following: loggedInUserId },
+      { $pull: { following: loggedInUserId } },
+    ),
+
+    Notification.deleteMany({
+      $or: [{ sender: loggedInUserId }, { recipient: loggedInUserId }],
+    }),
+
+    Community.updateMany(
+      { members: loggedInUserId },
+      {
+        $pull: { members: loggedInUserId },
+        $inc: { membersCount: -1 },
+      },
+    ),
+
+    Community.deleteMany({ creator: loggedInUserId }),
+
+    User.findByIdAndDelete(loggedInUserId),
+  ]);
+
+  const cookieOptions = {
+    sameSite: "lax" as const,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  };
+
   return res
     .status(200)
-    .clearCookie("accessToken", {
-      sameSite: "lax",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    })
-    .clearCookie("refreshToken", {
-      sameSite: "lax",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    })
-    .json(new ApiResponse(200, "User deleted successfully"));
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        "Your profile and associated data have been permanently purged.",
+      ),
+    );
 });
 
 const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
   const { _id: loggedInUserId } = req.user;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+
   const me = await User.findById(loggedInUserId).select("following").lean();
   if (!me) {
     throw new ApiError(404, "User not found");
@@ -154,7 +183,8 @@ const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
   const excludedUserIds = [loggedInUserId, ...me.following];
   const users = await User.find({ _id: { $nin: excludedUserIds } })
     .select("userName fullName avatarUrl bio ")
-    .limit(10)
+    .skip(skip)
+    .limit(limit)
     .lean();
   const followMe = await User.find({
     _id: { $in: users.map((user) => user._id) },
@@ -169,12 +199,16 @@ const userDiscoveryList = asyncHandler(async (req: Request, res: Response) => {
       (follower) => follower._id.toString() === user._id.toString(),
     ),
   }));
+  const totalUsers = await User.countDocuments({
+    _id: { $nin: excludedUserIds },
+  });
+  const hasMore = skip + users.length < totalUsers;
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { users: formattedUsers },
+        { users: formattedUsers, hasMore, nextPage: hasMore ? page + 1 : null },
         "User discovery list fetched successfully",
       ),
     );
@@ -351,19 +385,42 @@ const getBookmarkedPosts = asyncHandler(async (req: Request, res: Response) => {
 const getUserNotifications = asyncHandler(
   async (req: Request, res: Response) => {
     const { _id: loggedInUserId } = req.user;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const page = parseInt(req.query.page as string) || 1;
+    const skip = (page - 1) * limit;
     const notifications = await Notification.find({
       recipient: loggedInUserId,
+      type: {
+        $in: ["like", "comment", "follow", "likeComment", "community_join"],
+      },
     })
       .populate("sender", "userName avatarUrl fullName")
-      .populate("post", "text")
+      .populate({
+        path: "post",
+        select: "text communityId",
+        populate: {
+          path: "communityId",
+          select: "name",
+        },
+      })
+      .populate("communityId", "name")
+
       .sort({ createdAt: -1 })
-      .limit(20);
+      .limit(limit)
+      .skip(skip);
+    const totalNotifications = await Notification.countDocuments({
+      recipient: loggedInUserId,
+      type: {
+        $in: ["like", "comment", "follow", "likeComment", "community_join"],
+      },
+    });
+    const hasMore = skip + notifications.length < totalNotifications;
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { notifications },
+          { notifications, hasMore, nextPage: hasMore ? page + 1 : null },
           "Notifications fetched successfully",
         ),
       );

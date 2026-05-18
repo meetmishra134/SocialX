@@ -23,8 +23,16 @@ export const userService = {
     return res.data.data.userDetails;
   },
 
-  discoverUsers: async () => {
-    const res = await api.get("/users/discovery");
+  discoverUsers: async ({
+    pageParam = 1,
+    limit = 10,
+  }: {
+    pageParam: number;
+    limit: number;
+  }) => {
+    const res = await api.get(
+      `/users/discovery?page=${pageParam}&limit=${limit}`,
+    );
     return res.data.data.users;
   },
 

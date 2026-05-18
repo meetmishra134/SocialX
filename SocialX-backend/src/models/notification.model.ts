@@ -4,9 +4,16 @@ import { Document } from "mongoose";
 export interface INotification extends Document {
   recipient: mongoose.Types.ObjectId;
   sender: mongoose.Types.ObjectId;
-  type: "like" | "comment" | "follow" | "likeComment";
+  type:
+    | "like"
+    | "comment"
+    | "follow"
+    | "likeComment"
+    | "community_post"
+    | "community_join";
   post?: mongoose.Types.ObjectId;
   comment?: mongoose.Types.ObjectId;
+  communityId?: mongoose.Types.ObjectId;
   isRead: boolean;
 }
 
@@ -24,7 +31,14 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["like", "comment", "follow", "likeComment"],
+      enum: [
+        "like",
+        "comment",
+        "follow",
+        "likeComment",
+        "community_post",
+        "community_join",
+      ],
       required: true,
     },
     post: {
@@ -34,6 +48,10 @@ const notificationSchema = new mongoose.Schema(
     comment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
+    },
+    communityId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Community",
     },
     isRead: {
       type: Boolean,

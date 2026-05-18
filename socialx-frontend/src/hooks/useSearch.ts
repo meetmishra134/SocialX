@@ -1,10 +1,19 @@
 import { postServices } from "@/services/post.services";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export const useSearch = (topic: string | undefined) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["GlobalFeed", "topic", topic],
-    queryFn: () => postServices.fetchPostsByTopic(topic as string),
+    queryFn: ({ pageParam }) =>
+      postServices.fetchPostsByTopic({
+        pageParam,
+        limit: 10,
+        topic: topic as string,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.nextPage ?? undefined;
+    },
     enabled: !!topic,
   });
 };

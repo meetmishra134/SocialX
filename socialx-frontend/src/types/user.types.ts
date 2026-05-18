@@ -47,6 +47,13 @@ export interface Following {
   followsMe: boolean;
   isOwnProfile: boolean;
 }
+
+export interface PaginatedUsers {
+  users: UserCardType[];
+  nextPage: number;
+  hasMore: boolean;
+}
+
 export const userCardSchema = z.object({
   _id: z.string(),
   fullName: z.string(),

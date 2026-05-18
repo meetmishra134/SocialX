@@ -7,7 +7,7 @@ const userRegistrationValidator = z.object({
     .email({ error: "Email is required and it must be valid" })
     .trim()
     .toLowerCase(),
-  password: z.string({ error: "Password is required" }).min(3).max(15),
+  password: z.string({ error: "Password is required" }).min(6).max(15),
   bio: z.string().max(200).optional(),
   avatarUrl: z
     .object({
@@ -25,7 +25,7 @@ const userLoginValidator = z.object({
     .string({ error: "Password is required" })
     .trim()
     .min(6, "password must be atleast 6 characters")
-    .max(10, "Password must be atmost 10 characters"),
+    .max(15, "Password must be atmost 15 characters"),
 });
 
 const userForgotPasswordValidator = z.object({
@@ -38,12 +38,12 @@ const userResetForgotPasswordValidator = z.object({
   newPassword: z
     .string({ error: "New password is required" })
     .min(6, "New password must be atleast 6 characters")
-    .max(10)
+    .max(15, "New password must be atmost 15 characters")
     .trim(),
   confirmPassword: z
     .string({ error: "Confirm password is required" })
     .min(6, "Confirm password must be atleast 6 characters")
-    .max(10)
+    .max(15, "Confirm password must be atmost 15 characters")
     .trim(),
 });
 export {

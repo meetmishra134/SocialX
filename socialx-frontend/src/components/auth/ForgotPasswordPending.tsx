@@ -19,6 +19,7 @@ const ForgotPasswordPending = () => {
   const {
     register,
     formState: { errors },
+    reset,
     handleSubmit,
   } = useForm<UserForgotPasswordData>({
     resolver: zodResolver(userForgotPasswordValidator),
@@ -41,6 +42,7 @@ const ForgotPasswordPending = () => {
       }
     } finally {
       setIsSubmitting(false);
+      reset();
     }
   };
   return (

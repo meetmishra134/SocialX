@@ -7,16 +7,23 @@ import RichTextEditor from "./RichTextEditor";
 import { useForm, Controller } from "react-hook-form";
 import { useCreatePost } from "@/hooks/useCreatePost";
 import { useState } from "react";
+import { useCreateCommunityPost } from "@/hooks/useCommunity";
 
 export interface PostFormData {
   text: string;
   images: File[];
 }
 interface CreatePostFormProps {
+  communityId?: string;
   onSuccessClose: () => void;
 }
-const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
+const CreatePostForm = ({
+  communityId,
+  onSuccessClose,
+}: CreatePostFormProps) => {
   const { mutate: createPost, isPending } = useCreatePost();
+  const { mutate: createCommunityPost, isPending: isCommunityPostPending } =
+    useCreateCommunityPost(communityId as string);
   const [topics, setTopics] = useState<string[]>([]);
   const [topicInput, setTopicInput] = useState("");
   const { control, handleSubmit, setValue, watch, reset } =
@@ -82,11 +89,30 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
     }
     topics.forEach((topic) => formData.append("topics", topic));
     console.log(data);
+
+    if (communityId) {
+      createCommunityPost(formData, {
+        onSuccess: () => {
+          reset();
+          setValue("text", "");
+          setValue("images", []);
+          setTopics([]);
+          setTopicInput("");
+          if (onSuccessClose) {
+            onSuccessClose();
+          }
+        },
+      });
+      return;
+    }
+
     createPost(formData, {
       onSuccess: () => {
         reset();
         setValue("text", "");
         setValue("images", []);
+        setTopics([]);
+        setTopicInput("");
         if (onSuccessClose) {
           onSuccessClose();
         }
@@ -182,11 +208,12 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
           type="submit"
           disabled={
             (images.length === 0 && (!text || text === "<p><br></p>")) ||
-            isPending
+            isPending ||
+            isCommunityPostPending
           }
           className="w-25 cursor-pointer rounded-full font-bold"
         >
-          {isPending ? (
+          {isPending || isCommunityPostPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             </>
@@ -198,5 +225,4 @@ const CreatePostForm = ({ onSuccessClose }: CreatePostFormProps) => {
     </form>
   );
 };
-
 export default CreatePostForm;

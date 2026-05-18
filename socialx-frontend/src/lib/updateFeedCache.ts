@@ -1,5 +1,6 @@
 import type { PaginatedPosts, Post } from "@/types/post.types";
-import type { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import type { InfiniteData } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const updateFeedCache = (
   oldData: InfiniteData<PaginatedPosts> | undefined,
@@ -39,17 +40,49 @@ export const findPostInFeeds = (
   queryClient: ReturnType<typeof useQueryClient>,
   postId: string,
 ): Post | undefined => {
+  // static feed keys only
   for (const key of FEED_KEYS) {
-    const feedData = queryClient.getQueryData<InfiniteData<PaginatedPosts>>([
-      key,
-    ]);
-    for (const page of feedData?.pages ?? []) {
-      const posts = Array.isArray(page)
-        ? page
-        : ((page as PaginatedPosts)?.posts ?? []);
-      const found = (posts as Post[]).find((p) => p._id === postId);
-      if (found) return found;
+    const data = queryClient.getQueryData<InfiniteData<PaginatedPosts>>([key]);
+    if (data) {
+      for (const page of data.pages) {
+        const posts = Array.isArray(page) ? page : page.posts;
+        const post = posts?.find((p) => p._id === postId);
+        if (post) return post;
+      }
     }
   }
+
+  // dynamic community post caches
+  const communityQueries = queryClient.getQueriesData<
+    InfiniteData<PaginatedPosts>
+  >({
+    queryKey: ["community-posts"],
+  });
+  for (const [, data] of communityQueries) {
+    if (data) {
+      for (const page of data.pages) {
+        const posts = Array.isArray(page) ? page : page.posts;
+        const post = posts?.find((p) => p._id === postId);
+        if (post) return post;
+      }
+    }
+  }
+
+  // dynamic profile caches
+  const profileQueries = queryClient.getQueriesData<
+    InfiniteData<PaginatedPosts>
+  >({
+    queryKey: ["userPosts"],
+  });
+  for (const [, data] of profileQueries) {
+    if (data) {
+      for (const page of data.pages) {
+        const posts = Array.isArray(page) ? page : page.posts;
+        const post = posts?.find((p) => p._id === postId);
+        if (post) return post;
+      }
+    }
+  }
+
   return undefined;
 };

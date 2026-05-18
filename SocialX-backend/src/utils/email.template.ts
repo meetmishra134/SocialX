@@ -30,7 +30,7 @@ export const getVerificationEmailTemplate = (
         </div>
         <div class="content">
           <h2>Welcome back, ${userName}!</h2>
-          <p>We received a request to resend your email verification link. Please click the button below to verify your account.</p>
+          <p>We received a request to send you an email verification link. Please click the button below to verify your account.</p>
           <div class="button-container">
             <a href="${verificationLink}" class="button">Verify My Account</a>
           </div>

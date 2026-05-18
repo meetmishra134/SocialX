@@ -2,7 +2,15 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProfileData } from "@/hooks/useProfileData";
-import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowDownIcon,
+  ArrowLeft,
+  BookmarkIcon,
+  CheckCircle2,
+  Grid3X3,
+  Loader,
+} from "lucide-react";
 import { useGetUserPosts } from "@/hooks/getUserPosts";
 import PostCard from "../posts/PostCard";
 import type { Post } from "@/types/post.types";
@@ -14,6 +22,8 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import type { UserProfile } from "@/types/user.types";
 import ProfileSettings from "./ProfileSettings";
 import SkeletonCard from "../posts/SkeletonCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import BookmarksPage from "../Bookmarks/BookmarksPage";
 
 interface ProfileLayoutProps {
   open: boolean;
@@ -26,7 +36,18 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: profile, isFetching } = useProfileData(userId as string);
-  const { data: posts, isError, isLoading } = useGetUserPosts(userId as string);
+  const {
+    data,
+    isError,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useGetUserPosts(userId as string);
+  const posts =
+    data?.pages
+      .flatMap((page) => (Array.isArray(page) ? page : (page?.posts ?? [])))
+      .filter((post): post is Post => !!post?._id) ?? [];
 
   const handleOptimisticStats = (userId: string, isNowFollowing: boolean) => {
     queryClient.setQueryData(["profile", userId], (oldData: UserProfile) => {
@@ -180,24 +201,73 @@ const ProfileLayout = ({ open, setOpen }: ProfileLayoutProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-y-4">
-        {isLoading ? (
-          <div className="flex flex-col space-y-4 px-3 py-4">
-            {[1, 2, 3].map((i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : isError ? (
-          <p className="text-muted-foreground p-4 text-center">
-            Error loading posts.
-          </p>
-        ) : posts?.length === 0 ? (
-          <p className="text-muted-foreground p-4 text-center">
-            No posts available
-          </p>
-        ) : (
-          posts?.map((post: Post) => <PostCard key={post._id} post={post} />)
-        )}
+      <div className="">
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="mb-4 h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
+            <TabsTrigger
+              value="posts"
+              className="data-[state=active]:border-primary rounded-none px-6 py-3 data-[state=active]:border-b-2"
+            >
+              <Grid3X3 className="mr-2 h-4 w-4" />
+              Posts
+            </TabsTrigger>
+
+            {profile?.isOwnProfile && (
+              <TabsTrigger
+                value="bookmarks"
+                className="data-[state=active]:border-primary rounded-none px-6 py-3 data-[state=active]:border-b-2"
+              >
+                <BookmarkIcon className="mr-2 h-4 w-4" />
+                Saved
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="posts" className="mt-0 flex flex-col gap-4">
+            <div className="flex flex-col gap-y-4 px-2">
+              {isLoading ? (
+                <div className="flex flex-col space-y-4 px-3 py-4">
+                  {[1, 2, 3].map((i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              ) : isError ? (
+                <p className="text-muted-foreground p-4 text-center">
+                  Error loading posts.
+                </p>
+              ) : posts?.length === 0 ? (
+                <p className="text-muted-foreground p-4 text-center">
+                  No posts available
+                </p>
+              ) : (
+                posts?.map((post: Post) => (
+                  <PostCard key={post._id} post={post} />
+                ))
+              )}
+              <div className="flex w-full justify-center py-6">
+                {hasNextPage && (
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+                  >
+                    {isFetchingNextPage ? (
+                      <Loader className="animate-spin" />
+                    ) : (
+                      <ArrowDownIcon className="animate-bounce" />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {profile?.isOwnProfile && (
+            <TabsContent value="bookmarks" className="mt-0 flex flex-col gap-4">
+              <BookmarksPage />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     </div>
   );
