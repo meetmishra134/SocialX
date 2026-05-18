@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import DeleteAccountModal from "../ui/DeleteModal";
+import DeleteModal from "../ui/DeleteModal";
 
 interface CommunitySettingsProps {
   communityName: string;
@@ -43,7 +43,7 @@ const CommunitySettings = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DeleteAccountModal
+      <DeleteModal
         title={`Delete ${communityName}?`}
         description="This will permanently delete the community and all its posts. This action cannot be undone."
         onDelete={onDelete}
