@@ -8,6 +8,21 @@ SocialX is a feature-rich social networking application where users can connect,
 
 ---
 
+# 📷 Screenshots
+
+<p align="center">
+  <img src="./assets/main page.png" width="400"/>
+  <img src="./assets/profile page.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="./assets/communities.png" width="400"/>
+  <img src="./assets/connect page.png" width="400"/>
+</p>
+
+<p align="center">
+  <img src="./assets/login page.png" width="45%"/>
+</p>
 ## ✨ Features
 
 - 🔐 JWT Authentication, Google OAuth and Email Verification
