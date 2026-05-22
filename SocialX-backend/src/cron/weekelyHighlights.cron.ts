@@ -15,7 +15,16 @@ const runWeekelyHighlights = async () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const topPosts = await Post.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+          $or: [
+            { communityId: null },
+            { communityId: { $exists: false } },
+            { communityId: "" },
+          ],
+        },
+      },
       {
         $addFields: {
           likesCount: { $size: { $ifNull: ["$likes", []] } },

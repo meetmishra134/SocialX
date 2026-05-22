@@ -114,20 +114,18 @@ export default function NotificationsMenu() {
                       {communityName && (
                         <span className="text-muted-foreground">
                           {" "}
-                          {notif.type !== "community_join" ? "in" : " "}
+                          {notif.type !== "community_join" ? "in" : " "}{" "}
                           <span className="text-foreground font-medium">
                             {communityName}
                           </span>
                         </span>
                       )}
                     </p>
-
                     {plainText && (
                       <p className="border-muted text-muted-foreground line-clamp-1 border-l-2 text-xs">
                         "{plainText}"
                       </p>
                     )}
-
                     <span className="text-muted-foreground/80 mt-0.5 text-[11px]">
                       {getRelativeTime(notif.createdAt)}
                     </span>

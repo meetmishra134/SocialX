@@ -1,5 +1,3 @@
-import { Post } from "../types/post.types";
-
 export const getVerificationEmailTemplate = (
   userName: string,
   verificationLink: string,
@@ -111,7 +109,7 @@ export const getPasswordResetEmailTemplate = (
     </html>
   `;
 };
-export const weeklyTrendingTemplate = (userName: string, posts: Post[]) => {
+export const weeklyTrendingTemplate = (userName: string, posts: any[]) => {
   const postsHtml = posts
     .map(
       (post) => `
@@ -127,7 +125,7 @@ export const weeklyTrendingTemplate = (userName: string, posts: Post[]) => {
         ${post.text?.length > 100 ? post.text.substring(0, 100) + "..." : post.text}
       </p>
       <div style="font-size: 12px; color: #6b7280; border-top: 1px solid #f3f4f6; padding-top: 8px;">
-        ❤️ ${post.likes?.length || 0} Likes · 
+        ❤️ ${post.likesCount || 0} Likes · 
       </div>
       <a href="${process.env.FRONTEND_URL}/post/${post._id}" style="display: inline-block; margin-top: 12px; font-size: 13px; color: #0ea5e9; text-decoration: none; font-weight: 500;">
         Read full post →
